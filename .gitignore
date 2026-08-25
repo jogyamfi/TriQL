@@ -1,0 +1,31 @@
+## .NET build outputs
+bin/
+obj/
+*.user
+*.suo
+
+## Test results
+[Tt]est[Rr]esult*/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+## Rider / VS / VS Code
+.vs/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.DotSettings.user
+
+## BenchmarkDotNet artifacts
+BenchmarkDotNet.Artifacts/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## NuGet local caches (never the checked-in lock files)
+*.nupkg
+*.snupkg

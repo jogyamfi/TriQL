@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>TriQL.Data.ADO</PackageId>
+    <Title>TriQL ADO.NET Provider</Title>
+    <Description>An ADO.NET provider (DbConnection, DbCommand, DbDataReader) for Trino, built on the TriQL client.</Description>
+    <PackageTags>trino;sql;database;client;ado.net;dbconnection</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TriQL.Client\TriQL.Client.csproj" />
+  </ItemGroup>
+
+</Project>

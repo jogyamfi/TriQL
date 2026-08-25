@@ -1,0 +1,9 @@
+M:System.Console.Write(System.String);Do not write to Console in a library. Use ILogger (FR-11.1.4).
+M:System.Console.WriteLine(System.String);Do not write to Console in a library. Use ILogger (FR-11.1.4).
+M:System.Console.WriteLine;Do not write to Console in a library. Use ILogger (FR-11.1.4).
+P:System.DateTime.Now;Non-deterministic and not UTC. Use DateTimeOffset.UtcNow or an injected TimeProvider.
+P:System.DateTime.Today;Non-deterministic and not UTC. Use DateTimeOffset.UtcNow or an injected TimeProvider.
+M:System.Threading.Tasks.Task.Wait;Blocks on async work. Await the task instead (NFR-REL-2).
+M:System.Threading.Tasks.Task.Wait(System.Int32);Blocks on async work. Await the task instead (NFR-REL-2).
+P:System.Threading.Tasks.Task`1.Result;Blocks on async work. Await the task instead (NFR-REL-2).
+M:System.Runtime.CompilerServices.TaskAwaiter.GetResult;Blocks on async work when called outside an await. Await the task instead (NFR-REL-2).

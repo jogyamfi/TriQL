@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>TriQL.Client.Auth</PackageId>
+    <Title>TriQL Client Authentication Providers</Title>
+    <Description>Cloud and enterprise authentication providers (Microsoft Entra ID, OAuth 2.0) for the TriQL .NET client for Trino.</Description>
+    <PackageTags>trino;sql;database;client;auth;oauth;entra-id</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" />
+    <PackageReference Include="Azure.Core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TriQL.Client\TriQL.Client.csproj" />
+  </ItemGroup>
+
+</Project>

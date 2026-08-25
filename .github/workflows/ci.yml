@@ -1,0 +1,71 @@
+name: CI
+
+# Temporarily disabled (manual trigger only); restore pull_request/push triggers to re-enable.
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore (locked mode)
+        run: dotnet restore TriQL.slnx --locked-mode
+
+      - name: Build (Release, warnings as errors)
+        run: dotnet build TriQL.slnx -c Release --no-restore
+
+      - name: Verify formatting
+        run: dotnet format TriQL.slnx --verify-no-changes --no-restore
+
+      - name: Unit tests with coverage (TriQL.Client.Tests)
+        run: >
+          dotnet test tests/TriQL.Client.Tests/TriQL.Client.Tests.csproj
+          -c Release --no-build
+          --collect:"XPlat Code Coverage"
+          --results-directory ./coverage
+        # Coverage is collected from Phase 1 onward; the ≥85%/75% gate (TEST-3) is enforced
+        # starting at P1-T22, once product code exists to measure.
+
+      - name: Unit tests with coverage (TriQL.Data.ADO.Tests)
+        run: >
+          dotnet test tests/TriQL.Data.ADO.Tests/TriQL.Data.ADO.Tests.csproj
+          -c Release --no-build
+          --collect:"XPlat Code Coverage"
+          --results-directory ./coverage
+
+      - name: Check for Docker
+        id: docker-check
+        shell: bash
+        run: |
+          if docker info > /dev/null 2>&1; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Docker is not available on this runner — integration tests are explicitly skipped, not silently passed (see Phase 0 risk register)."
+          fi
+
+      - name: Integration tests
+        if: steps.docker-check.outputs.available == 'true'
+        run: dotnet test tests/TriQL.IntegrationTests -c Release --no-build

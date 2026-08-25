@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>TriQL.Client.Compression</PackageId>
+    <Title>TriQL Client Spooled Protocol Compression</Title>
+    <Description>LZ4 and Zstandard codec support for the TriQL Trino spooled protocol, isolated from the dependency-free core client.</Description>
+    <PackageTags>trino;sql;database;client;lz4;zstd;compression</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TriQL.Client\TriQL.Client.csproj" />
+  </ItemGroup>
+
+</Project>

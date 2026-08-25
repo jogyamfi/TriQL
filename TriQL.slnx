@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/TriQL.Samples.Console/TriQL.Samples.Console.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/TriQL.Client.Auth/TriQL.Client.Auth.csproj" />
+    <Project Path="src/TriQL.Client.Compression/TriQL.Client.Compression.csproj" />
+    <Project Path="src/TriQL.Client/TriQL.Client.csproj" />
+    <Project Path="src/TriQL.Data.ADO/TriQL.Data.ADO.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TriQL.AotSmoke/TriQL.AotSmoke.csproj" />
+    <Project Path="tests/TriQL.Benchmarks/TriQL.Benchmarks.csproj" />
+    <Project Path="tests/TriQL.Client.Tests/TriQL.Client.Tests.csproj" />
+    <Project Path="tests/TriQL.Data.ADO.Tests/TriQL.Data.ADO.Tests.csproj" />
+    <Project Path="tests/TriQL.IntegrationTests/TriQL.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TriQL.Client\TriQL.Client.csproj" />
+    <ProjectReference Include="..\..\src\TriQL.Data.ADO\TriQL.Data.ADO.csproj" />
+    <ProjectReference Include="..\..\src\TriQL.Client.Auth\TriQL.Client.Auth.csproj" />
+  </ItemGroup>
+
+</Project>
+
