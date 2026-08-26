@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using TriQL.Client.Exceptions;
 using TriQL.Client.Internal;
 
@@ -86,6 +87,55 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
         {
             return false;
         }
+    }
+
+    /// <summary>
+    /// Submits <paramref name="sql"/> via <c>POST /v1/statement</c> and returns a
+    /// <see cref="TrinoResultSet"/> ready for streaming. See FR-4.1, FR-4.5.
+    /// </summary>
+    /// <exception cref="ArgumentException"><paramref name="sql"/> is null or empty.</exception>
+    public async Task<TrinoResultSet> ExecuteAsync(string sql, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(sql);
+
+        var statementClient = new StatementClient(_invoker, Options, Session, _logger);
+        var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        if (Options.QueryTimeout is { } timeout)
+        {
+            linkedCts.CancelAfter(timeout);
+        }
+
+        var stopwatch = Stopwatch.StartNew();
+        TrinoPageEnvelope initial;
+        try
+        {
+            initial = await statementClient.SubmitAsync(sql, linkedCts.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (linkedCts.IsCancellationRequested)
+        {
+            await statementClient.CancelAsync().ConfigureAwait(false);
+            linkedCts.Dispose();
+
+            if (!cancellationToken.IsCancellationRequested && Options.QueryTimeout is { } configuredTimeout)
+            {
+                throw new TrinoTimeoutException(
+                    $"The query exceeded the configured QueryTimeout of {configuredTimeout}.", configuredTimeout, stopwatch.Elapsed, queryId: null);
+            }
+
+            throw;
+        }
+        catch
+        {
+            linkedCts.Dispose();
+            throw;
+        }
+
+        if (_logger is not null)
+        {
+            Log.QuerySubmitted(_logger, initial.QueryId);
+        }
+
+        return new TrinoResultSet(statementClient, initial, Options, _logger, linkedCts, cancellationToken);
     }
 
     /// <inheritdoc/>

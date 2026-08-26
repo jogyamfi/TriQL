@@ -5,7 +5,7 @@ namespace TriQL.Client.Internal;
 /// <summary>
 /// Backoff parameters for <see cref="RetryPolicy"/>. Defaults match FR-3.3.1: base 50 ms, factor 2.0, cap 10 s, 5 attempts.
 /// </summary>
-internal readonly record struct RetryPolicyOptions(TimeSpan BaseDelay, double Multiplier, TimeSpan MaxDelay, int MaxAttempts)
+internal readonly record struct RetryPolicyOptions(TimeSpan BaseDelay, double Multiplier, TimeSpan MaxDelay, int MaxAttempts, bool RetryOnResponseStatus = true)
 {
     public static RetryPolicyOptions Default { get; } = new(TimeSpan.FromMilliseconds(50), 2.0, TimeSpan.FromSeconds(10), 5);
 }
@@ -52,7 +52,7 @@ internal static class RetryPolicy
                 continue;
             }
 
-            if (attempt >= options.MaxAttempts || !RetryableStatusCodes.Contains((int)response.StatusCode))
+            if (attempt >= options.MaxAttempts || !options.RetryOnResponseStatus || !RetryableStatusCodes.Contains((int)response.StatusCode))
             {
                 return response;
             }

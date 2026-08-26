@@ -19,10 +19,11 @@ internal static class RequestExecutor
         ITrinoAuthenticator authenticator,
         TrinoSessionOptions options,
         ILogger? logger,
-        CancellationToken cancellationToken) =>
+        CancellationToken cancellationToken,
+        bool retryOnResponseStatus = true) =>
         RetryPolicy.ExecuteAsync(
             ct => SendOnceAsync(invoker, requestFactory, authenticator, options, logger, ct),
-            RetryPolicyOptions.Default,
+            RetryPolicyOptions.Default with { RetryOnResponseStatus = retryOnResponseStatus },
             logger,
             cancellationToken);
 

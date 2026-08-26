@@ -82,6 +82,15 @@ public sealed class TrinoSessionOptions
     /// <summary>The <c>targetResultSize</c> query parameter value, in bytes. Default 5 MB.</summary>
     public long TargetResultSizeBytes { get; set; } = 5_242_880;
 
+    /// <summary>The initial adaptive polling delay after an empty page. Default 50 ms. See FR-4.4.5.</summary>
+    public TimeSpan PollingBackoffInitialDelay { get; set; } = TimeSpan.FromMilliseconds(50);
+
+    /// <summary>The multiplier applied to the polling delay after each empty page. Default 1.2. See FR-4.4.5.</summary>
+    public double PollingBackoffMultiplier { get; set; } = 1.2;
+
+    /// <summary>The maximum adaptive polling delay. Default 5 seconds. See FR-4.4.5.</summary>
+    public TimeSpan PollingBackoffMaxDelay { get; set; } = TimeSpan.FromSeconds(5);
+
     /// <summary>Disables automatic response decompression. Default <see langword="false"/>.</summary>
     public bool CompressionDisabled { get; set; }
 
@@ -153,6 +162,21 @@ public sealed class TrinoSessionOptions
                 nameof(ReadAheadBufferBytes),
                 ReadAheadBufferBytes,
                 "ReadAheadBufferBytes must be at least TargetResultSizeBytes so at least one maximal page fits.");
+        }
+
+        if (PollingBackoffInitialDelay <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(PollingBackoffInitialDelay), PollingBackoffInitialDelay, "PollingBackoffInitialDelay must be positive.");
+        }
+
+        if (PollingBackoffMultiplier < 1.0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(PollingBackoffMultiplier), PollingBackoffMultiplier, "PollingBackoffMultiplier must be at least 1.0.");
+        }
+
+        if (PollingBackoffMaxDelay < PollingBackoffInitialDelay)
+        {
+            throw new ArgumentOutOfRangeException(nameof(PollingBackoffMaxDelay), PollingBackoffMaxDelay, "PollingBackoffMaxDelay must be at least PollingBackoffInitialDelay.");
         }
     }
 }

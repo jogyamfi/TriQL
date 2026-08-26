@@ -241,3 +241,160 @@ virtual TriQL.Client.Auth.BasicAuthenticator.ApplyAsync(System.Net.Http.HttpRequ
 virtual TriQL.Client.Auth.BasicAuthenticator.ConfigureHandler(System.Net.Http.SocketsHttpHandler! handler) -> void
 virtual TriQL.Client.Auth.BasicAuthenticator.InitializeAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
 virtual TriQL.Client.Auth.BasicAuthenticator.TryRefreshAsync(System.Net.Http.HttpResponseMessage! response, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<bool>
+override TriQL.Client.TrinoColumn.Equals(object? obj) -> bool
+override TriQL.Client.TrinoColumn.GetHashCode() -> int
+override TriQL.Client.TrinoColumn.ToString() -> string!
+override TriQL.Client.TrinoExecutionSummary.Equals(object? obj) -> bool
+override TriQL.Client.TrinoExecutionSummary.GetHashCode() -> int
+override TriQL.Client.TrinoExecutionSummary.ToString() -> string!
+override TriQL.Client.TrinoQueryStats.Equals(object? obj) -> bool
+override TriQL.Client.TrinoQueryStats.GetHashCode() -> int
+override TriQL.Client.TrinoQueryStats.ToString() -> string!
+override TriQL.Client.TrinoStageStats.Equals(object? obj) -> bool
+override TriQL.Client.TrinoStageStats.GetHashCode() -> int
+override TriQL.Client.TrinoStageStats.ToString() -> string!
+static TriQL.Client.TrinoColumn.operator !=(TriQL.Client.TrinoColumn? left, TriQL.Client.TrinoColumn? right) -> bool
+static TriQL.Client.TrinoColumn.operator ==(TriQL.Client.TrinoColumn? left, TriQL.Client.TrinoColumn? right) -> bool
+static TriQL.Client.TrinoExecutionSummary.operator !=(TriQL.Client.TrinoExecutionSummary? left, TriQL.Client.TrinoExecutionSummary? right) -> bool
+static TriQL.Client.TrinoExecutionSummary.operator ==(TriQL.Client.TrinoExecutionSummary? left, TriQL.Client.TrinoExecutionSummary? right) -> bool
+static TriQL.Client.TrinoQueryStats.operator !=(TriQL.Client.TrinoQueryStats? left, TriQL.Client.TrinoQueryStats? right) -> bool
+static TriQL.Client.TrinoQueryStats.operator ==(TriQL.Client.TrinoQueryStats? left, TriQL.Client.TrinoQueryStats? right) -> bool
+static TriQL.Client.TrinoStageStats.operator !=(TriQL.Client.TrinoStageStats? left, TriQL.Client.TrinoStageStats? right) -> bool
+static TriQL.Client.TrinoStageStats.operator ==(TriQL.Client.TrinoStageStats? left, TriQL.Client.TrinoStageStats? right) -> bool
+TriQL.Client.TrinoClient.ExecuteAsync(string! sql, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TriQL.Client.TrinoResultSet!>!
+TriQL.Client.TrinoColumn
+TriQL.Client.TrinoColumn.<Clone>$() -> TriQL.Client.TrinoColumn!
+TriQL.Client.TrinoColumn.Deconstruct(out string! Name, out string! TypeName) -> void
+TriQL.Client.TrinoColumn.Equals(TriQL.Client.TrinoColumn? other) -> bool
+TriQL.Client.TrinoColumn.Name.get -> string!
+TriQL.Client.TrinoColumn.Name.init -> void
+TriQL.Client.TrinoColumn.TrinoColumn(string! Name, string! TypeName) -> void
+TriQL.Client.TrinoColumn.TypeName.get -> string!
+TriQL.Client.TrinoColumn.TypeName.init -> void
+TriQL.Client.TrinoExecutionSummary
+TriQL.Client.TrinoExecutionSummary.<Clone>$() -> TriQL.Client.TrinoExecutionSummary!
+TriQL.Client.TrinoExecutionSummary.Deconstruct(out string? UpdateType, out long? UpdateCount, out TriQL.Client.TrinoQueryStats? Stats) -> void
+TriQL.Client.TrinoExecutionSummary.Equals(TriQL.Client.TrinoExecutionSummary? other) -> bool
+TriQL.Client.TrinoExecutionSummary.Stats.get -> TriQL.Client.TrinoQueryStats?
+TriQL.Client.TrinoExecutionSummary.Stats.init -> void
+TriQL.Client.TrinoExecutionSummary.TrinoExecutionSummary(string? UpdateType, long? UpdateCount, TriQL.Client.TrinoQueryStats? Stats) -> void
+TriQL.Client.TrinoExecutionSummary.UpdateCount.get -> long?
+TriQL.Client.TrinoExecutionSummary.UpdateCount.init -> void
+TriQL.Client.TrinoExecutionSummary.UpdateType.get -> string?
+TriQL.Client.TrinoExecutionSummary.UpdateType.init -> void
+TriQL.Client.TrinoPage
+TriQL.Client.TrinoPage.Columns.get -> System.Collections.Generic.IReadOnlyList<TriQL.Client.TrinoColumn!>!
+TriQL.Client.TrinoPage.RowCount.get -> int
+TriQL.Client.TrinoPage.Stats.get -> TriQL.Client.TrinoQueryStats?
+TriQL.Client.TrinoPage.UpdateCount.get -> long?
+TriQL.Client.TrinoPage.UpdateType.get -> string?
+TriQL.Client.TrinoQueryProgressEventArgs
+TriQL.Client.TrinoQueryProgressEventArgs.Stats.get -> TriQL.Client.TrinoQueryStats!
+TriQL.Client.TrinoQueryProgressEventArgs.TrinoQueryProgressEventArgs(TriQL.Client.TrinoQueryStats! stats) -> void
+TriQL.Client.TrinoQueryState
+TriQL.Client.TrinoQueryState.Cancelled = 4 -> TriQL.Client.TrinoQueryState
+TriQL.Client.TrinoQueryState.Failed = 3 -> TriQL.Client.TrinoQueryState
+TriQL.Client.TrinoQueryState.Finished = 2 -> TriQL.Client.TrinoQueryState
+TriQL.Client.TrinoQueryState.Running = 1 -> TriQL.Client.TrinoQueryState
+TriQL.Client.TrinoQueryState.Submitting = 0 -> TriQL.Client.TrinoQueryState
+TriQL.Client.TrinoQueryState.TimedOut = 5 -> TriQL.Client.TrinoQueryState
+TriQL.Client.TrinoQueryStats
+TriQL.Client.TrinoQueryStats.<Clone>$() -> TriQL.Client.TrinoQueryStats!
+TriQL.Client.TrinoQueryStats.CompletedSplits.get -> int
+TriQL.Client.TrinoQueryStats.CompletedSplits.init -> void
+TriQL.Client.TrinoQueryStats.CpuTime.get -> System.TimeSpan
+TriQL.Client.TrinoQueryStats.CpuTime.init -> void
+TriQL.Client.TrinoQueryStats.Deconstruct(out string! State, out bool Queued, out bool Scheduled, out int Nodes, out int TotalSplits, out int QueuedSplits, out int RunningSplits, out int CompletedSplits, out System.TimeSpan CpuTime, out System.TimeSpan WallTime, out System.TimeSpan QueuedTime, out System.TimeSpan ElapsedTime, out long ProcessedRows, out long ProcessedBytes, out long PhysicalInputBytes, out long PeakMemoryBytes, out long SpilledBytes, out double? ProgressPercentage, out TriQL.Client.TrinoStageStats? RootStage) -> void
+TriQL.Client.TrinoQueryStats.ElapsedTime.get -> System.TimeSpan
+TriQL.Client.TrinoQueryStats.ElapsedTime.init -> void
+TriQL.Client.TrinoQueryStats.Equals(TriQL.Client.TrinoQueryStats? other) -> bool
+TriQL.Client.TrinoQueryStats.Nodes.get -> int
+TriQL.Client.TrinoQueryStats.Nodes.init -> void
+TriQL.Client.TrinoQueryStats.PeakMemoryBytes.get -> long
+TriQL.Client.TrinoQueryStats.PeakMemoryBytes.init -> void
+TriQL.Client.TrinoQueryStats.PhysicalInputBytes.get -> long
+TriQL.Client.TrinoQueryStats.PhysicalInputBytes.init -> void
+TriQL.Client.TrinoQueryStats.ProcessedBytes.get -> long
+TriQL.Client.TrinoQueryStats.ProcessedBytes.init -> void
+TriQL.Client.TrinoQueryStats.ProcessedRows.get -> long
+TriQL.Client.TrinoQueryStats.ProcessedRows.init -> void
+TriQL.Client.TrinoQueryStats.ProgressPercentage.get -> double?
+TriQL.Client.TrinoQueryStats.ProgressPercentage.init -> void
+TriQL.Client.TrinoQueryStats.Queued.get -> bool
+TriQL.Client.TrinoQueryStats.Queued.init -> void
+TriQL.Client.TrinoQueryStats.QueuedSplits.get -> int
+TriQL.Client.TrinoQueryStats.QueuedSplits.init -> void
+TriQL.Client.TrinoQueryStats.QueuedTime.get -> System.TimeSpan
+TriQL.Client.TrinoQueryStats.QueuedTime.init -> void
+TriQL.Client.TrinoQueryStats.RootStage.get -> TriQL.Client.TrinoStageStats?
+TriQL.Client.TrinoQueryStats.RootStage.init -> void
+TriQL.Client.TrinoQueryStats.RunningSplits.get -> int
+TriQL.Client.TrinoQueryStats.RunningSplits.init -> void
+TriQL.Client.TrinoQueryStats.Scheduled.get -> bool
+TriQL.Client.TrinoQueryStats.Scheduled.init -> void
+TriQL.Client.TrinoQueryStats.SpilledBytes.get -> long
+TriQL.Client.TrinoQueryStats.SpilledBytes.init -> void
+TriQL.Client.TrinoQueryStats.State.get -> string!
+TriQL.Client.TrinoQueryStats.State.init -> void
+TriQL.Client.TrinoQueryStats.TotalSplits.get -> int
+TriQL.Client.TrinoQueryStats.TotalSplits.init -> void
+TriQL.Client.TrinoQueryStats.TrinoQueryStats(string! State, bool Queued, bool Scheduled, int Nodes, int TotalSplits, int QueuedSplits, int RunningSplits, int CompletedSplits, System.TimeSpan CpuTime, System.TimeSpan WallTime, System.TimeSpan QueuedTime, System.TimeSpan ElapsedTime, long ProcessedRows, long ProcessedBytes, long PhysicalInputBytes, long PeakMemoryBytes, long SpilledBytes, double? ProgressPercentage, TriQL.Client.TrinoStageStats? RootStage) -> void
+TriQL.Client.TrinoQueryStats.WallTime.get -> System.TimeSpan
+TriQL.Client.TrinoQueryStats.WallTime.init -> void
+TriQL.Client.TrinoResultSet
+TriQL.Client.TrinoResultSet.Columns.get -> System.Collections.Generic.IReadOnlyList<TriQL.Client.TrinoColumn!>!
+TriQL.Client.TrinoResultSet.Dispose() -> void
+TriQL.Client.TrinoResultSet.DisposeAsync() -> System.Threading.Tasks.ValueTask
+TriQL.Client.TrinoResultSet.DrainAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TriQL.Client.TrinoExecutionSummary!>!
+TriQL.Client.TrinoResultSet.IsQuery.get -> bool
+TriQL.Client.TrinoResultSet.Progress -> System.EventHandler<TriQL.Client.TrinoQueryProgressEventArgs!>?
+TriQL.Client.TrinoResultSet.ProgressReporter.get -> System.IProgress<TriQL.Client.TrinoQueryStats!>?
+TriQL.Client.TrinoResultSet.ProgressReporter.set -> void
+TriQL.Client.TrinoResultSet.QueryId.get -> string!
+TriQL.Client.TrinoResultSet.ReadPagesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TriQL.Client.TrinoPage!>!
+TriQL.Client.TrinoResultSet.ReadRowsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TriQL.Client.TrinoRow!>!
+TriQL.Client.TrinoResultSet.ServerState.get -> string?
+TriQL.Client.TrinoResultSet.State.get -> TriQL.Client.TrinoQueryState
+TriQL.Client.TrinoResultSet.UpdateCount.get -> long?
+TriQL.Client.TrinoResultSet.UpdateType.get -> string?
+TriQL.Client.TrinoResultSet.WaitForSchemaAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<TriQL.Client.TrinoColumn!>!>!
+TriQL.Client.TrinoRow
+TriQL.Client.TrinoRow.Clone() -> TriQL.Client.TrinoRow!
+TriQL.Client.TrinoRow.FieldCount.get -> int
+TriQL.Client.TrinoRow.GetName(int ordinal) -> string!
+TriQL.Client.TrinoRow.GetOrdinal(string! name) -> int
+TriQL.Client.TrinoRow.GetValue(int ordinal) -> object?
+TriQL.Client.TrinoRow.GetValue(string! name) -> object?
+TriQL.Client.TrinoRow.IsDBNull(int ordinal) -> bool
+TriQL.Client.TrinoRow.this[int ordinal].get -> object?
+TriQL.Client.TrinoRow.this[string! name].get -> object?
+TriQL.Client.TrinoRow.ToArray() -> object?[]!
+TriQL.Client.TrinoSessionOptions.PollingBackoffInitialDelay.get -> System.TimeSpan
+TriQL.Client.TrinoSessionOptions.PollingBackoffInitialDelay.set -> void
+TriQL.Client.TrinoSessionOptions.PollingBackoffMaxDelay.get -> System.TimeSpan
+TriQL.Client.TrinoSessionOptions.PollingBackoffMaxDelay.set -> void
+TriQL.Client.TrinoSessionOptions.PollingBackoffMultiplier.get -> double
+TriQL.Client.TrinoSessionOptions.PollingBackoffMultiplier.set -> void
+TriQL.Client.TrinoStageStats
+TriQL.Client.TrinoStageStats.<Clone>$() -> TriQL.Client.TrinoStageStats!
+TriQL.Client.TrinoStageStats.CompletedSplits.get -> int
+TriQL.Client.TrinoStageStats.CompletedSplits.init -> void
+TriQL.Client.TrinoStageStats.Deconstruct(out string? StageId, out string? State, out bool Done, out int Nodes, out int TotalSplits, out int QueuedSplits, out int RunningSplits, out int CompletedSplits, out System.Collections.Generic.IReadOnlyList<TriQL.Client.TrinoStageStats!>! SubStages) -> void
+TriQL.Client.TrinoStageStats.Done.get -> bool
+TriQL.Client.TrinoStageStats.Done.init -> void
+TriQL.Client.TrinoStageStats.Equals(TriQL.Client.TrinoStageStats? other) -> bool
+TriQL.Client.TrinoStageStats.Nodes.get -> int
+TriQL.Client.TrinoStageStats.Nodes.init -> void
+TriQL.Client.TrinoStageStats.QueuedSplits.get -> int
+TriQL.Client.TrinoStageStats.QueuedSplits.init -> void
+TriQL.Client.TrinoStageStats.RunningSplits.get -> int
+TriQL.Client.TrinoStageStats.RunningSplits.init -> void
+TriQL.Client.TrinoStageStats.StageId.get -> string?
+TriQL.Client.TrinoStageStats.StageId.init -> void
+TriQL.Client.TrinoStageStats.State.get -> string?
+TriQL.Client.TrinoStageStats.State.init -> void
+TriQL.Client.TrinoStageStats.SubStages.get -> System.Collections.Generic.IReadOnlyList<TriQL.Client.TrinoStageStats!>!
+TriQL.Client.TrinoStageStats.SubStages.init -> void
+TriQL.Client.TrinoStageStats.TotalSplits.get -> int
+TriQL.Client.TrinoStageStats.TotalSplits.init -> void
+TriQL.Client.TrinoStageStats.TrinoStageStats(string? StageId, string? State, bool Done, int Nodes, int TotalSplits, int QueuedSplits, int RunningSplits, int CompletedSplits, System.Collections.Generic.IReadOnlyList<TriQL.Client.TrinoStageStats!>! SubStages) -> void
