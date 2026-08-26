@@ -45,8 +45,6 @@ jobs:
           -c Release --no-build
           --collect:"XPlat Code Coverage"
           --results-directory ./coverage
-        # Coverage is collected from Phase 1 onward; the ≥85%/75% gate (TEST-3) is enforced
-        # starting at P1-T22, once product code exists to measure.
 
       - name: Unit tests with coverage (TriQL.Data.ADO.Tests)
         run: >
@@ -54,6 +52,46 @@ jobs:
           -c Release --no-build
           --collect:"XPlat Code Coverage"
           --results-directory ./coverage
+
+      # TEST-3: >=85% line / >=75% branch coverage, enforced from Phase 1 onward (P1-T22).
+      # Reports for projects with no coverable lines yet (e.g. TriQL.Data.ADO.Tests before
+      # Phase 4 product code exists) are skipped rather than failing the gate.
+      - name: Enforce coverage gate (TEST-3)
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem -Recurse ./coverage -Filter coverage.cobertura.xml
+          if ($files.Count -eq 0) {
+            Write-Error "No coverage reports were produced."
+            exit 1
+          }
+
+          $failed = $false
+          foreach ($file in $files) {
+            [xml]$xml = Get-Content $file.FullName
+            $linesValid = [int]$xml.coverage.'lines-valid'
+            if ($linesValid -eq 0) {
+              Write-Host "Skipping $($file.FullName) (no coverable lines yet)."
+              continue
+            }
+
+            $lineRate = [double]$xml.coverage.'line-rate'
+            $branchRate = [double]$xml.coverage.'branch-rate'
+            $linePct = [math]::Round($lineRate * 100, 2)
+            $branchPct = [math]::Round($branchRate * 100, 2)
+            Write-Host "$($file.FullName): line=$linePct% branch=$branchPct%"
+
+            if ($lineRate -lt 0.85) {
+              Write-Host "::error::Line coverage $linePct% is below the 85% gate (TEST-3) for $($file.FullName)"
+              $failed = $true
+            }
+
+            if ($branchRate -lt 0.75) {
+              Write-Host "::error::Branch coverage $branchPct% is below the 75% gate (TEST-3) for $($file.FullName)"
+              $failed = $true
+            }
+          }
+
+          if ($failed) { exit 1 }
 
       - name: Check for Docker
         id: docker-check
