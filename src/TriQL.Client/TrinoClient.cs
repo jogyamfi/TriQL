@@ -93,11 +93,61 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
     /// Submits <paramref name="sql"/> via <c>POST /v1/statement</c> and returns a
     /// <see cref="TrinoResultSet"/> ready for streaming. See FR-4.1, FR-4.5.
     /// </summary>
+    /// <param name="sql">
+    /// The statement text. When <paramref name="parameters"/> is non-<see langword="null"/>, this may use
+    /// <c>?</c>, <c>:name</c>, or <c>@name</c> placeholders, which are rewritten to positional form
+    /// (FR-8.4, FR-8.5) and bound server-side via <c>PREPARE</c>/<c>EXECUTE</c> (FR-8.1, FR-8.2).
+    /// Client-side interpolation of parameter values into <paramref name="sql"/> is never performed.
+    /// </param>
+    /// <param name="parameters">
+    /// The parameter values, matched to placeholders in occurrence order (or by name). <see langword="null"/>
+    /// (the default) submits <paramref name="sql"/> verbatim with no parameter binding.
+    /// </param>
+    /// <param name="retainPreparedStatement">
+    /// When <paramref name="parameters"/> is non-<see langword="null"/> and this is <see langword="true"/>,
+    /// the generated prepared statement is left registered on <see cref="Session"/> after submission
+    /// instead of being deallocated (FR-8.9). Ignored when <paramref name="parameters"/> is <see langword="null"/>.
+    /// </param>
+    /// <param name="cancellationToken">A token to cancel the initial submission.</param>
     /// <exception cref="ArgumentException"><paramref name="sql"/> is null or empty.</exception>
-    public async Task<TrinoResultSet> ExecuteAsync(string sql, CancellationToken cancellationToken = default)
+    /// <exception cref="Exceptions.TrinoParameterException">
+    /// <paramref name="parameters"/> is supplied and its count does not match the statement's
+    /// placeholder count, or a named placeholder has no matching parameter (FR-8.6).
+    /// </exception>
+    public async Task<TrinoResultSet> ExecuteAsync(
+        string sql, TrinoParameterCollection? parameters = null, bool retainPreparedStatement = false, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(sql);
 
+        if (parameters is null)
+        {
+            return await ExecuteCoreAsync(sql, cancellationToken).ConfigureAwait(false);
+        }
+
+        var (rewrittenSql, placeholderNames) = ParameterRewriter.Rewrite(sql);
+        var orderedParameters = ParameterBinder.Bind(placeholderNames, parameters);
+
+        var name = "triql_" + Guid.NewGuid().ToString("N");
+        var usingClause = orderedParameters.Count == 0
+            ? string.Empty
+            : " USING " + string.Join(", ", orderedParameters.Select(SqlLiteralEncoder.Encode));
+
+        Session.RegisterPreparedStatement(name, rewrittenSql);
+        try
+        {
+            return await ExecuteCoreAsync($"EXECUTE {name}{usingClause}", cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            if (!retainPreparedStatement)
+            {
+                Session.UnregisterPreparedStatement(name);
+            }
+        }
+    }
+
+    private async Task<TrinoResultSet> ExecuteCoreAsync(string sql, CancellationToken cancellationToken)
+    {
         var statementClient = new StatementClient(_invoker, Options, Session, _logger);
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         if (Options.QueryTimeout is { } timeout)

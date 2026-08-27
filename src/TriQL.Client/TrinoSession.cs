@@ -76,6 +76,28 @@ public sealed class TrinoSession
         get { lock (_gate) { return new Dictionary<string, string>(_preparedStatements, StringComparer.Ordinal); } }
     }
 
+    /// <summary>
+    /// Client-side bookkeeping for a prepared statement created via <c>X-Trino-Prepared-Statement</c>
+    /// (FR-8.2). The coordinator does not retain prepared-statement state across requests, so the
+    /// name/text pair is resent with every subsequent initial submission until deallocated.
+    /// </summary>
+    internal void RegisterPreparedStatement(string name, string sql)
+    {
+        lock (_gate)
+        {
+            _preparedStatements[name] = sql;
+        }
+    }
+
+    /// <summary>Removes client-side bookkeeping for a prepared statement (FR-8.9).</summary>
+    internal void UnregisterPreparedStatement(string name)
+    {
+        lock (_gate)
+        {
+            _preparedStatements.Remove(name);
+        }
+    }
+
     /// <summary>A snapshot of the original user's role selections.</summary>
     public IReadOnlyList<TrinoSelectedRole> OriginalRoles { get { lock (_gate) { return _originalRoles; } } }
 

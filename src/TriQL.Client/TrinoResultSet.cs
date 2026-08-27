@@ -7,7 +7,7 @@ using TriQL.Client.Internal;
 namespace TriQL.Client;
 
 /// <summary>
-/// The streaming result of a query submitted via <see cref="TrinoClient.ExecuteAsync"/>. Pages are
+/// The streaming result of a query submitted via <see cref="TrinoClient.ExecuteAsync(string, TrinoParameterCollection?, bool, System.Threading.CancellationToken)"/>. Pages are
 /// fetched on a background task while the consumer processes already-buffered rows (FR-6.1);
 /// disposing before enumeration completes cancels the query server-side (FR-4.6.6).
 /// </summary>

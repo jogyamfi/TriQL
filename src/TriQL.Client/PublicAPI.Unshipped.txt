@@ -261,7 +261,6 @@ static TriQL.Client.TrinoQueryStats.operator !=(TriQL.Client.TrinoQueryStats? le
 static TriQL.Client.TrinoQueryStats.operator ==(TriQL.Client.TrinoQueryStats? left, TriQL.Client.TrinoQueryStats? right) -> bool
 static TriQL.Client.TrinoStageStats.operator !=(TriQL.Client.TrinoStageStats? left, TriQL.Client.TrinoStageStats? right) -> bool
 static TriQL.Client.TrinoStageStats.operator ==(TriQL.Client.TrinoStageStats? left, TriQL.Client.TrinoStageStats? right) -> bool
-TriQL.Client.TrinoClient.ExecuteAsync(string! sql, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TriQL.Client.TrinoResultSet!>!
 TriQL.Client.TrinoColumn
 TriQL.Client.TrinoColumn.<Clone>$() -> TriQL.Client.TrinoColumn!
 TriQL.Client.TrinoColumn.Deconstruct(out string! Name, out string! TypeName) -> void
@@ -398,3 +397,227 @@ TriQL.Client.TrinoStageStats.SubStages.init -> void
 TriQL.Client.TrinoStageStats.TotalSplits.get -> int
 TriQL.Client.TrinoStageStats.TotalSplits.init -> void
 TriQL.Client.TrinoStageStats.TrinoStageStats(string? StageId, string? State, bool Done, int Nodes, int TotalSplits, int QueuedSplits, int RunningSplits, int CompletedSplits, System.Collections.Generic.IReadOnlyList<TriQL.Client.TrinoStageStats!>! SubStages) -> void
+override TriQL.Client.Types.TrinoBigDecimal.Equals(object? obj) -> bool
+override TriQL.Client.Types.TrinoBigDecimal.GetHashCode() -> int
+override TriQL.Client.Types.TrinoBigDecimal.ToString() -> string!
+override TriQL.Client.Types.TrinoIntervalYearToMonth.Equals(object? obj) -> bool
+override TriQL.Client.Types.TrinoIntervalYearToMonth.GetHashCode() -> int
+override TriQL.Client.Types.TrinoIntervalYearToMonth.ToString() -> string!
+override TriQL.Client.Types.TrinoRowField.Equals(object? obj) -> bool
+override TriQL.Client.Types.TrinoRowField.GetHashCode() -> int
+override TriQL.Client.Types.TrinoRowField.ToString() -> string!
+override TriQL.Client.Types.TrinoTime.Equals(object? obj) -> bool
+override TriQL.Client.Types.TrinoTime.GetHashCode() -> int
+override TriQL.Client.Types.TrinoTime.ToString() -> string!
+override TriQL.Client.Types.TrinoTimestamp.Equals(object? obj) -> bool
+override TriQL.Client.Types.TrinoTimestamp.GetHashCode() -> int
+override TriQL.Client.Types.TrinoTimestamp.ToString() -> string!
+override TriQL.Client.Types.TrinoTimestampWithTimeZone.Equals(object? obj) -> bool
+override TriQL.Client.Types.TrinoTimestampWithTimeZone.GetHashCode() -> int
+override TriQL.Client.Types.TrinoTimestampWithTimeZone.ToString() -> string!
+override TriQL.Client.Types.TrinoTimeWithTimeZone.Equals(object? obj) -> bool
+override TriQL.Client.Types.TrinoTimeWithTimeZone.GetHashCode() -> int
+override TriQL.Client.Types.TrinoTimeWithTimeZone.ToString() -> string!
+override TriQL.Client.Types.TrinoTypeSignature.ToString() -> string!
+static TriQL.Client.Types.TrinoBigDecimal.explicit operator decimal(TriQL.Client.Types.TrinoBigDecimal value) -> decimal
+static TriQL.Client.Types.TrinoBigDecimal.operator !=(TriQL.Client.Types.TrinoBigDecimal left, TriQL.Client.Types.TrinoBigDecimal right) -> bool
+static TriQL.Client.Types.TrinoBigDecimal.operator <(TriQL.Client.Types.TrinoBigDecimal left, TriQL.Client.Types.TrinoBigDecimal right) -> bool
+static TriQL.Client.Types.TrinoBigDecimal.operator <=(TriQL.Client.Types.TrinoBigDecimal left, TriQL.Client.Types.TrinoBigDecimal right) -> bool
+static TriQL.Client.Types.TrinoBigDecimal.operator ==(TriQL.Client.Types.TrinoBigDecimal left, TriQL.Client.Types.TrinoBigDecimal right) -> bool
+static TriQL.Client.Types.TrinoBigDecimal.operator >(TriQL.Client.Types.TrinoBigDecimal left, TriQL.Client.Types.TrinoBigDecimal right) -> bool
+static TriQL.Client.Types.TrinoBigDecimal.operator >=(TriQL.Client.Types.TrinoBigDecimal left, TriQL.Client.Types.TrinoBigDecimal right) -> bool
+static TriQL.Client.Types.TrinoBigDecimal.Parse(string! s, System.IFormatProvider? provider) -> TriQL.Client.Types.TrinoBigDecimal
+static TriQL.Client.Types.TrinoBigDecimal.Parse(System.ReadOnlySpan<char> s) -> TriQL.Client.Types.TrinoBigDecimal
+static TriQL.Client.Types.TrinoBigDecimal.TryParse(string? s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoBigDecimal result) -> bool
+static TriQL.Client.Types.TrinoBigDecimal.TryParse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoBigDecimal result) -> bool
+static TriQL.Client.Types.TrinoIntervalYearToMonth.explicit operator int(TriQL.Client.Types.TrinoIntervalYearToMonth value) -> int
+static TriQL.Client.Types.TrinoIntervalYearToMonth.operator !=(TriQL.Client.Types.TrinoIntervalYearToMonth left, TriQL.Client.Types.TrinoIntervalYearToMonth right) -> bool
+static TriQL.Client.Types.TrinoIntervalYearToMonth.operator <(TriQL.Client.Types.TrinoIntervalYearToMonth left, TriQL.Client.Types.TrinoIntervalYearToMonth right) -> bool
+static TriQL.Client.Types.TrinoIntervalYearToMonth.operator <=(TriQL.Client.Types.TrinoIntervalYearToMonth left, TriQL.Client.Types.TrinoIntervalYearToMonth right) -> bool
+static TriQL.Client.Types.TrinoIntervalYearToMonth.operator ==(TriQL.Client.Types.TrinoIntervalYearToMonth left, TriQL.Client.Types.TrinoIntervalYearToMonth right) -> bool
+static TriQL.Client.Types.TrinoIntervalYearToMonth.operator >(TriQL.Client.Types.TrinoIntervalYearToMonth left, TriQL.Client.Types.TrinoIntervalYearToMonth right) -> bool
+static TriQL.Client.Types.TrinoIntervalYearToMonth.operator >=(TriQL.Client.Types.TrinoIntervalYearToMonth left, TriQL.Client.Types.TrinoIntervalYearToMonth right) -> bool
+static TriQL.Client.Types.TrinoIntervalYearToMonth.Parse(string! s, System.IFormatProvider? provider) -> TriQL.Client.Types.TrinoIntervalYearToMonth
+static TriQL.Client.Types.TrinoIntervalYearToMonth.Parse(System.ReadOnlySpan<char> s) -> TriQL.Client.Types.TrinoIntervalYearToMonth
+static TriQL.Client.Types.TrinoIntervalYearToMonth.TryParse(string? s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoIntervalYearToMonth result) -> bool
+static TriQL.Client.Types.TrinoIntervalYearToMonth.TryParse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoIntervalYearToMonth result) -> bool
+static TriQL.Client.Types.TrinoRowField.operator !=(TriQL.Client.Types.TrinoRowField? left, TriQL.Client.Types.TrinoRowField? right) -> bool
+static TriQL.Client.Types.TrinoRowField.operator ==(TriQL.Client.Types.TrinoRowField? left, TriQL.Client.Types.TrinoRowField? right) -> bool
+static TriQL.Client.Types.TrinoTime.explicit operator System.TimeOnly(TriQL.Client.Types.TrinoTime value) -> System.TimeOnly
+static TriQL.Client.Types.TrinoTime.operator !=(TriQL.Client.Types.TrinoTime left, TriQL.Client.Types.TrinoTime right) -> bool
+static TriQL.Client.Types.TrinoTime.operator <(TriQL.Client.Types.TrinoTime left, TriQL.Client.Types.TrinoTime right) -> bool
+static TriQL.Client.Types.TrinoTime.operator <=(TriQL.Client.Types.TrinoTime left, TriQL.Client.Types.TrinoTime right) -> bool
+static TriQL.Client.Types.TrinoTime.operator ==(TriQL.Client.Types.TrinoTime left, TriQL.Client.Types.TrinoTime right) -> bool
+static TriQL.Client.Types.TrinoTime.operator >(TriQL.Client.Types.TrinoTime left, TriQL.Client.Types.TrinoTime right) -> bool
+static TriQL.Client.Types.TrinoTime.operator >=(TriQL.Client.Types.TrinoTime left, TriQL.Client.Types.TrinoTime right) -> bool
+static TriQL.Client.Types.TrinoTime.Parse(string! s, System.IFormatProvider? provider) -> TriQL.Client.Types.TrinoTime
+static TriQL.Client.Types.TrinoTime.Parse(System.ReadOnlySpan<char> s) -> TriQL.Client.Types.TrinoTime
+static TriQL.Client.Types.TrinoTime.TryParse(string? s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoTime result) -> bool
+static TriQL.Client.Types.TrinoTime.TryParse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoTime result) -> bool
+static TriQL.Client.Types.TrinoTimestamp.explicit operator System.DateTime(TriQL.Client.Types.TrinoTimestamp value) -> System.DateTime
+static TriQL.Client.Types.TrinoTimestamp.operator !=(TriQL.Client.Types.TrinoTimestamp left, TriQL.Client.Types.TrinoTimestamp right) -> bool
+static TriQL.Client.Types.TrinoTimestamp.operator <(TriQL.Client.Types.TrinoTimestamp left, TriQL.Client.Types.TrinoTimestamp right) -> bool
+static TriQL.Client.Types.TrinoTimestamp.operator <=(TriQL.Client.Types.TrinoTimestamp left, TriQL.Client.Types.TrinoTimestamp right) -> bool
+static TriQL.Client.Types.TrinoTimestamp.operator ==(TriQL.Client.Types.TrinoTimestamp left, TriQL.Client.Types.TrinoTimestamp right) -> bool
+static TriQL.Client.Types.TrinoTimestamp.operator >(TriQL.Client.Types.TrinoTimestamp left, TriQL.Client.Types.TrinoTimestamp right) -> bool
+static TriQL.Client.Types.TrinoTimestamp.operator >=(TriQL.Client.Types.TrinoTimestamp left, TriQL.Client.Types.TrinoTimestamp right) -> bool
+static TriQL.Client.Types.TrinoTimestamp.Parse(string! s, System.IFormatProvider? provider) -> TriQL.Client.Types.TrinoTimestamp
+static TriQL.Client.Types.TrinoTimestamp.Parse(System.ReadOnlySpan<char> s) -> TriQL.Client.Types.TrinoTimestamp
+static TriQL.Client.Types.TrinoTimestamp.TryParse(string? s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoTimestamp result) -> bool
+static TriQL.Client.Types.TrinoTimestamp.TryParse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoTimestamp result) -> bool
+static TriQL.Client.Types.TrinoTimestampWithTimeZone.explicit operator System.DateTimeOffset(TriQL.Client.Types.TrinoTimestampWithTimeZone value) -> System.DateTimeOffset
+static TriQL.Client.Types.TrinoTimestampWithTimeZone.operator !=(TriQL.Client.Types.TrinoTimestampWithTimeZone left, TriQL.Client.Types.TrinoTimestampWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimestampWithTimeZone.operator <(TriQL.Client.Types.TrinoTimestampWithTimeZone left, TriQL.Client.Types.TrinoTimestampWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimestampWithTimeZone.operator <=(TriQL.Client.Types.TrinoTimestampWithTimeZone left, TriQL.Client.Types.TrinoTimestampWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimestampWithTimeZone.operator ==(TriQL.Client.Types.TrinoTimestampWithTimeZone left, TriQL.Client.Types.TrinoTimestampWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimestampWithTimeZone.operator >(TriQL.Client.Types.TrinoTimestampWithTimeZone left, TriQL.Client.Types.TrinoTimestampWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimestampWithTimeZone.operator >=(TriQL.Client.Types.TrinoTimestampWithTimeZone left, TriQL.Client.Types.TrinoTimestampWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimestampWithTimeZone.Parse(string! s, System.IFormatProvider? provider) -> TriQL.Client.Types.TrinoTimestampWithTimeZone
+static TriQL.Client.Types.TrinoTimestampWithTimeZone.Parse(System.ReadOnlySpan<char> s) -> TriQL.Client.Types.TrinoTimestampWithTimeZone
+static TriQL.Client.Types.TrinoTimestampWithTimeZone.TryParse(string? s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoTimestampWithTimeZone result) -> bool
+static TriQL.Client.Types.TrinoTimestampWithTimeZone.TryParse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoTimestampWithTimeZone result) -> bool
+static TriQL.Client.Types.TrinoTimeWithTimeZone.explicit operator System.DateTimeOffset(TriQL.Client.Types.TrinoTimeWithTimeZone value) -> System.DateTimeOffset
+static TriQL.Client.Types.TrinoTimeWithTimeZone.operator !=(TriQL.Client.Types.TrinoTimeWithTimeZone left, TriQL.Client.Types.TrinoTimeWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimeWithTimeZone.operator <(TriQL.Client.Types.TrinoTimeWithTimeZone left, TriQL.Client.Types.TrinoTimeWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimeWithTimeZone.operator <=(TriQL.Client.Types.TrinoTimeWithTimeZone left, TriQL.Client.Types.TrinoTimeWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimeWithTimeZone.operator ==(TriQL.Client.Types.TrinoTimeWithTimeZone left, TriQL.Client.Types.TrinoTimeWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimeWithTimeZone.operator >(TriQL.Client.Types.TrinoTimeWithTimeZone left, TriQL.Client.Types.TrinoTimeWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimeWithTimeZone.operator >=(TriQL.Client.Types.TrinoTimeWithTimeZone left, TriQL.Client.Types.TrinoTimeWithTimeZone right) -> bool
+static TriQL.Client.Types.TrinoTimeWithTimeZone.Parse(string! s, System.IFormatProvider? provider) -> TriQL.Client.Types.TrinoTimeWithTimeZone
+static TriQL.Client.Types.TrinoTimeWithTimeZone.Parse(System.ReadOnlySpan<char> s) -> TriQL.Client.Types.TrinoTimeWithTimeZone
+static TriQL.Client.Types.TrinoTimeWithTimeZone.TryParse(string? s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoTimeWithTimeZone result) -> bool
+static TriQL.Client.Types.TrinoTimeWithTimeZone.TryParse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider, out TriQL.Client.Types.TrinoTimeWithTimeZone result) -> bool
+static TriQL.Client.Types.TrinoTypeSignature.Parse(string! typeString) -> TriQL.Client.Types.TrinoTypeSignature!
+TriQL.Client.TrinoColumn.TypeSignature.get -> TriQL.Client.Types.TrinoTypeSignature!
+TriQL.Client.TrinoRow.GetBoolean(int ordinal) -> bool
+TriQL.Client.TrinoRow.GetBytes(int ordinal) -> byte[]!
+TriQL.Client.TrinoRow.GetDate(int ordinal) -> System.DateOnly
+TriQL.Client.TrinoRow.GetDateTime(int ordinal) -> System.DateTime
+TriQL.Client.TrinoRow.GetDateTimeOffset(int ordinal) -> System.DateTimeOffset
+TriQL.Client.TrinoRow.GetDecimal(int ordinal) -> decimal
+TriQL.Client.TrinoRow.GetDouble(int ordinal) -> double
+TriQL.Client.TrinoRow.GetFieldType(int ordinal) -> System.Type!
+TriQL.Client.TrinoRow.GetFieldValue<T>(int ordinal) -> T
+TriQL.Client.TrinoRow.GetFloat(int ordinal) -> float
+TriQL.Client.TrinoRow.GetGuid(int ordinal) -> System.Guid
+TriQL.Client.TrinoRow.GetInt16(int ordinal) -> short
+TriQL.Client.TrinoRow.GetInt32(int ordinal) -> int
+TriQL.Client.TrinoRow.GetInt64(int ordinal) -> long
+TriQL.Client.TrinoRow.GetRow(int ordinal) -> TriQL.Client.Types.ITrinoRowValue!
+TriQL.Client.TrinoRow.GetSByte(int ordinal) -> sbyte
+TriQL.Client.TrinoRow.GetString(int ordinal) -> string!
+TriQL.Client.TrinoRow.GetTime(int ordinal) -> System.TimeOnly
+TriQL.Client.Types.ITrinoRowValue
+TriQL.Client.Types.ITrinoRowValue.FieldCount.get -> int
+TriQL.Client.Types.ITrinoRowValue.GetName(int ordinal) -> string?
+TriQL.Client.Types.ITrinoRowValue.GetOrdinal(string! name) -> int
+TriQL.Client.Types.ITrinoRowValue.this[int ordinal].get -> object?
+TriQL.Client.Types.ITrinoRowValue.this[string! name].get -> object?
+TriQL.Client.Types.TrinoBigDecimal
+TriQL.Client.Types.TrinoBigDecimal.CompareTo(TriQL.Client.Types.TrinoBigDecimal other) -> int
+TriQL.Client.Types.TrinoBigDecimal.Equals(TriQL.Client.Types.TrinoBigDecimal other) -> bool
+TriQL.Client.Types.TrinoBigDecimal.Scale.get -> int
+TriQL.Client.Types.TrinoBigDecimal.ToString(string? format, System.IFormatProvider? formatProvider) -> string!
+TriQL.Client.Types.TrinoBigDecimal.TrinoBigDecimal() -> void
+TriQL.Client.Types.TrinoBigDecimal.TrinoBigDecimal(System.Numerics.BigInteger unscaledValue, int scale) -> void
+TriQL.Client.Types.TrinoBigDecimal.TryFormat(System.Span<char> destination, out int charsWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
+TriQL.Client.Types.TrinoBigDecimal.UnscaledValue.get -> System.Numerics.BigInteger
+TriQL.Client.Types.TrinoIntervalYearToMonth
+TriQL.Client.Types.TrinoIntervalYearToMonth.CompareTo(TriQL.Client.Types.TrinoIntervalYearToMonth other) -> int
+TriQL.Client.Types.TrinoIntervalYearToMonth.Equals(TriQL.Client.Types.TrinoIntervalYearToMonth other) -> bool
+TriQL.Client.Types.TrinoIntervalYearToMonth.Months.get -> int
+TriQL.Client.Types.TrinoIntervalYearToMonth.ToString(string? format, System.IFormatProvider? formatProvider) -> string!
+TriQL.Client.Types.TrinoIntervalYearToMonth.TotalMonths.get -> int
+TriQL.Client.Types.TrinoIntervalYearToMonth.TrinoIntervalYearToMonth() -> void
+TriQL.Client.Types.TrinoIntervalYearToMonth.TrinoIntervalYearToMonth(int totalMonths) -> void
+TriQL.Client.Types.TrinoIntervalYearToMonth.TryFormat(System.Span<char> destination, out int charsWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
+TriQL.Client.Types.TrinoIntervalYearToMonth.Years.get -> int
+TriQL.Client.Types.TrinoRowField
+TriQL.Client.Types.TrinoRowField.<Clone>$() -> TriQL.Client.Types.TrinoRowField!
+TriQL.Client.Types.TrinoRowField.Deconstruct(out string? Name, out TriQL.Client.Types.TrinoTypeSignature! Type) -> void
+TriQL.Client.Types.TrinoRowField.Equals(TriQL.Client.Types.TrinoRowField? other) -> bool
+TriQL.Client.Types.TrinoRowField.Name.get -> string?
+TriQL.Client.Types.TrinoRowField.Name.init -> void
+TriQL.Client.Types.TrinoRowField.TrinoRowField(string? Name, TriQL.Client.Types.TrinoTypeSignature! Type) -> void
+TriQL.Client.Types.TrinoRowField.Type.get -> TriQL.Client.Types.TrinoTypeSignature!
+TriQL.Client.Types.TrinoRowField.Type.init -> void
+TriQL.Client.Types.TrinoTime
+TriQL.Client.Types.TrinoTime.CompareTo(TriQL.Client.Types.TrinoTime other) -> int
+TriQL.Client.Types.TrinoTime.Equals(TriQL.Client.Types.TrinoTime other) -> bool
+TriQL.Client.Types.TrinoTime.PicosecondOfDay.get -> long
+TriQL.Client.Types.TrinoTime.ToString(string? format, System.IFormatProvider? formatProvider) -> string!
+TriQL.Client.Types.TrinoTime.TrinoTime() -> void
+TriQL.Client.Types.TrinoTime.TrinoTime(long picosecondOfDay) -> void
+TriQL.Client.Types.TrinoTime.TryFormat(System.Span<char> destination, out int charsWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
+TriQL.Client.Types.TrinoTimestamp
+TriQL.Client.Types.TrinoTimestamp.CompareTo(TriQL.Client.Types.TrinoTimestamp other) -> int
+TriQL.Client.Types.TrinoTimestamp.Date.get -> System.DateOnly
+TriQL.Client.Types.TrinoTimestamp.Equals(TriQL.Client.Types.TrinoTimestamp other) -> bool
+TriQL.Client.Types.TrinoTimestamp.PicosecondOfDay.get -> long
+TriQL.Client.Types.TrinoTimestamp.ToString(string? format, System.IFormatProvider? formatProvider) -> string!
+TriQL.Client.Types.TrinoTimestamp.TrinoTimestamp() -> void
+TriQL.Client.Types.TrinoTimestamp.TrinoTimestamp(System.DateOnly date, long picosecondOfDay) -> void
+TriQL.Client.Types.TrinoTimestamp.TryFormat(System.Span<char> destination, out int charsWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
+TriQL.Client.Types.TrinoTimestampWithTimeZone
+TriQL.Client.Types.TrinoTimestampWithTimeZone.CompareTo(TriQL.Client.Types.TrinoTimestampWithTimeZone other) -> int
+TriQL.Client.Types.TrinoTimestampWithTimeZone.Date.get -> System.DateOnly
+TriQL.Client.Types.TrinoTimestampWithTimeZone.Equals(TriQL.Client.Types.TrinoTimestampWithTimeZone other) -> bool
+TriQL.Client.Types.TrinoTimestampWithTimeZone.Offset.get -> System.TimeSpan
+TriQL.Client.Types.TrinoTimestampWithTimeZone.PicosecondOfDay.get -> long
+TriQL.Client.Types.TrinoTimestampWithTimeZone.ToString(string? format, System.IFormatProvider? formatProvider) -> string!
+TriQL.Client.Types.TrinoTimestampWithTimeZone.TrinoTimestampWithTimeZone() -> void
+TriQL.Client.Types.TrinoTimestampWithTimeZone.TrinoTimestampWithTimeZone(System.DateOnly date, long picosecondOfDay, System.TimeSpan offset, string? zoneId = null) -> void
+TriQL.Client.Types.TrinoTimestampWithTimeZone.TryFormat(System.Span<char> destination, out int charsWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
+TriQL.Client.Types.TrinoTimestampWithTimeZone.ZoneId.get -> string?
+TriQL.Client.Types.TrinoTimeWithTimeZone
+TriQL.Client.Types.TrinoTimeWithTimeZone.CompareTo(TriQL.Client.Types.TrinoTimeWithTimeZone other) -> int
+TriQL.Client.Types.TrinoTimeWithTimeZone.Equals(TriQL.Client.Types.TrinoTimeWithTimeZone other) -> bool
+TriQL.Client.Types.TrinoTimeWithTimeZone.Offset.get -> System.TimeSpan
+TriQL.Client.Types.TrinoTimeWithTimeZone.PicosecondOfDay.get -> long
+TriQL.Client.Types.TrinoTimeWithTimeZone.ToString(string? format, System.IFormatProvider? formatProvider) -> string!
+TriQL.Client.Types.TrinoTimeWithTimeZone.TrinoTimeWithTimeZone() -> void
+TriQL.Client.Types.TrinoTimeWithTimeZone.TrinoTimeWithTimeZone(long picosecondOfDay, System.TimeSpan offset) -> void
+TriQL.Client.Types.TrinoTimeWithTimeZone.TryFormat(System.Span<char> destination, out int charsWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
+TriQL.Client.Types.TrinoTypeSignature
+TriQL.Client.Types.TrinoTypeSignature.BaseName.get -> string!
+TriQL.Client.Types.TrinoTypeSignature.IntervalRange.get -> string?
+TriQL.Client.Types.TrinoTypeSignature.Length.get -> int?
+TriQL.Client.Types.TrinoTypeSignature.NumericParameters.get -> System.Collections.Generic.IReadOnlyList<int>!
+TriQL.Client.Types.TrinoTypeSignature.Precision.get -> int?
+TriQL.Client.Types.TrinoTypeSignature.RawSignature.get -> string!
+TriQL.Client.Types.TrinoTypeSignature.RowFields.get -> System.Collections.Generic.IReadOnlyList<TriQL.Client.Types.TrinoRowField!>!
+TriQL.Client.Types.TrinoTypeSignature.Scale.get -> int?
+TriQL.Client.Types.TrinoTypeSignature.TypeArguments.get -> System.Collections.Generic.IReadOnlyList<TriQL.Client.Types.TrinoTypeSignature!>!
+TriQL.Client.Types.TrinoTypeSignature.WithTimeZone.get -> bool
+TriQL.Client.TrinoClient.ExecuteAsync(string! sql, TriQL.Client.TrinoParameterCollection? parameters = null, bool retainPreparedStatement = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TriQL.Client.TrinoResultSet!>!
+TriQL.Client.TrinoParameter
+TriQL.Client.TrinoParameter.DbType.get -> System.Data.DbType?
+TriQL.Client.TrinoParameter.DbType.set -> void
+TriQL.Client.TrinoParameter.Direction.get -> System.Data.ParameterDirection
+TriQL.Client.TrinoParameter.Direction.set -> void
+TriQL.Client.TrinoParameter.IsNullable.get -> bool
+TriQL.Client.TrinoParameter.IsNullable.set -> void
+TriQL.Client.TrinoParameter.Name.get -> string?
+TriQL.Client.TrinoParameter.Name.set -> void
+TriQL.Client.TrinoParameter.Precision.get -> byte?
+TriQL.Client.TrinoParameter.Precision.set -> void
+TriQL.Client.TrinoParameter.Scale.get -> byte?
+TriQL.Client.TrinoParameter.Scale.set -> void
+TriQL.Client.TrinoParameter.Size.get -> int?
+TriQL.Client.TrinoParameter.Size.set -> void
+TriQL.Client.TrinoParameter.TrinoParameter() -> void
+TriQL.Client.TrinoParameter.TrinoParameter(string? name, object? value) -> void
+TriQL.Client.TrinoParameter.TrinoType.get -> string?
+TriQL.Client.TrinoParameter.TrinoType.set -> void
+TriQL.Client.TrinoParameter.Value.get -> object?
+TriQL.Client.TrinoParameter.Value.set -> void
+TriQL.Client.TrinoParameterCollection
+TriQL.Client.TrinoParameterCollection.Add(object? value) -> TriQL.Client.TrinoParameter!
+TriQL.Client.TrinoParameterCollection.Add(string! name, object? value) -> TriQL.Client.TrinoParameter!
+TriQL.Client.TrinoParameterCollection.Add(TriQL.Client.TrinoParameter! parameter) -> void
+TriQL.Client.TrinoParameterCollection.Count.get -> int
+TriQL.Client.TrinoParameterCollection.GetEnumerator() -> System.Collections.Generic.IEnumerator<TriQL.Client.TrinoParameter!>!
+TriQL.Client.TrinoParameterCollection.this[int index].get -> TriQL.Client.TrinoParameter!
+TriQL.Client.TrinoParameterCollection.this[string! name].get -> TriQL.Client.TrinoParameter!
+TriQL.Client.TrinoParameterCollection.TrinoParameterCollection() -> void
+TriQL.Client.TrinoParameterCollection.TryGetValue(string! name, out TriQL.Client.TrinoParameter! parameter) -> bool
