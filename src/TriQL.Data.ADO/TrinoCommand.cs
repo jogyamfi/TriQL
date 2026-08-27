@@ -118,7 +118,7 @@ public sealed class TrinoCommand : DbCommand
         try
         {
             var resultSet = await ExecuteCoreAsync(connection, cancellationToken).ConfigureAwait(false);
-            _activeResultSet = resultSet;
+            TrackResultSet(connection, resultSet);
             await using (resultSet.ConfigureAwait(false))
             {
                 long rowCount = 0;
@@ -130,6 +130,11 @@ public sealed class TrinoCommand : DbCommand
                 var affected = resultSet.UpdateCount ?? rowCount;
                 return affected > int.MaxValue ? int.MaxValue : (int)affected;
             }
+        }
+        catch (TrinoException ex)
+        {
+            connection.RaiseInfoMessage(stats: null, ex);
+            throw;
         }
         finally
         {
@@ -149,7 +154,7 @@ public sealed class TrinoCommand : DbCommand
         try
         {
             var resultSet = await ExecuteCoreAsync(connection, cancellationToken).ConfigureAwait(false);
-            _activeResultSet = resultSet;
+            TrackResultSet(connection, resultSet);
             await using (resultSet.ConfigureAwait(false))
             {
                 await foreach (var row in resultSet.ReadRowsAsync(cancellationToken).ConfigureAwait(false))
@@ -159,6 +164,11 @@ public sealed class TrinoCommand : DbCommand
 
                 return null;
             }
+        }
+        catch (TrinoException ex)
+        {
+            connection.RaiseInfoMessage(stats: null, ex);
+            throw;
         }
         finally
         {
@@ -179,7 +189,7 @@ public sealed class TrinoCommand : DbCommand
         try
         {
             var resultSet = await ExecuteCoreAsync(connection, cancellationToken).ConfigureAwait(false);
-            _activeResultSet = resultSet;
+            TrackResultSet(connection, resultSet);
 
             var closeConnectionOnDispose = (behavior & CommandBehavior.CloseConnection) != 0;
             return await TrinoDataReader.CreateAsync(
@@ -196,8 +206,13 @@ public sealed class TrinoCommand : DbCommand
                 },
                 cancellationToken).ConfigureAwait(false);
         }
-        catch
+        catch (Exception ex)
         {
+            if (ex is TrinoException)
+            {
+                connection.RaiseInfoMessage(stats: null, ex);
+            }
+
             _activeResultSet = null;
             connection.EndCommand();
             throw;
@@ -228,6 +243,18 @@ public sealed class TrinoCommand : DbCommand
             var configuredTimeout = TimeSpan.FromSeconds(_commandTimeout);
             throw new TrinoTimeoutException($"CommandTimeout of {_commandTimeout}s expired.", configuredTimeout, configuredTimeout, queryId: null);
         }
+    }
+
+    /// <summary>
+    /// Publishes the result set to the connection: progress statistics feed
+    /// <see cref="TrinoConnection.InfoMessage"/> (FR-9.1.14), and the registration lets
+    /// <see cref="TrinoConnection.CloseAsync"/> cancel the query if it is still running (FR-9.1.8).
+    /// </summary>
+    private void TrackResultSet(TrinoConnection connection, TrinoResultSet resultSet)
+    {
+        _activeResultSet = resultSet;
+        connection.RegisterActiveQuery(resultSet);
+        resultSet.Progress += (_, e) => connection.RaiseInfoMessage(e.Stats, error: null);
     }
 
     private ClientParameterCollection? ToClientParameters()

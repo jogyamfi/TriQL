@@ -188,11 +188,7 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
 
     private void ObservePage(TrinoPage page)
     {
-        if (page.Columns.Count > 0 && _columns.Count == 0)
-        {
-            _columns = page.Columns;
-            _schemaTcs.TrySetResult(_columns);
-        }
+        CaptureSchema(page.Columns);
 
         if (page.UpdateType is not null)
         {
@@ -208,6 +204,20 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
         {
             _lastStats = stats;
             RaiseProgress(stats);
+        }
+    }
+
+    /// <summary>
+    /// Publishes the column schema the first time it is seen. Called from both the background pump
+    /// (so <see cref="WaitForSchemaAsync"/> completes as soon as the schema arrives on the wire,
+    /// not only once a consumer reads that page) and the consumer's <see cref="ObservePage"/>.
+    /// </summary>
+    private void CaptureSchema(IReadOnlyList<TrinoColumn> columns)
+    {
+        if (columns.Count > 0 && _columns.Count == 0)
+        {
+            _columns = columns;
+            _schemaTcs.TrySetResult(columns);
         }
     }
 
@@ -240,6 +250,7 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
                 }
 
                 _rowsProduced += page.RowCount;
+                CaptureSchema(page.Columns);
                 var sizeBytes = PayloadSizeEstimator.EstimateRows(page.RawRows);
                 await _buffer.EnqueueAsync(page, sizeBytes, _linkedCts.Token).ConfigureAwait(false);
             }
@@ -273,6 +284,28 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
             Log.QueryCompleted(_logger, QueryId, _stopwatch.Elapsed, _rowsProduced);
         }
 
+        SettleSchema(failure);
         _buffer.Complete(failure);
+    }
+
+    /// <summary>
+    /// Guarantees <see cref="WaitForSchemaAsync"/> always completes once the query is over. A DDL/DML
+    /// statement never carries columns, and a query that fails before its first schema-bearing page
+    /// never carries them either — without this, both would wait forever (FR-6.9).
+    /// </summary>
+    private void SettleSchema(Exception? failure)
+    {
+        if (failure is null)
+        {
+            _schemaTcs.TrySetResult(_columns);
+            return;
+        }
+
+        if (_schemaTcs.TrySetException(failure))
+        {
+            // Nothing may ever await the schema task, so observe the fault here to keep it from
+            // resurfacing as an unobserved TaskScheduler exception at finalization.
+            _ = _schemaTcs.Task.Exception;
+        }
     }
 }

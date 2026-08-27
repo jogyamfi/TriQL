@@ -20,6 +20,7 @@ public sealed class TrinoConnection : DbConnection
     private readonly IHttpClientFactory? _httpClientFactory;
     private TrinoSessionOptions? _options;
     private TrinoClient? _client;
+    private IDisposable? _activeQuery;
     private ConnectionState _state = ConnectionState.Closed;
     private string? _connectionString;
     private string? _serverVersion;
@@ -77,8 +78,10 @@ public sealed class TrinoConnection : DbConnection
     public override string DataSource => _options?.Server?.ToString() ?? string.Empty;
 
     /// <inheritdoc/>
-    public override string ServerVersion => _serverVersion ??
-        throw new InvalidOperationException("ServerVersion is unavailable: the connection has not confirmed a server version yet.");
+    /// <remarks>Fetched from <c>/v1/info</c> on first access and cached for the connection's lifetime (FR-9.1.4).</remarks>
+    /// <exception cref="InvalidOperationException">The connection is not open.</exception>
+    public override string ServerVersion =>
+        _serverVersion ??= SyncBridge.Run(() => RequireOpenClient().GetServerInfoAsync(CancellationToken.None)).Version;
 
     /// <inheritdoc/>
     public override ConnectionState State => _state;
@@ -146,6 +149,10 @@ public sealed class TrinoConnection : DbConnection
         {
             return;
         }
+
+        // FR-9.1.8: closing cancels any query still owned by this connection. TrinoResultSet.Dispose()
+        // is the documented non-blocking cancel signal; the background pump then cancels server-side.
+        Interlocked.Exchange(ref _activeQuery, null)?.Dispose();
 
         var client = _client;
         _client = null;
@@ -239,7 +246,14 @@ public sealed class TrinoConnection : DbConnection
     }
 
     /// <summary>Releases the single-command-at-a-time lock taken by <see cref="BeginCommand"/>.</summary>
-    internal void EndCommand() => Volatile.Write(ref _commandActive, 0);
+    internal void EndCommand()
+    {
+        Interlocked.Exchange(ref _activeQuery, null);
+        Volatile.Write(ref _commandActive, 0);
+    }
+
+    /// <summary>Tracks the running query so <see cref="CloseAsync"/> can cancel it (FR-9.1.8).</summary>
+    internal void RegisterActiveQuery(IDisposable query) => Interlocked.Exchange(ref _activeQuery, query);
 
     /// <summary>Raises <see cref="InfoMessage"/> (FR-9.1.14).</summary>
     internal void RaiseInfoMessage(TrinoQueryStats? stats, Exception? error) =>

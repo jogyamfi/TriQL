@@ -25,6 +25,7 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
     private TrinoRow? _current;
     private TrinoRow? _pending;
     private bool _hasPending;
+    private bool _hadRows;
     private bool _closed;
     private bool _singleRowConsumed;
 
@@ -51,6 +52,7 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
             var enumerator = resultSet.ReadRowsAsync(cancellationToken).GetAsyncEnumerator(cancellationToken);
             reader._enumerator = enumerator;
             reader._hasPending = await enumerator.MoveNextAsync().ConfigureAwait(false);
+            reader._hadRows = reader._hasPending;
             if (reader._hasPending)
             {
                 reader._pending = enumerator.Current;
@@ -76,7 +78,12 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
     public override int FieldCount => _closed ? 0 : _columns.Count;
 
     /// <inheritdoc/>
-    public override bool HasRows => _hasPending || _current is not null;
+    /// <remarks>
+    /// Reports whether the result set contained any rows, answered from the eagerly-fetched first
+    /// row without consuming it (FR-9.3.5). Stays <see langword="true"/> after the last row has been
+    /// read, matching the <see cref="DbDataReader"/> contract.
+    /// </remarks>
+    public override bool HasRows => _hadRows;
 
     /// <inheritdoc/>
     public override bool IsClosed => _closed;
@@ -397,6 +404,11 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
         }
 
         _closed = true;
+
+        // FR-9.3.13: accessors must throw once the reader is closed, so drop the current row first.
+        _current = null;
+        _pending = null;
+        _hasPending = false;
 
         // Non-blocking cancel signal (NFR-REL-2); the background pump completes on its own (FR-9.3.12).
         _resultSet.Dispose();
