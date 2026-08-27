@@ -10,6 +10,7 @@ internal sealed record TrinoPageEnvelope(
     string QueryId,
     Uri? NextUri,
     Uri? PartialCancelUri,
+    Uri? InfoUri,
     IReadOnlyList<TrinoColumn>? Columns,
     IReadOnlyList<object?[]> Rows,
     bool ValuesAreDecoded,

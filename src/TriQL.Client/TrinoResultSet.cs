@@ -45,6 +45,7 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
         _linkedCts = linkedCts;
         _callerToken = callerToken;
         QueryId = initial.QueryId;
+        InfoUri = initial.InfoUri;
         _columns = initial.Columns ?? [];
         _updateType = initial.UpdateType;
         _updateCount = initial.UpdateCount;
@@ -62,6 +63,9 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
 
     /// <summary>The id of the underlying query.</summary>
     public string QueryId { get; }
+
+    /// <summary>The Trino web UI deep-link for this query, if reported. See FR-10.4.</summary>
+    public Uri? InfoUri { get; }
 
     /// <summary>The column schema, once known. Empty until <see cref="WaitForSchemaAsync"/> completes or a row is read.</summary>
     public IReadOnlyList<TrinoColumn> Columns => _columns;

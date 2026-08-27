@@ -34,4 +34,5 @@ internal sealed class ServerInfoDto
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase, MaxDepth = 64)]
 [JsonSerializable(typeof(ServerInfoDto))]
 [JsonSerializable(typeof(StatementResponseDto))]
+[JsonSerializable(typeof(QueryInfoDto))]
 internal sealed partial class TriqlInternalJsonContext : JsonSerializerContext;

@@ -89,6 +89,13 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
         }
     }
 
+    /// <summary><c>GET /v1/query/{queryId}</c>. See FR-10.3.</summary>
+    public Task<TrinoQueryInfo> GetQueryInfoAsync(string queryId, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(queryId);
+        return QueryInfoClient.GetQueryInfoAsync(_invoker, Options, queryId, _logger, cancellationToken);
+    }
+
     /// <summary>
     /// Submits <paramref name="sql"/> via <c>POST /v1/statement</c> and returns a
     /// <see cref="TrinoResultSet"/> ready for streaming. See FR-4.1, FR-4.5.

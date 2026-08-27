@@ -21,6 +21,7 @@ internal static class StatementResponseMapper
             dto.Id,
             dto.NextUri is null ? null : new Uri(dto.NextUri),
             dto.PartialCancelUri is null ? null : new Uri(dto.PartialCancelUri),
+            dto.InfoUri is null ? null : new Uri(dto.InfoUri),
             columns,
             rows,
             valuesAreDecoded,

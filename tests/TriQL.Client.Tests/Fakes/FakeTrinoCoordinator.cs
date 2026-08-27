@@ -7,7 +7,7 @@ namespace TriQL.Client.Tests.Fakes;
 /// A request captured by <see cref="FakeTrinoCoordinator"/>, decoupled from <see cref="HttpRequestMessage"/>
 /// so callers can inspect it after the (possibly disposed) request has been sent.
 /// </summary>
-public sealed record CapturedRequest(HttpMethod Method, Uri? RequestUri, IReadOnlyDictionary<string, string[]> Headers)
+public sealed record CapturedRequest(HttpMethod Method, Uri? RequestUri, IReadOnlyDictionary<string, string[]> Headers, string? Body = null)
 {
     public bool HasHeader(string name) => Headers.ContainsKey(name);
 
@@ -49,9 +49,10 @@ public sealed class FakeTrinoCoordinator : HttpMessageHandler
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        var body = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         lock (_gate)
         {
-            _receivedRequests.Add(Capture(request));
+            _receivedRequests.Add(Capture(request, body));
         }
 
         ScriptedResponse? scripted;
@@ -87,11 +88,11 @@ public sealed class FakeTrinoCoordinator : HttpMessageHandler
         return response;
     }
 
-    private static CapturedRequest Capture(HttpRequestMessage request)
+    private static CapturedRequest Capture(HttpRequestMessage request, string? body)
     {
         var headers = request.Headers
             .ToDictionary(h => h.Key, h => h.Value.ToArray(), StringComparer.OrdinalIgnoreCase);
-        return new CapturedRequest(request.Method, request.RequestUri, headers);
+        return new CapturedRequest(request.Method, request.RequestUri, headers, body);
     }
 
     private sealed record ScriptedResponse(

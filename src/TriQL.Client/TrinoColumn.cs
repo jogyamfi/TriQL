@@ -1,3 +1,4 @@
+using TriQL.Client.Internal;
 using TriQL.Client.Types;
 
 namespace TriQL.Client;
@@ -11,4 +12,7 @@ public sealed record TrinoColumn(string Name, string TypeName)
 {
     /// <summary>The parsed type signature for <see cref="TypeName"/>. Parsed once and cached per distinct string (FR-7.1.3).</summary>
     public TrinoTypeSignature TypeSignature => TrinoTypeSignature.Parse(TypeName);
+
+    /// <summary>The default CLR type this column materializes to (FR-7.2.1).</summary>
+    public Type ClrType => TrinoValueConverter.GetDefaultClrType(TypeSignature);
 }

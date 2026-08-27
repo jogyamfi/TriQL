@@ -153,6 +153,79 @@ internal sealed class StatementStatsDto
     public StatementStageStatsDto? RootStage { get; set; }
 }
 
+/// <summary>Wire DTO for the <c>session</c> member of <c>GET /v1/query/{queryId}</c>. See FR-10.3.</summary>
+internal sealed class QueryInfoSessionDto
+{
+    [JsonPropertyName("user")]
+    public string? User { get; set; }
+
+    [JsonPropertyName("catalog")]
+    public string? Catalog { get; set; }
+
+    [JsonPropertyName("schema")]
+    public string? Schema { get; set; }
+}
+
+/// <summary>
+/// Wire DTO for the <c>queryStats</c> member of <c>GET /v1/query/{queryId}</c>. This is a distinct,
+/// Duration-string-based shape from <see cref="StatementStatsDto"/>'s millis-based <c>stats</c>
+/// member on <c>/v1/statement</c>; only the fields documented as required by FR-10.3 are mapped.
+/// </summary>
+internal sealed class QueryInfoStatsDto
+{
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+
+    [JsonPropertyName("queued")]
+    public bool Queued { get; set; }
+
+    [JsonPropertyName("scheduled")]
+    public bool Scheduled { get; set; }
+
+    [JsonPropertyName("elapsedTime")]
+    public string? ElapsedTime { get; set; }
+
+    [JsonPropertyName("queuedTime")]
+    public string? QueuedTime { get; set; }
+
+    [JsonPropertyName("totalCpuTime")]
+    public string? TotalCpuTime { get; set; }
+
+    [JsonPropertyName("processedInputPositions")]
+    public long ProcessedInputPositions { get; set; }
+
+    [JsonPropertyName("processedInputDataSize")]
+    public string? ProcessedInputDataSize { get; set; }
+
+    [JsonPropertyName("peakUserMemoryReservation")]
+    public string? PeakUserMemoryReservation { get; set; }
+}
+
+/// <summary>
+/// Wire DTO for the <c>GET /v1/query/{queryId}</c> response body. Unknown members are tolerated
+/// for forward compatibility. See FR-10.3.
+/// </summary>
+internal sealed class QueryInfoDto
+{
+    [JsonPropertyName("queryId")]
+    public string QueryId { get; set; } = string.Empty;
+
+    [JsonPropertyName("state")]
+    public string State { get; set; } = string.Empty;
+
+    [JsonPropertyName("query")]
+    public string Query { get; set; } = string.Empty;
+
+    [JsonPropertyName("session")]
+    public QueryInfoSessionDto? Session { get; set; }
+
+    [JsonPropertyName("queryStats")]
+    public QueryInfoStatsDto? QueryStats { get; set; }
+
+    [JsonPropertyName("failureInfo")]
+    public StatementFailureInfoDto? FailureInfo { get; set; }
+}
+
 /// <summary>
 /// Wire DTO for the <c>POST /v1/statement</c> submission response and every subsequent
 /// <c>nextUri</c> page. Unknown members are tolerated for forward compatibility. See FR-4.2.1.

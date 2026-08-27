@@ -30,7 +30,7 @@ internal static class FailureClassifier
         _ => TrinoErrorType.InternalError,
     };
 
-    private static TrinoFailureInfo? ToFailureInfo(StatementFailureInfoDto? dto)
+    internal static TrinoFailureInfo? ToFailureInfo(StatementFailureInfoDto? dto)
     {
         if (dto is null)
         {

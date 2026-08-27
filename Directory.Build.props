@@ -42,11 +42,13 @@
     CA1707 (underscores in identifiers) and CA1711 (type name ends in a reserved suffix) both
     collide with idiomatic xUnit conventions: MethodName_Scenario_Outcome test naming, and the
     "FooCollection" fixture-collection-definition pattern. CA2007 (ConfigureAwait) directly
-    conflicts with xUnit1030, which forbids ConfigureAwait(false) in test methods. Suppressed for
-    test projects only.
+    conflicts with xUnit1030, which forbids ConfigureAwait(false) in test methods. CA1849 (prefer
+    async APIs) directly conflicts with conformance tests for a provider's SYNCHRONOUS ADO.NET
+    surface (TEST-9): calling DbCommand.ExecuteReader()/DbDataReader.Read() etc. synchronously is
+    the point of those tests, not an oversight. Suppressed for test projects only.
   -->
   <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('\tests\'))">
-    <NoWarn>$(NoWarn);CA1707;CA1711;CA2007</NoWarn>
+    <NoWarn>$(NoWarn);CA1707;CA1711;CA2007;CA1849</NoWarn>
   </PropertyGroup>
 
   <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('\src\'))">

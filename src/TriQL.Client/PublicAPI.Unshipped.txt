@@ -621,3 +621,60 @@ TriQL.Client.TrinoParameterCollection.this[int index].get -> TriQL.Client.TrinoP
 TriQL.Client.TrinoParameterCollection.this[string! name].get -> TriQL.Client.TrinoParameter!
 TriQL.Client.TrinoParameterCollection.TrinoParameterCollection() -> void
 TriQL.Client.TrinoParameterCollection.TryGetValue(string! name, out TriQL.Client.TrinoParameter! parameter) -> bool
+override TriQL.Client.TrinoQueryInfo.Equals(object? obj) -> bool
+override TriQL.Client.TrinoQueryInfo.GetHashCode() -> int
+override TriQL.Client.TrinoQueryInfo.ToString() -> string!
+override TriQL.Client.TrinoQueryInfoStats.Equals(object? obj) -> bool
+override TriQL.Client.TrinoQueryInfoStats.GetHashCode() -> int
+override TriQL.Client.TrinoQueryInfoStats.ToString() -> string!
+static TriQL.Client.TrinoQueryInfo.operator !=(TriQL.Client.TrinoQueryInfo? left, TriQL.Client.TrinoQueryInfo? right) -> bool
+static TriQL.Client.TrinoQueryInfo.operator ==(TriQL.Client.TrinoQueryInfo? left, TriQL.Client.TrinoQueryInfo? right) -> bool
+static TriQL.Client.TrinoQueryInfoStats.operator !=(TriQL.Client.TrinoQueryInfoStats? left, TriQL.Client.TrinoQueryInfoStats? right) -> bool
+static TriQL.Client.TrinoQueryInfoStats.operator ==(TriQL.Client.TrinoQueryInfoStats? left, TriQL.Client.TrinoQueryInfoStats? right) -> bool
+TriQL.Client.TrinoClient.GetQueryInfoAsync(string! queryId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TriQL.Client.TrinoQueryInfo!>!
+TriQL.Client.TrinoColumn.ClrType.get -> System.Type!
+TriQL.Client.TrinoQueryInfo
+TriQL.Client.TrinoQueryInfo.<Clone>$() -> TriQL.Client.TrinoQueryInfo!
+TriQL.Client.TrinoQueryInfo.Deconstruct(out string! QueryId, out string! State, out string! Query, out string? SessionUser, out string? SessionCatalog, out string? SessionSchema, out TriQL.Client.TrinoQueryInfoStats? QueryStats, out TriQL.Client.Exceptions.TrinoFailureInfo? FailureInfo) -> void
+TriQL.Client.TrinoQueryInfo.Equals(TriQL.Client.TrinoQueryInfo? other) -> bool
+TriQL.Client.TrinoQueryInfo.FailureInfo.get -> TriQL.Client.Exceptions.TrinoFailureInfo?
+TriQL.Client.TrinoQueryInfo.FailureInfo.init -> void
+TriQL.Client.TrinoQueryInfo.Query.get -> string!
+TriQL.Client.TrinoQueryInfo.Query.init -> void
+TriQL.Client.TrinoQueryInfo.QueryId.get -> string!
+TriQL.Client.TrinoQueryInfo.QueryId.init -> void
+TriQL.Client.TrinoQueryInfo.QueryStats.get -> TriQL.Client.TrinoQueryInfoStats?
+TriQL.Client.TrinoQueryInfo.QueryStats.init -> void
+TriQL.Client.TrinoQueryInfo.SessionCatalog.get -> string?
+TriQL.Client.TrinoQueryInfo.SessionCatalog.init -> void
+TriQL.Client.TrinoQueryInfo.SessionSchema.get -> string?
+TriQL.Client.TrinoQueryInfo.SessionSchema.init -> void
+TriQL.Client.TrinoQueryInfo.SessionUser.get -> string?
+TriQL.Client.TrinoQueryInfo.SessionUser.init -> void
+TriQL.Client.TrinoQueryInfo.State.get -> string!
+TriQL.Client.TrinoQueryInfo.State.init -> void
+TriQL.Client.TrinoQueryInfo.TrinoQueryInfo(string! QueryId, string! State, string! Query, string? SessionUser, string? SessionCatalog, string? SessionSchema, TriQL.Client.TrinoQueryInfoStats? QueryStats, TriQL.Client.Exceptions.TrinoFailureInfo? FailureInfo) -> void
+TriQL.Client.TrinoQueryInfoStats
+TriQL.Client.TrinoQueryInfoStats.<Clone>$() -> TriQL.Client.TrinoQueryInfoStats!
+TriQL.Client.TrinoQueryInfoStats.Deconstruct(out string? State, out bool Queued, out bool Scheduled, out string? ElapsedTime, out string? QueuedTime, out string? TotalCpuTime, out long ProcessedInputPositions, out string? ProcessedInputDataSize, out string? PeakUserMemoryReservation) -> void
+TriQL.Client.TrinoQueryInfoStats.ElapsedTime.get -> string?
+TriQL.Client.TrinoQueryInfoStats.ElapsedTime.init -> void
+TriQL.Client.TrinoQueryInfoStats.Equals(TriQL.Client.TrinoQueryInfoStats? other) -> bool
+TriQL.Client.TrinoQueryInfoStats.PeakUserMemoryReservation.get -> string?
+TriQL.Client.TrinoQueryInfoStats.PeakUserMemoryReservation.init -> void
+TriQL.Client.TrinoQueryInfoStats.ProcessedInputDataSize.get -> string?
+TriQL.Client.TrinoQueryInfoStats.ProcessedInputDataSize.init -> void
+TriQL.Client.TrinoQueryInfoStats.ProcessedInputPositions.get -> long
+TriQL.Client.TrinoQueryInfoStats.ProcessedInputPositions.init -> void
+TriQL.Client.TrinoQueryInfoStats.Queued.get -> bool
+TriQL.Client.TrinoQueryInfoStats.Queued.init -> void
+TriQL.Client.TrinoQueryInfoStats.QueuedTime.get -> string?
+TriQL.Client.TrinoQueryInfoStats.QueuedTime.init -> void
+TriQL.Client.TrinoQueryInfoStats.Scheduled.get -> bool
+TriQL.Client.TrinoQueryInfoStats.Scheduled.init -> void
+TriQL.Client.TrinoQueryInfoStats.State.get -> string?
+TriQL.Client.TrinoQueryInfoStats.State.init -> void
+TriQL.Client.TrinoQueryInfoStats.TotalCpuTime.get -> string?
+TriQL.Client.TrinoQueryInfoStats.TotalCpuTime.init -> void
+TriQL.Client.TrinoQueryInfoStats.TrinoQueryInfoStats(string? State, bool Queued, bool Scheduled, string? ElapsedTime, string? QueuedTime, string? TotalCpuTime, long ProcessedInputPositions, string? ProcessedInputDataSize, string? PeakUserMemoryReservation) -> void
+TriQL.Client.TrinoResultSet.InfoUri.get -> System.Uri?

@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\TriQL.Data.ADO\TriQL.Data.ADO.csproj" />
     <ProjectReference Include="..\..\src\TriQL.Client\TriQL.Client.csproj" />
+    <ProjectReference Include="..\TriQL.Client.Tests\TriQL.Client.Tests.csproj" />
   </ItemGroup>
 
 </Project>
