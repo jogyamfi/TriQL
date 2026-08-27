@@ -9,12 +9,14 @@ public sealed class TrinoPage
     internal TrinoPage(
         IReadOnlyList<TrinoColumn> columns,
         IReadOnlyList<object?[]> rawRows,
+        bool valuesAreDecoded,
         TrinoQueryStats? stats,
         string? updateType,
         long? updateCount)
     {
         Columns = columns;
         RawRows = rawRows;
+        ValuesAreDecoded = valuesAreDecoded;
         Stats = stats;
         UpdateType = updateType;
         UpdateCount = updateCount;
@@ -37,4 +39,7 @@ public sealed class TrinoPage
 
     /// <summary>The raw decoded row values. See <see cref="TrinoRow"/> remarks on materialization.</summary>
     internal IReadOnlyList<object?[]> RawRows { get; }
+
+    /// <summary>Whether <see cref="RawRows"/> scalars were already materialized by <c>Utf8RowDecoder</c>.</summary>
+    internal bool ValuesAreDecoded { get; }
 }

@@ -9,32 +9,37 @@ namespace TriQL.Client.Internal;
 /// </summary>
 internal static class StatementResponseMapper
 {
-    public static TrinoPageEnvelope ToEnvelope(StatementResponseDto dto, IReadOnlyList<TrinoColumn>? previousColumns)
+    public static TrinoPageEnvelope ToEnvelope(StatementResponseDto dto, ReadOnlySpan<byte> responseBytes, IReadOnlyList<TrinoColumn>? previousColumns)
     {
         var columns = dto.Columns is { Count: > 0 }
             ? dto.Columns.ConvertAll(c => new TrinoColumn(c.Name, c.Type))
             : previousColumns;
+
+        var rows = ExtractRows(dto.Data, responseBytes, columns, out var valuesAreDecoded);
 
         return new TrinoPageEnvelope(
             dto.Id,
             dto.NextUri is null ? null : new Uri(dto.NextUri),
             dto.PartialCancelUri is null ? null : new Uri(dto.PartialCancelUri),
             columns,
-            ExtractRows(dto.Data),
+            rows,
+            valuesAreDecoded,
             dto.Stats is null ? null : ToStats(dto.Stats),
             dto.Error,
             dto.UpdateType,
             dto.UpdateCount);
     }
 
-    private static object?[][] ExtractRows(JsonElement? data)
+    private static object?[][] ExtractRows(
+        RawJsonSlice? data, ReadOnlySpan<byte> responseBytes, IReadOnlyList<TrinoColumn>? columns, out bool valuesAreDecoded)
     {
-        if (data is not { } element)
+        valuesAreDecoded = false;
+        if (data is not { } slice)
         {
             return [];
         }
 
-        if (element.ValueKind == JsonValueKind.Object)
+        if (slice.Kind == JsonValueKind.Object)
         {
             // FR-5.1.2: an object `data` member indicates the spooled protocol, which Phase 5 implements.
             throw new TrinoProtocolException(
@@ -42,11 +47,27 @@ internal static class StatementResponseMapper
                 "Set TrinoSessionOptions.QueryDataEncodings to an empty list to force the direct protocol.");
         }
 
-        if (element.ValueKind != JsonValueKind.Array)
+        if (slice.Kind != JsonValueKind.Array)
         {
             return [];
         }
 
+        var json = responseBytes.Slice(slice.Start, slice.Length);
+
+        // Without a schema there is nothing to convert against, so fall back to untyped decoding.
+        if (columns is not { Count: > 0 })
+        {
+            return DecodeUntyped(json);
+        }
+
+        valuesAreDecoded = true;
+        return Utf8RowDecoder.DecodeRows(json, columns);
+    }
+
+    private static object?[][] DecodeUntyped(ReadOnlySpan<byte> json)
+    {
+        using var document = JsonDocument.Parse(json.ToArray());
+        var element = document.RootElement;
         var rows = new object?[element.GetArrayLength()][];
         var i = 0;
         foreach (var rowElement in element.EnumerateArray())

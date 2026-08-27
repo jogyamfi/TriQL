@@ -35,13 +35,13 @@ internal static class TrinoValueConverter
                 "bigint" => ToLong(raw),
                 "real" => ToSingle(raw),
                 "double" => ToDouble(raw),
-                "decimal" => ConvertDecimal((string)raw, type),
+                "decimal" => ParseScalarFromText(((string)raw).AsSpan(), type),
                 "varchar" or "char" or "json" => (string)raw,
                 "varbinary" => System.Convert.FromBase64String((string)raw),
-                "date" => DateOnly.ParseExact((string)raw, "yyyy-MM-dd", CultureInfo.InvariantCulture),
-                "time" => ConvertTime((string)raw, type),
-                "timestamp" => ConvertTimestamp((string)raw, type),
-                "interval" => ConvertInterval((string)raw, type),
+                "date" => ParseScalarFromText(((string)raw).AsSpan(), type),
+                "time" => ParseScalarFromText(((string)raw).AsSpan(), type),
+                "timestamp" => ParseScalarFromText(((string)raw).AsSpan(), type),
+                "interval" => ParseScalarFromText(((string)raw).AsSpan(), type),
                 "uuid" => Guid.Parse((string)raw),
                 "ipaddress" => IPAddress.Parse((string)raw),
                 "array" => ComplexConverters.ConvertArray((object?[])raw, RequireSingleTypeArgument(type)),
@@ -90,6 +90,31 @@ internal static class TrinoValueConverter
 
     /// <summary>Whether a <c>time(p)</c>/<c>timestamp(p)</c> fits the BCL 100ns tick resolution (FR-7.2.1).</summary>
     public static bool UsesClrTemporal(TrinoTypeSignature type) => (type.Precision ?? DefaultTemporalPrecision) <= 7;
+
+    /// <summary>
+    /// Whether values of <paramref name="type"/> are left in raw form by <see cref="Utf8RowDecoder"/>
+    /// and materialized only on first access, so a caller reading just the scalar columns of a row
+    /// never pays to build a large <c>array</c>/<c>map</c>/<c>row</c> value (FR-7.2.7).
+    /// </summary>
+    public static bool RequiresDeferredMaterialization(TrinoTypeSignature type) =>
+        type.BaseName is "array" or "map" or "row";
+
+    /// <summary>
+    /// Parses the string-shaped Trino types (everything the wire sends as a JSON string other than
+    /// <c>varchar</c>/<c>char</c>/<c>json</c>/<c>uuid</c>/<c>varbinary</c>) from character data.
+    /// Shared by the naive and <see cref="Utf8RowDecoder"/> paths so both parse identically (FR-7.2.6).
+    /// </summary>
+    public static object ParseScalarFromText(ReadOnlySpan<char> text, TrinoTypeSignature type) => type.BaseName switch
+    {
+        "decimal" => ConvertDecimal(text, type),
+        "date" => DateOnly.ParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture),
+        "time" => ConvertTime(text, type),
+        "timestamp" => ConvertTimestamp(text, type),
+        "interval" => ConvertInterval(text, type),
+        "ipaddress" => IPAddress.Parse(text),
+        "uuid" => Guid.Parse(text),
+        _ => throw new TrinoTypeConversionException($"'{type.RawSignature}' is not a text-shaped scalar type."),
+    };
 
     /// <summary>
     /// The array CLR type for an <c>array(T)</c> element type. Enumerates known scalar leaf types
@@ -172,11 +197,11 @@ internal static class TrinoValueConverter
         _ => float.Parse(s, CultureInfo.InvariantCulture),
     };
 
-    private static object ConvertDecimal(string text, TrinoTypeSignature type) => UsesClrDecimal(type)
+    private static object ConvertDecimal(ReadOnlySpan<char> text, TrinoTypeSignature type) => UsesClrDecimal(type)
         ? decimal.Parse(text, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture)
         : TrinoBigDecimal.Parse(text);
 
-    private static object ConvertTime(string text, TrinoTypeSignature type)
+    private static object ConvertTime(ReadOnlySpan<char> text, TrinoTypeSignature type)
     {
         if (type.WithTimeZone)
         {
@@ -187,7 +212,7 @@ internal static class TrinoValueConverter
         return UsesClrTemporal(type) ? (TimeOnly)time : time;
     }
 
-    private static object ConvertTimestamp(string text, TrinoTypeSignature type)
+    private static object ConvertTimestamp(ReadOnlySpan<char> text, TrinoTypeSignature type)
     {
         if (type.WithTimeZone)
         {
@@ -199,16 +224,16 @@ internal static class TrinoValueConverter
         return UsesClrTemporal(type) ? (DateTime)timestamp : timestamp;
     }
 
-    private static object ConvertInterval(string text, TrinoTypeSignature type) => type.IntervalRange switch
+    private static object ConvertInterval(ReadOnlySpan<char> text, TrinoTypeSignature type) => type.IntervalRange switch
     {
         "year to month" => TrinoIntervalYearToMonth.Parse(text),
         "day to second" => ParseIntervalDayToSecond(text),
         _ => throw new TrinoTypeConversionException($"Unknown interval range '{type.IntervalRange}'."),
     };
 
-    private static TimeSpan ParseIntervalDayToSecond(string text)
+    private static TimeSpan ParseIntervalDayToSecond(ReadOnlySpan<char> text)
     {
-        var negative = text.StartsWith('-');
+        var negative = text.StartsWith("-", StringComparison.Ordinal);
         var body = negative ? text[1..] : text;
         var spaceIndex = body.IndexOf(' ');
         if (spaceIndex < 0)

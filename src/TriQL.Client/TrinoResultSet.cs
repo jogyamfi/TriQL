@@ -119,7 +119,7 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
         {
             foreach (var values in page.RawRows)
             {
-                yield return new TrinoRow(page.Columns, values);
+                yield return new TrinoRow(page.Columns, values, page.ValuesAreDecoded);
             }
         }
     }

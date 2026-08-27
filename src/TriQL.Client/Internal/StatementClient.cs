@@ -154,10 +154,14 @@ internal sealed class StatementClient
 
         _session.Apply(SessionMutationApplier.Parse(response));
 
+        // Buffered as one contiguous array because RawJsonSlice offsets index into exactly this buffer,
+        // which Utf8RowDecoder then slices to decode rows without re-materializing them (NFR-PERF-3).
+        var responseBytes = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+
         StatementResponseDto dto;
         try
         {
-            dto = await response.Content.ReadFromJsonAsync(TriqlInternalJsonContext.Default.StatementResponseDto, cancellationToken).ConfigureAwait(false)
+            dto = JsonSerializer.Deserialize(responseBytes, TriqlInternalJsonContext.Default.StatementResponseDto)
                 ?? throw new TrinoProtocolException($"The response body from {requestUri} was empty.");
         }
         catch (JsonException ex)
@@ -165,7 +169,7 @@ internal sealed class StatementClient
             throw new TrinoProtocolException($"The response from {requestUri} could not be parsed.", ex);
         }
 
-        var envelope = StatementResponseMapper.ToEnvelope(dto, previousColumns);
+        var envelope = StatementResponseMapper.ToEnvelope(dto, responseBytes, previousColumns);
         _lastNextUri = envelope.NextUri;
         if (envelope.PartialCancelUri is not null)
         {

@@ -54,5 +54,5 @@ internal static class PageReader
     }
 
     private static TrinoPage BuildPage(TrinoPageEnvelope envelope) =>
-        new(envelope.Columns ?? [], envelope.Rows, envelope.Stats, envelope.UpdateType, envelope.UpdateCount);
+        new(envelope.Columns ?? [], envelope.Rows, envelope.ValuesAreDecoded, envelope.Stats, envelope.UpdateType, envelope.UpdateCount);
 }

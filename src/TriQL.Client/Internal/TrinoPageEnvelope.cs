@@ -12,6 +12,7 @@ internal sealed record TrinoPageEnvelope(
     Uri? PartialCancelUri,
     IReadOnlyList<TrinoColumn>? Columns,
     IReadOnlyList<object?[]> Rows,
+    bool ValuesAreDecoded,
     TrinoQueryStats? Stats,
     StatementErrorDto? Error,
     string? UpdateType,

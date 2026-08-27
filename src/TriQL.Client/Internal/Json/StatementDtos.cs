@@ -175,11 +175,13 @@ internal sealed class StatementResponseDto
     public List<StatementColumnDto>? Columns { get; set; }
 
     /// <summary>
-    /// The <c>data</c> member. An array of arrays indicates the direct protocol (FR-5.1.2); an
-    /// object indicates the spooled protocol, which is not implemented until Phase 5.
+    /// The <c>data</c> member, captured as a byte range rather than materialized. An array indicates
+    /// the direct protocol (FR-5.1.2); an object indicates the spooled protocol, which is not
+    /// implemented until Phase 5.
     /// </summary>
     [JsonPropertyName("data")]
-    public JsonElement? Data { get; set; }
+    [JsonConverter(typeof(RawJsonSliceConverter))]
+    public RawJsonSlice? Data { get; set; }
 
     [JsonPropertyName("stats")]
     public StatementStatsDto? Stats { get; set; }

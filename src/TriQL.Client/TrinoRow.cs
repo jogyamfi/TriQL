@@ -20,13 +20,15 @@ public sealed class TrinoRow
     private readonly object?[] _rawValues;
     private readonly object?[] _materialized;
     private readonly bool[] _computed;
+    private readonly bool _valuesAreDecoded;
 
-    internal TrinoRow(IReadOnlyList<TrinoColumn> columns, object?[] values)
+    internal TrinoRow(IReadOnlyList<TrinoColumn> columns, object?[] values, bool valuesAreDecoded = false)
     {
         _columns = columns;
         _rawValues = values;
         _materialized = new object?[values.Length];
         _computed = new bool[values.Length];
+        _valuesAreDecoded = valuesAreDecoded;
     }
 
     /// <summary>The number of fields in this row.</summary>
@@ -43,11 +45,22 @@ public sealed class TrinoRow
     {
         if (!_computed[ordinal])
         {
-            _materialized[ordinal] = TrinoValueConverter.Convert(_rawValues[ordinal], _columns[ordinal].TypeSignature);
+            _materialized[ordinal] = Materialize(ordinal);
             _computed[ordinal] = true;
         }
 
         return _materialized[ordinal];
+    }
+
+    private object? Materialize(int ordinal)
+    {
+        var raw = _rawValues[ordinal];
+        var type = _columns[ordinal].TypeSignature;
+
+        // Decoded scalars are already final; only the deferred complex types still need converting (FR-7.2.7).
+        return _valuesAreDecoded && !TrinoValueConverter.RequiresDeferredMaterialization(type)
+            ? raw
+            : TrinoValueConverter.Convert(raw, type);
     }
 
     /// <summary>Returns the materialized value of the column named <paramref name="name"/>.</summary>
@@ -161,7 +174,7 @@ public sealed class TrinoRow
     public object?[] ToArray() => (object?[])_rawValues.Clone();
 
     /// <summary>Returns an independent <see cref="TrinoRow"/> snapshot, safe to retain beyond the next <c>MoveNextAsync</c>.</summary>
-    public TrinoRow Clone() => new(_columns, ToArray());
+    public TrinoRow Clone() => new(_columns, ToArray(), _valuesAreDecoded);
 
     private T RequireNonNull<T>(int ordinal)
     {
