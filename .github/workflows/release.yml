@@ -1,0 +1,80 @@
+name: Release
+
+# REL-7: triggers on a `v*` tag; packs, signs, and publishes all three shipping packages via NuGet
+# trusted publishing (OIDC — no long-lived API key stored in the repo), then creates a GitHub
+# Release with generated notes. Requires the repository to have NuGet trusted publishing configured
+# for this GitHub repo/workflow (see https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
+# before the first real tag push — this workflow cannot configure that itself.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write # to create the GitHub Release
+  id-token: write # to mint the NuGet trusted-publishing OIDC token
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  pack-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Derive package version from the tag
+        id: version
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Restore (locked mode)
+        run: dotnet restore TriQL.slnx --locked-mode
+
+      - name: Build (Release, warnings as errors)
+        run: dotnet build TriQL.slnx -c Release --no-restore -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Pack shipping packages (REL-4: deterministic, Source Link, .snupkg)
+        run: |
+          for proj in TriQL.Client TriQL.Client.Auth TriQL.Client.Compression TriQL.Data.ADO; do
+            dotnet pack "src/$proj/$proj.csproj" -c Release --no-build \
+              -p:Version=${{ steps.version.outputs.version }} \
+              -o ./artifacts
+          done
+
+      # REL-7: sign packages before publishing. Configure a code-signing certificate secret
+      # (e.g. via Azure Trusted Signing or a stored .pfx) and uncomment/adapt before first use.
+      # - name: Sign packages
+      #   run: dotnet nuget sign ./artifacts/*.nupkg --certificate-path <cert> --timestamper http://timestamp.digicert.com
+
+      - name: Publish to NuGet.org (trusted publishing / OIDC)
+        run: dotnet nuget push ./artifacts/*.nupkg --api-key "${NUGET_AUTH_TOKEN}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        env:
+          # With NuGet trusted publishing configured for this repo/workflow, NuGet exchanges the
+          # GitHub Actions OIDC token (minted via the `id-token: write` permission above) for a
+          # short-lived push token — no long-lived NUGET_API_KEY secret is stored here.
+          NUGET_AUTH_TOKEN: ${{ secrets.NUGET_AUTH_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: ./artifacts/*
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: ./artifacts/*.nupkg

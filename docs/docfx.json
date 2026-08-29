@@ -1,0 +1,30 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "../src",
+          "files": [
+            "TriQL.Client/TriQL.Client.csproj",
+            "TriQL.Client.Auth/TriQL.Client.Auth.csproj",
+            "TriQL.Client.Compression/TriQL.Client.Compression.csproj",
+            "TriQL.Data.ADO/TriQL.Data.ADO.csproj"
+          ]
+        }
+      ],
+      "dest": "api",
+      "disableGitFeatures": false
+    }
+  ],
+  "build": {
+    "content": [
+      { "files": ["api/**.yml", "api/index.md"] },
+      { "files": ["*.md"] }
+    ],
+    "dest": "_site",
+    "globalMetadata": {
+      "_appTitle": "TriQL API Reference",
+      "_appFooter": "TriQL — a .NET client and ADO.NET provider for Trino."
+    }
+  }
+}

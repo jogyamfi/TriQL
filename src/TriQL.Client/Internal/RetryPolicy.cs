@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using TriQL.Client.Diagnostics;
 
 namespace TriQL.Client.Internal;
 
@@ -43,6 +44,7 @@ internal static class RetryPolicy
             catch (Exception ex) when (attempt < options.MaxAttempts && IsTransient(ex))
             {
                 var delay = ComputeBackoffDelay(attempt, options);
+                Metrics.HttpRetries.Add(1);
                 if (logger is not null)
                 {
                     Log.RetryingRequest(logger, null, attempt, delay, ex.GetType().Name);
@@ -63,6 +65,7 @@ internal static class RetryPolicy
             response.Dispose();
 
             var backoffDelay = retryAfter ?? ComputeBackoffDelay(attempt, options);
+            Metrics.HttpRetries.Add(1);
             if (logger is not null)
             {
                 Log.RetryingRequest(logger, requestUri, attempt, backoffDelay, statusCode.ToString());

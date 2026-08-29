@@ -11,6 +11,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/TriQL.AotSmoke/TriQL.AotSmoke.csproj" />
     <Project Path="tests/TriQL.Benchmarks/TriQL.Benchmarks.csproj" />
+    <Project Path="tests/TriQL.Client.Auth.Tests/TriQL.Client.Auth.Tests.csproj" />
     <Project Path="tests/TriQL.Client.Tests/TriQL.Client.Tests.csproj" />
     <Project Path="tests/TriQL.Data.ADO.Tests/TriQL.Data.ADO.Tests.csproj" />
     <Project Path="tests/TriQL.IntegrationTests/TriQL.IntegrationTests.csproj" />

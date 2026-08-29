@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
 using TriQL.Client.Auth;
+using TriQL.Client.Diagnostics;
 using TriQL.Client.Exceptions;
 
 namespace TriQL.Client.Internal;
@@ -45,6 +46,9 @@ internal static class RequestExecutor
             using var request = requestFactory();
             await authenticator.ApplyAsync(request, cancellationToken).ConfigureAwait(false);
 
+            using var requestActivity = Tracing.StartRequestActivity(request.Method, request.RequestUri);
+            Tracing.PropagateTraceContext(request);
+
             if (logger is not null && logger.IsEnabled(LogLevel.Trace))
             {
 #pragma warning disable CA1873 // Guarded by the IsEnabled check above; DumpHeaders is only evaluated when Trace logging is active.
@@ -53,6 +57,7 @@ internal static class RequestExecutor
             }
 
             var response = await SendWithTimeoutAsync(invoker, request, options.RequestTimeout, timeoutCts.Token, cancellationToken).ConfigureAwait(false);
+            Tracing.SetResponseStatus(requestActivity, (int)response.StatusCode);
 
             if (response.StatusCode is not (HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden))
             {

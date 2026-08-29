@@ -103,6 +103,12 @@ public sealed class TrinoSessionOptions
     /// <summary>Issue a <c>/v1/info</c> request on <c>Open()</c> to confirm the server is ready. Default <see langword="false"/>.</summary>
     public bool TestConnectionOnOpen { get; set; }
 
+    /// <summary>
+    /// When <see langword="true"/>, the <c>db.statement</c> tag on the <c>trino.query</c> trace span
+    /// (FR-11.2.2) is redacted instead of carrying the submitted SQL text. Default <see langword="false"/>.
+    /// </summary>
+    public bool RedactStatementInTraces { get; set; }
+
     /// <summary>TLS policy.</summary>
     public TrinoTlsOptions Tls { get; } = new();
 

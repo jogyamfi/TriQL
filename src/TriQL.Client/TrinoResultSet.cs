@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
+using TriQL.Client.Diagnostics;
 using TriQL.Client.Exceptions;
 using TriQL.Client.Internal;
 
@@ -23,7 +24,10 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
     private readonly TaskCompletionSource<IReadOnlyList<TrinoColumn>> _schemaTcs =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly QueryStateMachine _state = new();
-    private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+    private readonly Stopwatch _stopwatch;
+    private readonly Activity? _queryActivity;
+    private readonly KeyValuePair<string, object?> _queryIdTag;
+    private bool _firstRowObserved;
     private IReadOnlyList<TrinoColumn> _columns;
     private TrinoQueryStats? _lastStats;
     private string? _updateType;
@@ -37,6 +41,8 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
         TrinoSessionOptions options,
         ILogger? logger,
         CancellationTokenSource linkedCts,
+        Activity? queryActivity,
+        Stopwatch stopwatch,
         CancellationToken callerToken)
     {
         _statementClient = statementClient;
@@ -44,7 +50,10 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
         _logger = logger;
         _linkedCts = linkedCts;
         _callerToken = callerToken;
+        _queryActivity = queryActivity;
+        _stopwatch = stopwatch;
         QueryId = initial.QueryId;
+        _queryIdTag = new KeyValuePair<string, object?>("trino.query_id", QueryId);
         InfoUri = initial.InfoUri;
         _columns = initial.Columns ?? [];
         _updateType = initial.UpdateType;
@@ -164,6 +173,7 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
             // Already surfaced to consumers via the buffer; disposal must not throw.
         }
 
+        _buffer.Dispose();
         _linkedCts.Dispose();
     }
 
@@ -179,6 +189,8 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
         {
             return;
         }
+
+        _buffer.Dispose();
 
         if (!_pumpTask.IsCompleted)
         {
@@ -253,6 +265,15 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
                 CaptureSchema(page.Columns);
                 var sizeBytes = PayloadSizeEstimator.EstimateRows(page.RawRows);
                 await _buffer.EnqueueAsync(page, sizeBytes, _linkedCts.Token).ConfigureAwait(false);
+
+                Metrics.PagesReceived.Add(1, _queryIdTag);
+                Metrics.RowsRead.Add(page.RowCount, _queryIdTag);
+                Metrics.BytesReceived.Add(sizeBytes, _queryIdTag);
+                if (!_firstRowObserved && page.RowCount > 0)
+                {
+                    _firstRowObserved = true;
+                    Metrics.TimeToFirstRow.Record(_stopwatch.Elapsed.TotalMilliseconds, _queryIdTag);
+                }
             }
 
             _state.TryFinish();
@@ -266,18 +287,29 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
                 _state.TryTimeout();
                 failure = new TrinoTimeoutException(
                     $"The query exceeded the configured QueryTimeout of {configuredTimeout}.", configuredTimeout, _stopwatch.Elapsed, QueryId);
+                Metrics.QueriesFailed.Add(1, _queryIdTag);
             }
             else
             {
                 _state.TryCancel();
                 failure = oce;
+                Metrics.QueriesCancelled.Add(1, _queryIdTag);
             }
         }
         catch (Exception ex)
         {
             _state.TryFail();
             failure = ex;
+            Metrics.QueriesFailed.Add(1, _queryIdTag);
         }
+
+        Metrics.QueryDuration.Record(_stopwatch.Elapsed.TotalMilliseconds, _queryIdTag);
+        if (failure is not null)
+        {
+            Tracing.RecordFailure(_queryActivity, failure);
+        }
+
+        _queryActivity?.Dispose();
 
         if (_logger is not null && failure is null)
         {

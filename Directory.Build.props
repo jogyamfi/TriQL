@@ -30,7 +30,21 @@
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!--
+      REL-3/REL-4/P6-T15 package metadata. PackageReleaseNotes deliberately points at GitHub
+      Releases rather than embedding per-version notes in the .nuspec (kept in one place, updated
+      per release without touching every project). PackageIcon is NOT set: NuGet requires a real
+      binary image file, which does not exist in this repository yet — `dotnet pack` on any src/
+      project will emit NU5046 until a real icon.png is added here and referenced. This is a known
+      gap; see docs/implementation-plan.md Phase 6.
+    -->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/jogyamfi/TriQL/releases</PackageReleaseNotes>
   </PropertyGroup>
+
+  <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('\src\'))">
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
 
   <!-- Test, benchmark, and sample projects are not packaged and target net10.0 only. -->
   <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('\tests\')) OR $(MSBuildProjectDirectory.Contains('\samples\'))">
@@ -49,6 +63,15 @@
   -->
   <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('\tests\'))">
     <NoWarn>$(NoWarn);CA1707;CA1711;CA2007;CA1849</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    CA2007 (ConfigureAwait) is a library-authoring rule: it protects against deadlocking a
+    caller's synchronization context, which is irrelevant to top-level application/demo code that
+    owns its own entry point (P6-T10 samples).
+  -->
+  <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('\samples\'))">
+    <NoWarn>$(NoWarn);CA2007</NoWarn>
   </PropertyGroup>
 
   <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('\src\'))">

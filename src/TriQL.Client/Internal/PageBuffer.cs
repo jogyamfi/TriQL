@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
+using TriQL.Client.Diagnostics;
 
 namespace TriQL.Client.Internal;
 
@@ -9,7 +10,7 @@ namespace TriQL.Client.Internal;
 /// side (it awaits a signal, per <see cref="Channel{T}"/> semantics), and production suspends via
 /// <see cref="ByteBudgetGate"/> when the budget is exhausted. See FR-6.1—FR-6.5.
 /// </summary>
-internal sealed class PageBuffer
+internal sealed class PageBuffer : IDisposable
 {
     private readonly Channel<(TrinoPage Page, long SizeBytes)> _channel =
         Channel.CreateUnbounded<(TrinoPage, long)>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = true });
@@ -18,6 +19,11 @@ internal sealed class PageBuffer
     public PageBuffer(long budgetBytes)
     {
         _gate = new ByteBudgetGate(budgetBytes);
+
+        // Capture the gate, never `this`: a ConditionalWeakTable value that reaches its own key
+        // would pin the entry forever and defeat the weak-key cleanup.
+        var gate = _gate;
+        Metrics.RegisterBufferOccupancyProvider(this, () => gate.Occupied);
     }
 
     /// <summary>The bytes currently held in the buffer, awaiting consumption.</summary>
@@ -36,6 +42,9 @@ internal sealed class PageBuffer
     /// the end of the buffered pages. See FR-6.8.
     /// </summary>
     public void Complete(Exception? error) => _channel.Writer.TryComplete(error);
+
+    /// <summary>Stops this buffer's residual occupancy from counting toward the process-wide gauge.</summary>
+    public void Dispose() => Metrics.UnregisterBufferOccupancyProvider(this);
 
     public IAsyncEnumerable<TrinoPage> ReadAllAsync(CancellationToken cancellationToken) => ReadCoreAsync(cancellationToken);
 

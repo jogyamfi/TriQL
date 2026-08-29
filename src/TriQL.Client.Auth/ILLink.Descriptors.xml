@@ -1,0 +1,11 @@
+<linker>
+  <!--
+    Roots the module initializer that registers "entra-id"/"oauth2-client-credentials" with the
+    connection-string authenticator registry. An app that selects them only by name in a connection
+    string never statically references a type in this assembly, so without this descriptor the
+    trimmer would drop the whole assembly and the registration would silently never run.
+  -->
+  <assembly fullname="TriQL.Client.Auth">
+    <type fullname="TriQL.Client.Auth.Registration" preserve="all" />
+  </assembly>
+</linker>

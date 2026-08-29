@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using TriQL.Client.Diagnostics;
 using TriQL.Client.Exceptions;
 using TriQL.Client.Internal;
 
@@ -128,7 +129,7 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
 
         if (parameters is null)
         {
-            return await ExecuteCoreAsync(sql, cancellationToken).ConfigureAwait(false);
+            return await ExecuteCoreAsync(sql, sql, cancellationToken).ConfigureAwait(false);
         }
 
         var (rewrittenSql, placeholderNames) = ParameterRewriter.Rewrite(sql);
@@ -142,7 +143,10 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
         Session.RegisterPreparedStatement(name, rewrittenSql);
         try
         {
-            return await ExecuteCoreAsync($"EXECUTE {name}{usingClause}", cancellationToken).ConfigureAwait(false);
+            // The submitted text inlines the bound values and a per-execution statement name; the
+            // caller's original SQL is what gets traced, so parameter values never reach telemetry
+            // (SEC-1) and db.statement stays aggregatable instead of unique per execution.
+            return await ExecuteCoreAsync($"EXECUTE {name}{usingClause}", sql, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -153,7 +157,7 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
         }
     }
 
-    private async Task<TrinoResultSet> ExecuteCoreAsync(string sql, CancellationToken cancellationToken)
+    private async Task<TrinoResultSet> ExecuteCoreAsync(string sql, string tracedStatement, CancellationToken cancellationToken)
     {
         var statementClient = new StatementClient(_invoker, Options, Session, _logger);
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -162,6 +166,7 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
             linkedCts.CancelAfter(timeout);
         }
 
+        var queryActivity = Tracing.StartQueryActivity(tracedStatement, Options.Catalog, Options.Schema, Options.Server, Options.RedactStatementInTraces);
         var stopwatch = Stopwatch.StartNew();
         TrinoPageEnvelope initial;
         try
@@ -175,24 +180,34 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
 
             if (!cancellationToken.IsCancellationRequested && Options.QueryTimeout is { } configuredTimeout)
             {
-                throw new TrinoTimeoutException(
+                var timeoutException = new TrinoTimeoutException(
                     $"The query exceeded the configured QueryTimeout of {configuredTimeout}.", configuredTimeout, stopwatch.Elapsed, queryId: null);
+                Tracing.RecordFailure(queryActivity, timeoutException);
+                queryActivity?.Dispose();
+                throw timeoutException;
             }
 
+            Tracing.RecordFailure(queryActivity, new OperationCanceledException());
+            queryActivity?.Dispose();
             throw;
         }
-        catch
+        catch (Exception ex)
         {
             linkedCts.Dispose();
+            Tracing.RecordFailure(queryActivity, ex);
+            queryActivity?.Dispose();
             throw;
         }
+
+        Tracing.SetQueryId(queryActivity, initial.QueryId);
+        Metrics.QueriesSubmitted.Add(1, new KeyValuePair<string, object?>("trino.query_id", initial.QueryId));
 
         if (_logger is not null)
         {
             Log.QuerySubmitted(_logger, initial.QueryId);
         }
 
-        return new TrinoResultSet(statementClient, initial, Options, _logger, linkedCts, cancellationToken);
+        return new TrinoResultSet(statementClient, initial, Options, _logger, linkedCts, queryActivity, stopwatch, cancellationToken);
     }
 
     /// <inheritdoc/>

@@ -153,7 +153,8 @@
         "dependencies": {
           "Azure.Core": "[1.48.0, )",
           "Azure.Identity": "[1.16.0, )",
-          "TriQL.Client": "[1.0.0, )"
+          "TriQL.Client": "[1.0.0, )",
+          "TriQL.Data.ADO": "[1.0.0, )"
         }
       },
       "triql.data.ado": {

@@ -110,14 +110,20 @@ public sealed class CertificateValidatorTests
     [Fact]
     public void Create_BuildsChain_UsingCustomTrustedRoot()
     {
+        // Both validity windows derive from one timestamp: re-reading UtcNow per certificate lets
+        // the clock tick between them, giving the leaf a NotAfter past the root's, which
+        // CertificateRequest.Create rejects outright.
+        var notBefore = DateTimeOffset.UtcNow.AddDays(-1);
+        var notAfter = notBefore.AddDays(31);
+
         using var rootKey = RSA.Create(2048);
         var rootRequest = new CertificateRequest("CN=triql-test-root", rootKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         rootRequest.CertificateExtensions.Add(new X509BasicConstraintsExtension(true, false, 0, true));
-        using var root = rootRequest.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(30));
+        using var root = rootRequest.CreateSelfSigned(notBefore, notAfter);
 
         using var leafKey = RSA.Create(2048);
         var leafRequest = new CertificateRequest("CN=triql-test-leaf", leafKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        using var leaf = leafRequest.Create(root, DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid().ToByteArray());
+        using var leaf = leafRequest.Create(root, notBefore, notAfter, Guid.NewGuid().ToByteArray());
         using var leafWithKey = leaf.CopyWithPrivateKey(leafKey);
 
         var options = new TrinoTlsOptions();

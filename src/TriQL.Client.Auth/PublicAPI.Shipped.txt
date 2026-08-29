@@ -1,1 +1,15 @@
-#nullable enable
+﻿#nullable enable
+TriQL.Client.Auth.EntraIdAuthenticator
+TriQL.Client.Auth.EntraIdAuthenticator.ApplyAsync(System.Net.Http.HttpRequestMessage! request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+TriQL.Client.Auth.EntraIdAuthenticator.ConfigureHandler(System.Net.Http.SocketsHttpHandler! handler) -> void
+TriQL.Client.Auth.EntraIdAuthenticator.Dispose() -> void
+TriQL.Client.Auth.EntraIdAuthenticator.EntraIdAuthenticator(System.Collections.Generic.IEnumerable<string!>! scopes, Azure.Core.TokenCredential? credential = null, System.TimeSpan? refreshSkew = null) -> void
+TriQL.Client.Auth.EntraIdAuthenticator.InitializeAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+TriQL.Client.Auth.EntraIdAuthenticator.TryRefreshAsync(System.Net.Http.HttpResponseMessage! response, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<bool>
+TriQL.Client.Auth.OAuth2ClientCredentialsAuthenticator
+TriQL.Client.Auth.OAuth2ClientCredentialsAuthenticator.ApplyAsync(System.Net.Http.HttpRequestMessage! request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+TriQL.Client.Auth.OAuth2ClientCredentialsAuthenticator.ConfigureHandler(System.Net.Http.SocketsHttpHandler! handler) -> void
+TriQL.Client.Auth.OAuth2ClientCredentialsAuthenticator.Dispose() -> void
+TriQL.Client.Auth.OAuth2ClientCredentialsAuthenticator.InitializeAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+TriQL.Client.Auth.OAuth2ClientCredentialsAuthenticator.OAuth2ClientCredentialsAuthenticator(System.Uri! tokenEndpoint, string! clientId, string! clientSecret, System.Collections.Generic.IEnumerable<string!>? scopes = null, string? audience = null, System.TimeSpan? refreshSkew = null, System.Net.Http.HttpClient? httpClient = null) -> void
+TriQL.Client.Auth.OAuth2ClientCredentialsAuthenticator.TryRefreshAsync(System.Net.Http.HttpResponseMessage! response, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<bool>

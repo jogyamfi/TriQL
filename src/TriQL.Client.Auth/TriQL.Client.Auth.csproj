@@ -14,6 +14,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TriQL.Client\TriQL.Client.csproj" />
+    <!-- Needed only to reach the internal AuthenticatorRegistry extension point (see AssemblyInfo.cs
+         in TriQL.Data.ADO); REQ-ARCH-3 forbids the reverse reference, not this one. -->
+    <ProjectReference Include="..\TriQL.Data.ADO\TriQL.Data.ADO.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="ILLink.Descriptors.xml" LogicalName="ILLink.Descriptors.xml" />
   </ItemGroup>
 
 </Project>
