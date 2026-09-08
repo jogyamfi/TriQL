@@ -71,7 +71,12 @@ internal sealed class StatementClient
 
         using var response = await RequestExecutor.SendAsync(
             _invoker,
-            () => new HttpRequestMessage(HttpMethod.Get, pollUri),
+            () =>
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, pollUri);
+                ProtocolHeaders.WriteFollowUpHeaders(request, _options);
+                return request;
+            },
             _options.Authenticator ?? AnonymousAuthenticator.Instance,
             _options,
             _logger,
@@ -102,6 +107,7 @@ internal sealed class StatementClient
         try
         {
             using var request = new HttpRequestMessage(HttpMethod.Delete, target);
+            ProtocolHeaders.WriteFollowUpHeaders(request, _options);
             using var response = await _invoker.SendAsync(request, cts.Token).ConfigureAwait(false);
             if (response.StatusCode is not (HttpStatusCode.OK or HttpStatusCode.NoContent) && _logger is not null)
             {
@@ -169,7 +175,7 @@ internal sealed class StatementClient
             throw new TrinoProtocolException($"The response from {requestUri} could not be parsed.", ex);
         }
 
-        var envelope = StatementResponseMapper.ToEnvelope(dto, responseBytes, previousColumns);
+        var envelope = StatementResponseMapper.ToEnvelope(dto, responseBytes, previousColumns, requestUri);
         _lastNextUri = envelope.NextUri;
         if (envelope.PartialCancelUri is not null)
         {

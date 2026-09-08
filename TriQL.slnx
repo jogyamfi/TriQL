@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/samples/">
+    <Project Path="samples/TriQL.Samples.CertificateAuth/TriQL.Samples.CertificateAuth.csproj" />
     <Project Path="samples/TriQL.Samples.Console/TriQL.Samples.Console.csproj" />
+    <Project Path="samples/TriQL.Samples.UserNamePassword/TriQL.Samples.UserNamePassword.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/TriQL.Client.Auth/TriQL.Client.Auth.csproj" />

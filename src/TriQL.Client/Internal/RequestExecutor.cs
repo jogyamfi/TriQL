@@ -1,4 +1,6 @@
 using System.Net;
+using System.Net.Http.Headers;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using TriQL.Client.Auth;
 using TriQL.Client.Diagnostics;
@@ -14,6 +16,14 @@ namespace TriQL.Client.Internal;
 /// </summary>
 internal static class RequestExecutor
 {
+    // Reverse proxies and WAFs in front of a coordinator commonly reject requests with no
+    // User-Agent; HttpClient sends none by default, so every request gets one here.
+    private static readonly ProductInfoHeaderValue DefaultUserAgent = new(
+        "TriQL",
+        typeof(RequestExecutor).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0]
+            ?? typeof(RequestExecutor).Assembly.GetName().Version?.ToString()
+            ?? "1.0.0");
+
     public static Task<HttpResponseMessage> SendAsync(
         HttpMessageInvoker invoker,
         Func<HttpRequestMessage> requestFactory,
@@ -44,6 +54,11 @@ internal static class RequestExecutor
         while (true)
         {
             using var request = requestFactory();
+            if (request.Headers.UserAgent.Count == 0)
+            {
+                request.Headers.UserAgent.Add(DefaultUserAgent);
+            }
+
             await authenticator.ApplyAsync(request, cancellationToken).ConfigureAwait(false);
 
             using var requestActivity = Tracing.StartRequestActivity(request.Method, request.RequestUri);
@@ -67,19 +82,47 @@ internal static class RequestExecutor
             if (attemptedRefresh)
             {
                 var status = (int)response.StatusCode;
+                var detail = await ReadFailureDetailAsync(response, cancellationToken).ConfigureAwait(false);
                 response.Dispose();
-                throw new TrinoAuthenticationException($"Authentication failed with status {status} for '{request.RequestUri}'.");
+                throw new TrinoAuthenticationException($"Authentication failed with status {status} for '{request.RequestUri}'.{detail}");
             }
 
             attemptedRefresh = true;
             var refreshed = await authenticator.TryRefreshAsync(response, cancellationToken).ConfigureAwait(false);
+            var failureStatus = (int)response.StatusCode;
+            var failureDetail = await ReadFailureDetailAsync(response, cancellationToken).ConfigureAwait(false);
             response.Dispose();
 
             if (!refreshed)
             {
                 throw new TrinoAuthenticationException(
-                    "Authentication failed and the configured authenticator could not refresh its credential.");
+                    $"Authentication failed with status {failureStatus} for '{request.RequestUri}' and the configured authenticator could not refresh its credential.{failureDetail}");
             }
+        }
+    }
+
+    /// <summary>Reads a short excerpt of a failed response body so the server's own explanation is not lost.</summary>
+    private static async Task<string> ReadFailureDetailAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(body))
+            {
+                return string.Empty;
+            }
+
+            var collapsed = string.Join(' ', body.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+            if (collapsed.Length > 500)
+            {
+                collapsed = collapsed[..500] + "...";
+            }
+
+            return $" Server response: {collapsed}";
+        }
+        catch (Exception ex) when (ex is HttpRequestException or IOException or ObjectDisposedException)
+        {
+            return string.Empty;
         }
     }
 

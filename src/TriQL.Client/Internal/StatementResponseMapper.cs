@@ -9,7 +9,8 @@ namespace TriQL.Client.Internal;
 /// </summary>
 internal static class StatementResponseMapper
 {
-    public static TrinoPageEnvelope ToEnvelope(StatementResponseDto dto, ReadOnlySpan<byte> responseBytes, IReadOnlyList<TrinoColumn>? previousColumns)
+    public static TrinoPageEnvelope ToEnvelope(
+        StatementResponseDto dto, ReadOnlySpan<byte> responseBytes, IReadOnlyList<TrinoColumn>? previousColumns, Uri? requestUri = null)
     {
         var columns = dto.Columns is { Count: > 0 }
             ? dto.Columns.ConvertAll(c => new TrinoColumn(c.Name, c.Type))
@@ -19,9 +20,9 @@ internal static class StatementResponseMapper
 
         return new TrinoPageEnvelope(
             dto.Id,
-            dto.NextUri is null ? null : new Uri(dto.NextUri),
-            dto.PartialCancelUri is null ? null : new Uri(dto.PartialCancelUri),
-            dto.InfoUri is null ? null : new Uri(dto.InfoUri),
+            ResolveUri(dto.NextUri, requestUri, nameof(dto.NextUri)),
+            ResolveUri(dto.PartialCancelUri, requestUri, nameof(dto.PartialCancelUri)),
+            ResolveUri(dto.InfoUri, requestUri, nameof(dto.InfoUri)),
             columns,
             rows,
             valuesAreDecoded,
@@ -29,6 +30,28 @@ internal static class StatementResponseMapper
             dto.Error,
             dto.UpdateType,
             dto.UpdateCount);
+    }
+
+    // Coordinators behind a gateway or proxy can emit blank or relative URIs, so relative values are
+    // resolved against the URI the response came from rather than rejected outright.
+    private static Uri? ResolveUri(string? value, Uri? requestUri, string memberName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        if (Uri.TryCreate(value, UriKind.Absolute, out var absolute))
+        {
+            return absolute;
+        }
+
+        if (requestUri is not null && Uri.TryCreate(requestUri, value, out var resolved))
+        {
+            return resolved;
+        }
+
+        throw new TrinoProtocolException($"The server returned '{value}' for '{memberName}', which is not a valid URI.");
     }
 
     private static object?[][] ExtractRows(

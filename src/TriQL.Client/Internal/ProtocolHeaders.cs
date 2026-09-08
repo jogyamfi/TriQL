@@ -62,6 +62,21 @@ internal static class ProtocolHeaders
     }
 
     /// <summary>
+    /// Writes the minimal header set that <c>nextUri</c> polls and <c>DELETE</c> cancellations carry.
+    /// The coordinator keeps the session on the query (FR-4.1.5), but the identifying user header is
+    /// still sent because reverse proxies fronting the coordinator commonly authorize against it.
+    /// </summary>
+    public static void WriteFollowUpHeaders(HttpRequestMessage request, TrinoSessionOptions options)
+    {
+        AddHeader(request, "X-Trino-User", ResolveUser(options));
+
+        foreach (var (name, value) in options.AdditionalHeaders)
+        {
+            AddHeader(request, name, value);
+        }
+    }
+
+    /// <summary>
     /// Resolves the effective <c>X-Trino-User</c>: the explicit <see cref="TrinoSessionOptions.User"/>,
     /// or the <see cref="Auth.BasicAuthenticator.Username"/> when a Basic-family authenticator is configured
     /// and no explicit user was set (FR-2.2.2).

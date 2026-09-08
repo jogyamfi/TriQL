@@ -35,7 +35,7 @@ public sealed class TrinoSessionOptions
     public string? Path { get; set; }
 
     /// <summary>The session time zone. Maps to <c>X-Trino-Time-Zone</c>. Defaults to the host's local zone id.</summary>
-    public string? TimeZone { get; set; } = TimeZoneInfo.Local.Id;
+    public string? TimeZone { get; set; } = ResolveLocalTimeZoneId();
 
     /// <summary>The session locale. Maps to <c>X-Trino-Language</c>. Defaults to the current culture.</summary>
     public string? Locale { get; set; } = CultureInfo.CurrentCulture.Name;
@@ -184,5 +184,17 @@ public sealed class TrinoSessionOptions
         {
             throw new ArgumentOutOfRangeException(nameof(PollingBackoffMaxDelay), PollingBackoffMaxDelay, "PollingBackoffMaxDelay must be at least PollingBackoffInitialDelay.");
         }
+    }
+
+    // Trino only recognises IANA zone ids, so Windows' registry ids ("GMT Standard Time") must be translated.
+    private static string ResolveLocalTimeZoneId()
+    {
+        var local = TimeZoneInfo.Local;
+        if (local.HasIanaId)
+        {
+            return local.Id;
+        }
+
+        return TimeZoneInfo.TryConvertWindowsIdToIanaId(local.Id, out var ianaId) ? ianaId : "UTC";
     }
 }

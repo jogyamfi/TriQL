@@ -233,7 +233,6 @@ public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
             Source = Source ?? "triql-dotnet",
             ClientInfo = ClientInfo,
             TraceToken = TraceToken,
-            TimeZone = TimeZone ?? TimeZoneInfo.Local.Id,
             Locale = Locale ?? CultureInfo.CurrentCulture.Name,
             QueryTimeout = QueryTimeout is > 0 ? TimeSpan.FromSeconds(QueryTimeout.Value) : null,
             RequestTimeout = TimeSpan.FromSeconds(RequestTimeout ?? 100),
@@ -242,6 +241,11 @@ public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
             CompressionDisabled = CompressionDisabled,
             TestConnectionOnOpen = TestConnection,
         };
+
+        if (TimeZone is not null)
+        {
+            options.TimeZone = TimeZone;
+        }
 
         if (ClientTags is { Length: > 0 } clientTags)
         {

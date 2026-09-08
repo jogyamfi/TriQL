@@ -26,7 +26,7 @@ public sealed class ClientCertificateAuthenticator : ITrinoAuthenticator, IDispo
     public static ClientCertificateAuthenticator FromPem(string certificatePem, string privateKeyPem)
     {
 #pragma warning disable CA2000 // Ownership transfers to the authenticator, which disposes it in Dispose().
-        return new ClientCertificateAuthenticator([X509Certificate2.CreateFromPem(certificatePem, privateKeyPem)]);
+        return new ClientCertificateAuthenticator([LoadFromPem(certificatePem, privateKeyPem)]);
 #pragma warning restore CA2000
     }
 
@@ -81,6 +81,37 @@ public sealed class ClientCertificateAuthenticator : ITrinoAuthenticator, IDispo
         foreach (var certificate in _certificates)
         {
             certificate.Dispose();
+        }
+    }
+
+    // Schannel rejects the ephemeral key handle produced by CreateFromPem ("The credentials supplied to
+    // the package were not recognized"), so the pair is round-tripped through PKCS#12 to get a usable key.
+    private static X509Certificate2 LoadFromPem(string certificatePem, string privateKeyPem)
+    {
+        var ephemeral = X509Certificate2.CreateFromPem(certificatePem, privateKeyPem);
+        if (!OperatingSystem.IsWindows())
+        {
+            return ephemeral;
+        }
+
+        byte[]? pkcs12 = null;
+        try
+        {
+            pkcs12 = ephemeral.Export(X509ContentType.Pkcs12);
+#if NET9_0_OR_GREATER
+            return X509CertificateLoader.LoadPkcs12(pkcs12, password: null);
+#else
+            return new X509Certificate2(pkcs12, (string?)null, X509KeyStorageFlags.DefaultKeySet);
+#endif
+        }
+        finally
+        {
+            if (pkcs12 is not null)
+            {
+                Array.Clear(pkcs12);
+            }
+
+            ephemeral.Dispose();
         }
     }
 
