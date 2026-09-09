@@ -60,12 +60,16 @@ jobs:
       #   run: dotnet nuget sign ./artifacts/*.nupkg --certificate-path <cert> --timestamper http://timestamp.digicert.com
 
       - name: Publish to NuGet.org (trusted publishing / OIDC)
-        run: dotnet nuget push ./artifacts/*.nupkg --api-key "${NUGET_AUTH_TOKEN}" --source https://api.nuget.org/v3/index.json --skip-duplicate
-        env:
-          # With NuGet trusted publishing configured for this repo/workflow, NuGet exchanges the
-          # GitHub Actions OIDC token (minted via the `id-token: write` permission above) for a
-          # short-lived push token — no long-lived NUGET_API_KEY secret is stored here.
-          NUGET_AUTH_TOKEN: ${{ secrets.NUGET_AUTH_TOKEN }}
+        # Exchanges the GitHub Actions OIDC token (minted via `id-token: write` above) for a
+        # short-lived nuget.org API key valid for 1 hour. Requires a trusted publishing policy on
+        # nuget.org for owner `jogyamfi`, repo `TriQL`, workflow file `release.yml`.
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push packages and symbols
+        run: dotnet nuget push "./artifacts/*.nupkg" --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

@@ -16,14 +16,18 @@ Additional packages:
   client credentials) kept isolated so their dependencies never leak into the core client.
 - `TriQL.Client.Compression` — support for compressed spooled protocol payloads.
 
-See [docs/requirements.md](docs/requirements.md) for the full requirements specification and
-[docs/implementation-plan.md](docs/implementation-plan.md) for the phased delivery plan.
+See [docs/requirements.md](https://github.com/jogyamfi/TriQL/blob/main/docs/requirements.md) for
+the full requirements specification and
+[docs/implementation-plan.md](https://github.com/jogyamfi/TriQL/blob/main/docs/implementation-plan.md)
+for the phased delivery plan.
 
 ## Status
 
-⚠️ **Experimental — work in progress.** TriQL is under active development and has not yet
-reached a 1.0 release. APIs, behavior, and package layout may change without notice at any time
-before version 1.0.0 ships. It is not recommended for production use until then.
+⚠️ **Pre-release.** TriQL has not yet shipped a stable 1.0.0. Published `1.0.0-preview.*`
+packages are functional but their APIs and package layout may still change before 1.0.0. From
+1.0.0 onward TriQL follows [Semantic Versioning](https://semver.org): breaking public-API changes
+only in a major version, additive API in minors, fixes in patches. The public API surface of each
+shipping package is locked by `PublicAPI.Shipped.txt` baselines and enforced at build time.
 
 ## Requirements
 
@@ -39,6 +43,8 @@ dotnet add package TriQL.Client        # streaming SDK
 dotnet add package TriQL.Data.ADO      # ADO.NET provider
 dotnet add package TriQL.Client.Auth   # optional: Entra ID / OAuth2 authentication
 ```
+
+While TriQL is in preview, add `--prerelease` to each command.
 
 ## Quick start: TriQL SDK (streaming)
 
@@ -88,7 +94,8 @@ while (await reader.ReadAsync())
 ```
 
 More runnable examples — including Microsoft Entra ID authentication and `IAsyncEnumerable`
-consumption — live in [samples/TriQL.Samples.Console](samples/TriQL.Samples.Console/Program.cs).
+consumption — live in
+[samples/TriQL.Samples.Console](https://github.com/jogyamfi/TriQL/blob/main/samples/TriQL.Samples.Console/Program.cs).
 
 ## Spooling protocol (experimental)
 
@@ -103,14 +110,19 @@ options.QueryDataEncodings = ["json+zstd", "json+lz4", "json"];
 
 Spooling is opt-in in 1.0 because it is verified against a scripted test double rather than a
 real spooling-configured cluster; see
-[docs/implementation-plan.md](docs/implementation-plan.md#phase-7--spooling-validation-and-promotion)
+[docs/implementation-plan.md](https://github.com/jogyamfi/TriQL/blob/main/docs/implementation-plan.md#phase-7--spooling-validation-and-promotion)
 for the plan to validate it against real object storage and promote it to the default in 1.1.0.
 
 ## Documentation
 
-- [Connection-string reference](docs/connection-string-reference.md)
-- [Type-mapping reference](docs/type-mapping-reference.md)
-- [Troubleshooting guide](docs/troubleshooting.md)
-- [Migration guide](docs/migration.md) (from `trinoclient.net`, the reference C# client)
-- [API reference](docs/api-reference.md) (generated from XML doc comments)
+- [Connection-string reference](https://github.com/jogyamfi/TriQL/blob/main/docs/connection-string-reference.md)
+- [Type-mapping reference](https://github.com/jogyamfi/TriQL/blob/main/docs/type-mapping-reference.md)
+- [Troubleshooting guide](https://github.com/jogyamfi/TriQL/blob/main/docs/troubleshooting.md)
+- [Benchmarks](https://github.com/jogyamfi/TriQL/blob/main/docs/benchmarks.md)
+- [API reference](https://github.com/jogyamfi/TriQL/blob/main/docs/api-reference.md) (generated from XML doc comments)
+- [Publishing guide](https://github.com/jogyamfi/TriQL/blob/main/docs/publishing.md) (maintainers: release and NuGet process)
+
+## License
+
+[Apache-2.0](https://github.com/jogyamfi/TriQL/blob/main/LICENSE)
 

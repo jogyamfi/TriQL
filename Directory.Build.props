@@ -16,9 +16,15 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Authors>TriQL Contributors</Authors>
     <RepositoryUrl>https://github.com/jogyamfi/TriQL</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/jogyamfi/TriQL</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+    <!--
+      Fallback version for local/dev builds only. Released builds are stamped from the git tag by
+      .github/workflows/release.yml (`-p:Version=<tag without the leading v>`), which overrides this.
+    -->
+    <VersionPrefix>1.0.0</VersionPrefix>
   </PropertyGroup>
 
   <!-- Shipping libraries under src/ are trim- and AOT-compatible, fully documented, and produce a NuGet package. -->

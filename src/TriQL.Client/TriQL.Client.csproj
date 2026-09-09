@@ -3,7 +3,7 @@
   <PropertyGroup>
     <PackageId>TriQL.Client</PackageId>
     <Title>TriQL Client</Title>
-    <Description>A .NET client for Trino: session management, streaming query execution, and the Trino type system. A .NET client and SDK for Trino (formerly Presto).</Description>
+    <Description>A .NET client and SDK for Trino (formerly Presto): session management, streaming query execution, and the Trino type system.</Description>
     <PackageTags>trino;sql;database;client;query;presto</PackageTags>
   </PropertyGroup>
 
