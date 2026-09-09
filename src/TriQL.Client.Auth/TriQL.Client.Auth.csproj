@@ -4,7 +4,7 @@
     <PackageId>TriQL.Client.Auth</PackageId>
     <Title>TriQL Client Authentication Providers</Title>
     <Description>Cloud and enterprise authentication providers (Microsoft Entra ID, OAuth 2.0) for the TriQL .NET client for Trino.</Description>
-    <PackageTags>trino;sql;database;client;auth;oauth;entra-id</PackageTags>
+    <PackageTags>$(CommonPackageTags);auth;oauth;entra-id</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

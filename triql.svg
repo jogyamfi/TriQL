@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Background Drop Shadow -->
+    <filter id="drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0f172a" flood-opacity="0.15" />
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.1" />
+    </filter>
+
+    <!-- Gear Gradients -->
+    <linearGradient id="gear-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00b4d8" />
+      <stop offset="50%" stop-color="#0077b6" />
+      <stop offset="100%" stop-color="#1d3557" />
+    </linearGradient>
+
+    <!-- Outer Shield Gradient -->
+    <linearGradient id="shield-outer-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3a0ca3" />
+      <stop offset="100%" stop-color="#10002b" />
+    </linearGradient>
+
+    <!-- Inner Shield Gradient -->
+    <linearGradient id="shield-inner-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f1f5f9" />
+    </linearGradient>
+
+    <!-- Main 'T' Top Bar Gradient -->
+    <linearGradient id="t-top-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4895ef" />
+      <stop offset="50%" stop-color="#4361ee" />
+      <stop offset="100%" stop-color="#3f37c9" />
+    </linearGradient>
+
+    <!-- Main 'T' Stem Gradient -->
+    <linearGradient id="t-stem-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4361ee" />
+      <stop offset="100%" stop-color="#3a0ca3" />
+    </linearGradient>
+
+    <!-- 3D Bevel Highlight -->
+    <linearGradient id="bevel-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Circular Badge Background -->
+  <circle cx="250" cy="250" r="210" fill="#ffffff" filter="url(#drop-shadow)" />
+  <circle cx="250" cy="250" r="208" fill="none" stroke="#e2e8f0" stroke-width="2" />
+
+  <!-- Outer Gear Silhouette -->
+  <g transform="translate(250, 245)">
+    <path d="
+      M -35,-145 L -25,-145 L -20,-125 A 125,125 0 0,1 20,-125 L 25,-145 L 35,-145 
+      L 48,-120 A 125,125 0 0,1 82,-100 L 102,-112 L 109,-105 L 100,-83 
+      A 125,125 0 0,1 120,-48 L 142,-38 L 144,-24 L 125,-18 
+      A 125,125 0 0,1 125,18 L 144,24 L 142,38 L 120,48 
+      A 125,125 0 0,1 100,83 L 109,105 L 102,112 L 82,100 
+      A 125,125 0 0,1 48,120 L 35,145 L 25,145 L 20,125 
+      A 125,125 0 0,1 -20,125 L -25,145 L -35,145 L -48,120 
+      A 125,125 0 0,1 -82,100 L -102,112 L -109,105 L -100,83 
+      A 125,125 0 0,1 -120,48 L -142,38 L -144,24 L -125,18 
+      A 125,125 0 0,1 -125,-18 L -144,-24 L -142,-38 L -120,-48 
+      A 125,125 0 0,1 -100,-83 L -109,-105 L -102,-112 L -82,-100 
+      A 125,125 0 0,1 -48,-120 Z" 
+      fill="url(#gear-grad)" stroke="#005f73" stroke-width="3" stroke-linejoin="round" />
+
+    <!-- Dark Shield Outline / Back Layer -->
+    <path d="M 0,-115 L 85,-115 L 85,-20 C 85,60 0,105 0,105 C 0,105 -85,60 -85,-20 L -85,-115 Z" 
+          fill="url(#shield-outer-grad)" />
+
+    <!-- Inner Shield Face -->
+    <path d="M 0,-103 L 73,-103 L 73,-18 C 73,52 0,91 0,91 C 0,91 -73,52 -73,-18 L -73,-103 Z" 
+          fill="url(#shield-inner-grad)" />
+
+    <!-- 3D 'T' Element - Top Crossbar -->
+    <path d="M -62,-92 L 62,-92 L 52,-60 L -52,-60 Z" fill="url(#t-top-grad)" />
+    <!-- T-Bar Top Bevel Highlight -->
+    <path d="M -62,-92 L 62,-92 L 55,-84 L -55,-84 Z" fill="url(#bevel-light)" />
+
+    <!-- 3D 'T' Element - Center Vertical Stem -->
+    <path d="M -22,-60 L 22,-60 L 16,72 L 0,83 L -16,72 Z" fill="url(#t-stem-grad)" />
+    <!-- Center Ridge Highlight for 3D effect -->
+    <path d="M 0,-60 L 22,-60 L 16,72 L 0,83 Z" fill="#ffffff" fill-opacity="0.15" />
+
+    <!-- Connected Data Nodes (Left Side of Stem) -->
+    <g transform="translate(-5, -5)">
+      <!-- Connections -->
+      <line x1="-15" y1="-20" x2="-38" y2="-32" stroke="#4cc9f0" stroke-width="4.5" stroke-linecap="round" />
+      <line x1="-15" y1="-20" x2="-42" y2="5" stroke="#4cc9f0" stroke-width="4.5" stroke-linecap="round" />
+      <line x1="-42" y1="5" x2="-28" y2="28" stroke="#4cc9f0" stroke-width="3.5" stroke-linecap="round" />
+
+      <!-- Node Circles -->
+      <circle cx="-15" cy="-20" r="9" fill="#4cc9f0" stroke="#3a0ca3" stroke-width="2.5" />
+      <circle cx="-38" cy="-32" r="6" fill="#7209b7" stroke="#ffffff" stroke-width="2" />
+      <circle cx="-42" cy="5" r="11" fill="#4361ee" stroke="#ffffff" stroke-width="2.5" />
+      <circle cx="-28" cy="28" r="7" fill="#4cc9f0" stroke="#3a0ca3" stroke-width="2" />
+
+      <!-- Inner Specular Highlights on Nodes -->
+      <circle cx="-17" cy="-22" r="3" fill="#ffffff" opacity="0.7" />
+      <circle cx="-45" cy="2" r="4" fill="#ffffff" opacity="0.7" />
+    </g>
+
+    <!-- .NET Pill Badge (Right Side) -->
+    <g transform="translate(30, 22)">
+      <!-- Shadow -->
+      <rect x="-24" y="-16" width="52" height="32" rx="16" fill="#000000" opacity="0.25" transform="translate(0, 3)" />
+      <!-- Outer Ring -->
+      <rect x="-24" y="-16" width="52" height="32" rx="16" fill="#4cc9f0" />
+      <!-- Inner Body -->
+      <rect x="-22" y="-14" width="48" height="28" rx="14" fill="#4361ee" />
+      <!-- .NET Text -->
+      <text x="2" y="5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
+            font-size="13" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">.NET</text>
+    </g>
+  </g>
+</svg>

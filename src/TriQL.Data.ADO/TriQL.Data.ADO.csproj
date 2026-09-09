@@ -4,7 +4,7 @@
     <PackageId>TriQL.Data.ADO</PackageId>
     <Title>TriQL ADO.NET Provider</Title>
     <Description>An ADO.NET provider (DbConnection, DbCommand, DbDataReader) for Trino, built on the TriQL client.</Description>
-    <PackageTags>trino;sql;database;client;ado.net;dbconnection</PackageTags>
+    <PackageTags>$(CommonPackageTags);ado.net;dbconnection;dbproviderfactory</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

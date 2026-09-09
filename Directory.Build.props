@@ -39,17 +39,20 @@
     <!--
       REL-3/REL-4/P6-T15 package metadata. PackageReleaseNotes deliberately points at GitHub
       Releases rather than embedding per-version notes in the .nuspec (kept in one place, updated
-      per release without touching every project). PackageIcon is NOT set: NuGet requires a real
-      binary image file, which does not exist in this repository yet — `dotnet pack` on any src/
-      project will emit NU5046 until a real icon.png is added here and referenced. This is a known
-      gap; see docs/implementation-plan.md Phase 6.
+      per release without touching every project).
     -->
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- icon.png is rasterised from triql.svg; NuGet accepts only PNG/JPEG, never SVG. -->
+    <PackageIcon>icon.png</PackageIcon>
     <PackageReleaseNotes>https://github.com/jogyamfi/TriQL/releases</PackageReleaseNotes>
+    <!-- Tags shared by every TriQL package; each project appends its own specific tags. -->
+    <CommonPackageTags>trino;presto;sql;database;client</CommonPackageTags>
+    <PackageTags>$(CommonPackageTags)</PackageTags>
   </PropertyGroup>
 
   <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('\src\'))">
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\" Visible="false" />
   </ItemGroup>
 
   <!-- Test, benchmark, and sample projects are not packaged and target net10.0 only. -->
