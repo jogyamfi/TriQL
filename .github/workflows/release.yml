@@ -22,6 +22,7 @@ env:
 
 jobs:
   pack-and-publish:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.event.created == true)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
