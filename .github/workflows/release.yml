@@ -37,6 +37,10 @@ jobs:
         id: version
         run: |
           tag="${GITHUB_REF_NAME}"
+          if [[ "$tag" != v1* ]]; then
+            echo "::error::Release tag '$tag' must start with v1"
+            exit 1
+          fi
           version="${tag#v}"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
