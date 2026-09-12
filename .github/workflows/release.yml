@@ -46,7 +46,7 @@ jobs:
       - name: Build (Release, warnings as errors)
         run: dotnet build TriQL.slnx -c Release --no-restore -p:Version=${{ steps.version.outputs.version }}
 
-      - name: Pack shipping packages (REL-4: deterministic, Source Link, .snupkg)
+      - name: "Pack shipping packages (REL-4: deterministic, Source Link, .snupkg)"
         run: |
           for proj in TriQL.Client TriQL.Client.Auth TriQL.Client.Compression TriQL.Data.ADO; do
             dotnet pack "src/$proj/$proj.csproj" -c Release --no-build \
