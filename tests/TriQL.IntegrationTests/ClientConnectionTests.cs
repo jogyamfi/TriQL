@@ -12,14 +12,18 @@ namespace TriQL.IntegrationTests;
 public sealed class ClientConnectionTests(TrinoContainerFixture fixture)
 {
     [Fact]
-    public async Task GetServerInfoAsync_ReturnsTheFloorVersion()
+    public async Task GetServerInfoAsync_ReturnsAVersionAtOrAboveTheFloor()
     {
         var options = new TrinoSessionOptions { Server = fixture.ServerUri };
         await using var client = new TrinoClient(options);
 
         var info = await client.GetServerInfoAsync();
 
-        Assert.Equal(TrinoContainerFixture.FloorVersion, info.Version);
+        // The fixture may be running the floor version or "latest" (TRIQL_TEST_TRINO_VERSION),
+        // so assert the numeric floor rather than an exact match — see TrinoContainerFixture.
+        Assert.True(int.TryParse(info.Version, System.Globalization.CultureInfo.InvariantCulture, out var reportedVersion), $"Expected a numeric version, got '{info.Version}'.");
+        var floorVersion = int.Parse(TrinoContainerFixture.FloorVersion, System.Globalization.CultureInfo.InvariantCulture);
+        Assert.True(reportedVersion >= floorVersion, $"Server version {reportedVersion} is below the supported floor {floorVersion}.");
         Assert.False(info.Starting);
         Assert.True(info.Coordinator);
     }
