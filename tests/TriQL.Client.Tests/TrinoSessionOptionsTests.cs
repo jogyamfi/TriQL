@@ -90,6 +90,43 @@ public sealed class TrinoSessionOptionsTests
     }
 
     [Fact]
+    public void Validate_ThrowsArgumentOutOfRangeException_WhenMaxDecompressedSegmentBytesIsZero()
+    {
+        var options = new TrinoSessionOptions
+        {
+            Server = new Uri("https://trino.example.com/"),
+            MaxDecompressedSegmentBytes = 0,
+        };
+
+        Assert.Throws<ArgumentOutOfRangeException>(options.Validate);
+    }
+
+    [Fact]
+    public void Validate_ThrowsArgumentOutOfRangeException_WhenSegmentFetchParallelismIsZero()
+    {
+        var options = new TrinoSessionOptions
+        {
+            Server = new Uri("https://trino.example.com/"),
+            SegmentFetchParallelism = 0,
+        };
+
+        Assert.Throws<ArgumentOutOfRangeException>(options.Validate);
+    }
+
+    [Fact]
+    public void Validate_Succeeds_WithDefaultSpoolingOptions()
+    {
+        var options = new TrinoSessionOptions { Server = new Uri("https://trino.example.com/") };
+
+        options.Validate();
+
+        Assert.Equal(268_435_456, options.MaxDecompressedSegmentBytes);
+        Assert.Equal(4, options.SegmentFetchParallelism);
+        Assert.Empty(options.SegmentHostAllowlist);
+        Assert.Empty(options.QueryDataEncodings);
+    }
+
+    [Fact]
     public void FromParts_BuildsExpectedUri()
     {
         var uri = TrinoSessionOptions.FromParts("trino.example.com", 8443, useTls: true, path: "gateway");

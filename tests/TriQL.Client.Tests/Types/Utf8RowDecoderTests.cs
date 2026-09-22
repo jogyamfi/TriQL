@@ -256,13 +256,22 @@ public sealed class Utf8RowDecoderTests
     }
 
     [Fact]
-    public void Mapper_SpooledDataObject_StillRaisesProtocolException()
+    public void Mapper_SpooledDataObject_ParsesShapeInsteadOfDecodingRowsSynchronously()
     {
+        // FR-5.1.2: an object `data` member is the spooled shape. The synchronous mapper only
+        // detects it and parses the segment descriptors; resolving segments is async I/O performed
+        // later by SegmentClient (see StatementClient.ReadEnvelopeAsync), so no rows are produced here.
         const string body = """{"id":"q1","data":{"encoding":"json+zstd","segments":[]}}""";
         var bytes = Encoding.UTF8.GetBytes(body);
         var dto = JsonSerializer.Deserialize(bytes, TriqlInternalJsonContext.Default.StatementResponseDto)!;
 
-        Assert.Throws<TrinoProtocolException>(() => StatementResponseMapper.ToEnvelope(dto, bytes, previousColumns: null));
+        var envelope = StatementResponseMapper.ToEnvelope(dto, bytes, previousColumns: null);
+
+        Assert.Empty(envelope.Rows);
+        Assert.False(envelope.ValuesAreDecoded);
+        Assert.NotNull(envelope.PendingSpooling);
+        Assert.Equal("json+zstd", envelope.PendingSpooling!.Encoding);
+        Assert.Empty(envelope.PendingSpooling.Segments);
     }
 
     [Fact]

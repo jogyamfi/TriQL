@@ -13,6 +13,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TriQL.Client\TriQL.Client.csproj" />
+    <ProjectReference Include="..\..\src\TriQL.Client.Compression\TriQL.Client.Compression.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Used only to build compressed fixture payloads for codec round-trip tests. -->
+    <PackageReference Include="K4os.Compression.LZ4" />
+    <PackageReference Include="ZstdSharp.Port" />
   </ItemGroup>
 
 </Project>
