@@ -1,7 +1,9 @@
 name: Nightly
 
-# Temporarily disabled (manual trigger only); restore the schedule trigger to re-enable.
 on:
+  schedule:
+    # 03:00 UTC daily.
+    - cron: "0 3 * * *"
   workflow_dispatch: {}
 
 env:

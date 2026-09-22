@@ -1,7 +1,9 @@
 name: CI
 
-# Temporarily disabled (manual trigger only); restore pull_request/push triggers to re-enable.
 on:
+  pull_request:
+  push:
+    branches: [main]
   workflow_dispatch: {}
 
 concurrency:
@@ -107,3 +109,49 @@ jobs:
       - name: Integration tests
         if: steps.docker-check.outputs.available == 'true'
         run: dotnet test tests/TriQL.IntegrationTests -c Release --no-build
+
+  aot-smoke:
+    # TEST-12 / P6-T9: publish with PublishAot=true and prove it queries a live coordinator with
+    # zero trim/AOT warnings. Linux-only — native AOT toolchains differ per OS and the unit-test
+    # matrix above already covers cross-platform build correctness.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Publish AOT smoke app
+        run: dotnet publish tests/TriQL.AotSmoke -c Release -r linux-x64 -p:PublishAot=true -o ./aot-smoke-publish
+
+      - name: Start a Trino coordinator
+        run: docker run -d --name trino-aot-smoke -p 8080:8080 trinodb/trino:466
+
+      - name: Wait for the HTTP endpoint to report ready
+        run: timeout 90 bash -c 'until curl -sf http://localhost:8080/v1/info | grep -q "\"starting\":false"; do sleep 1; done'
+
+      - name: Run the AOT smoke app against the live coordinator
+        env:
+          TRINO_TEST_SERVER: http://localhost:8080
+        # "starting: false" doesn't mean the single-node worker has registered with cluster
+        # discovery yet (see TrinoContainerFixture) — a query submitted right after can still fail
+        # with "No nodes available to run query". Retry through that warmup window.
+        run: |
+          for attempt in $(seq 1 20); do
+            if ./aot-smoke-publish/TriQL.AotSmoke; then
+              exit 0
+            fi
+            echo "Attempt $attempt failed (coordinator likely still registering its worker); retrying..."
+            sleep 3
+          done
+          echo "::error::AOT smoke app never succeeded against the live coordinator."
+          docker logs trino-aot-smoke
+          exit 1
+
+      - name: Stop the coordinator
+        if: always()
+        run: docker rm -f trino-aot-smoke
