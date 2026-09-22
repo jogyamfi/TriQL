@@ -10,6 +10,7 @@
 | Version | 0.1 (Draft) |
 | Date | 2026-08-25 |
 | Status | Draft — pending review |
+| Last status audit | 2026-09-22 — see [§2.2](#22-actual-status--2026-09-22-docker-unlock) |
 
 ---
 
@@ -100,6 +101,140 @@ Phases 5 and 6 are independent of each other and may be reordered or run concurr
 deliberately sequenced **after** the 1.0.0 release: it retires risk **X11** rather than delaying
 shipping for it.
 
+### 2.2 Actual Status — 2026-09-22 (Docker unlock)
+
+Docker is now installed on the primary dev machine. Every `Testcontainers`-based integration test
+in this plan (and all of Phase 7) was previously blocked or silently skipped locally for that
+reason. This section is a from-the-repo audit of what is actually built versus what the phase
+checklists above assume, so the checklists above should be read alongside it rather than taken at
+face value until they are re-verified task by task.
+
+**Execution has not followed strict phase order.** Phases 0–4 and most of Phase 6 are substantially
+implemented; Phase 5 (client-side spooling) has **not been started** at the code level, which is a
+larger gap than the unchecked Phase 5 exit-criteria boxes alone suggest.
+
+| Phase | Actual state |
+|---|---|
+| **0** | Solution, build props, CI/security/nightly/Dependabot workflows, and the `TrinoContainerFixture` all exist. **Gap:** the fixture hardcodes `FloorVersion` (466) and ignores the `TRIQL_TEST_TRINO_VERSION` env var nightly.yml sets — the `{466, latest}` matrix currently runs 466 twice. `FixtureSmokeTests.cs` (P0-T12, meant to be throwaway) is still present alongside its replacement. |
+| **1** | Transport, TLS, retry/redirect, session/header handling, authenticators, exceptions, logging, and `InfoClient` all implemented. `ClientConnectionTests.cs` covers P1-T21. Walking skeleton (P1-T18) deleted as planned. |
+| **2** | Statement client, advance loop, backoff, state machine, cancellation, `PageBuffer`/`ReadAheadPump`, `TrinoResultSet` all implemented. `QueryExecutionTests.cs` covers the P2-T21 streaming/cancellation exit criteria. |
+| **3** | Type signatures, scalar/temporal/complex converters, `TrinoRow`, literal encoder, parameter rewriter, `PREPARE`/`EXECUTE` all implemented (`src/TriQL.Client/Types/`, `Internal/`). **Gap:** no integration test round-trips these types against a live container — P3-T17 does not exist. |
+| **4** | `TrinoConnection`, `TrinoCommand`, `TrinoDataReader`, provider factory, data source, schema collections, sync bridge all implemented. **Gap:** no integration test exercises `GetSchema`, provider factory registration, or DDL/DML against a live container — P4-T24 does not exist. |
+| **5** | **Not implemented.** No `Encoding/` directory in `TriQL.Client`; `TriQL.Client.Compression` is an empty stub project (csproj only, no codec code, empty `PublicAPI.Shipped.txt`). `Internal/StatementResponseMapper.cs` currently **throws `TrinoProtocolException`** on any spooled-shape response rather than decoding it. `QueryDataEncodings` defaults to empty and the `X-Trino-Query-Data-Encoding` header exists, so the client correctly never *requests* spooling today — but none of Lanes A–C (codecs, negotiation/segments, benchmarks) exist yet. P5-T15 (integration fallback proof) does not exist either. |
+| **6** | Auth package (`OAuth2ClientCredentialsAuthenticator`, `EntraIdAuthenticator`), metrics (`Diagnostics/Metrics.cs`), tracing (`Diagnostics/Tracing.cs`), samples, and docs (`README.md`, `docs/api-reference.md`, `docs/connection-string-reference.md`, `docs/troubleshooting.md`, `docs/type-mapping-reference.md`) all exist. Public API is frozen for `TriQL.Client`, `TriQL.Client.Auth`, and `TriQL.Data.ADO` (`PublicAPI.Shipped.txt` populated, `PublicAPI.Unshipped.txt` empty); `TriQL.Client.Compression`'s is empty because it has no code yet. `artifacts/` (and a stray duplicate `artifactscls/`) contain locally packed `1.0.0-preview.1` `.nupkg`/`.snupkg` for all four projects. **Gaps:** `tests/TriQL.AotSmoke` exists but is not wired into any CI workflow and is not run against a live container (P6-T9 unmet); `ci.yml` and `nightly.yml` currently have their real triggers (`pull_request`/`push`/`schedule`) commented out in favour of `workflow_dispatch` only, apparently as a pre-Docker workaround; no confirmed publish to nuget.org. |
+| **7** | **Zero code or infrastructure.** No MinIO fixture, no spooling-configured Trino container config, no `docs/spooling-validation.md`. Only a TODO comment in `nightly.yml` flags it as future work. Logically blocked on Phase 5 landing first — there is no spooled decoding to validate yet. |
+
+**Other loose ends noticed during the audit (not phase-blocking, flag for cleanup):**
+- `tests/TriQL.IntegrationTests/NUL` — an untracked stray file (likely a Windows artifact from a redirected command); safe to remove after confirming it's not intentional.
+- `artifactscls/` — a duplicate of `artifacts/`'s packed output; consolidate or `.gitignore`.
+
+### 2.4 Progress — 2026-09-22 (post-audit)
+
+Acting on [§2.3](#23-immediate-next-steps), the following are done and verified against a live
+Docker container on this machine:
+
+- **Step 1 (fixture fix).** `TrinoContainerFixture` now honours `TRIQL_TEST_TRINO_VERSION`. Fixing
+  this surfaced two real, previously-unverifiable bugs in the fixture's readiness check: `/v1/info`
+  reports `starting: false` before the single-node worker has actually registered with cluster
+  discovery, so queries submitted right after start failed with *"Trino server is still
+  initializing"* and then *"No nodes available to run query"*. The fixture now probes with a real
+  table-scan query and requires three consecutive successes before `InitializeAsync` returns. All
+  four existing integration tests now pass reliably against both `466` and `latest`.
+- **Step 2 (CI triggers).** `ci.yml`'s `pull_request`/`push` triggers and `nightly.yml`'s `schedule`
+  trigger are restored (edited locally; **not yet committed or pushed** — validate once more after
+  review, since this is the first time either workflow will run for real). A pre-existing,
+  unrelated formatting violation in `samples/TriQL.Samples.UserNamePassword/UserNamePasswordSample.cs`
+  was fixed via `dotnet format`, since it would otherwise have failed CI immediately on re-enable.
+- **Step 3 (G2) and step 9 (G4, G5).** All three gates closed in `requirements.md` §23 and reflected
+  in [§4](#4-decision-gates): codecs ship from `TriQL.Client.Compression` (G2); `Prepare()` is a
+  documented no-op, matching what `TrinoCommand.Prepare()` already does (G4); the perf gate compares
+  against a same-run baseline (G5). All seven decision gates are now closed.
+- **Step 6 (AOT smoke in CI).** Added an `aot-smoke` job to `ci.yml`: publishes
+  `tests/TriQL.AotSmoke` with `PublishAot=true` on `ubuntu-latest`, starts a real Trino container via
+  the Docker CLI, and runs the smoke app against it (retrying through the same node-registration
+  warmup window the fixture fix above uncovered). **Not yet verified in CI** — this machine has no
+  C++ toolchain, so native AOT compilation itself could only be exercised on `win-x64` here and
+  failed for the expected reason (missing MSVC linker); the Linux path needs its first real CI run
+  to confirm.
+- **Step 5 (P3-T17, P4-T24 done; P5-T15 pending on Phase 5).** `TypeRoundTripTests.cs` (32 tests) and
+  `ParametersAndPreparedStatementTests.cs` (9 tests) cover P3-T17: every FR-7.2.1 type round-trips
+  correctly, including the `tinyint`→`sbyte` signedness exit criterion, `timestamp(12)` picosecond
+  precision, `decimal(38,10)` full precision, and session-time-zone governance of `with time zone`
+  conversion. `AdoSchemaCollectionTests.cs` (17), `AdoProviderFactoryTests.cs` (3), and
+  `AdoDdlDmlTests.cs` (5) cover P4-T24: all twelve FR-9.5.2 `GetSchema` collections, provider-factory
+  registration/resolution end to end, and DDL/DML affected-row counts. One real environment finding
+  from P4-T24: the default image's `memory` catalog supports `CREATE`/`INSERT`/`DROP` but **not**
+  `UPDATE` or `DELETE` at all (not a TriQL defect — the connector itself rejects row modification);
+  the test asserts that real behaviour rather than working around it. All 75 integration tests
+  (the original 4 plus these 71) pass together. `PREPARE`/`EXECUTE`/deallocation, connection-string
+  injection payloads as inert parameter data, and `CAST(varchar AS JSON)` semantics were also
+  clarified along the way (the last one is real Trino behaviour — it wraps text as a JSON *string*
+  rather than parsing it; `JSON '...'` literals parse as intended).
+- **Step 8.** `FixtureSmokeTests.cs` (P0-T12) deleted — superseded by `ClientConnectionTests.cs`.
+- **Step 10 (publish status — corrected).** All four packages **are** published on nuget.org at
+  `1.0.0-preview.1` (confirmed directly against the nuget.org flat-container API). However, every
+  recorded run of `release.yml` (7 runs, `gh run list --workflow=release.yml`) has **failed or been
+  cancelled** — none succeeded. The preview was evidently pushed manually (`dotnet nuget push`
+  against the locally-packed `artifacts/`), not via the automated release workflow. **The release
+  automation itself remains unproven** and should not be trusted for the real `1.0.0` release
+  without a successful dry run (`workflow_dispatch`) first, including the NuGet trusted-publishing
+  OIDC exchange, which has never completed successfully.
+
+- **Step 4 (Phase 5 Lanes A+B) done 2026-09-22.** Implemented in an isolated git worktree, reviewed,
+  merged, and re-verified against the combined working tree (build clean on both TFMs, `dotnet
+  format` clean, `TriQL.Client.Tests` 349/349, `TriQL.Data.ADO.Tests` 90/90, `TriQL.IntegrationTests`
+  77/77 including the new `SpoolingFallbackTests.cs` against a real container — the worktree's own
+  sandbox couldn't reach Docker, so this was the first real confirmation that path works). Lane C
+  (P5-T10–T12: benchmarks, tuning, the CI perf gate) was explicitly deferred, not forgotten — see
+  the Phase 5 section for what's still open there. Two real corrections to FR-5.2.1/FR-5.2.2 came
+  out of this (see the Phase 5 section and requirements.md) — this is risk **X4** materializing
+  exactly as the risk register predicted, caught before it could reach Phase 7.
+- **Not yet started: step 7 (Phase 7 MinIO infrastructure).** Now unblocked at the code level —
+  Phase 5's client-side spooling exists to validate — but still needs P7-T1…T4 (MinIO fixture,
+  spooling-configured Trino container, shared network) built from scratch.
+
+**Incidental cleanup:** a pre-existing, unrelated formatting violation in
+`samples/TriQL.Samples.UserNamePassword/UserNamePasswordSample.cs` (see step 2 above) was
+independently hit and fixed by both this session's direct work and the Phase 5 worktree agent;
+the two fixes were identical and merged without conflict.
+
+### 2.3 Immediate Next Steps
+
+Prioritized so that Docker-dependent work that de-risks the rest of the plan happens first:
+
+1. **Fix `TrinoContainerFixture` to honour `TRIQL_TEST_TRINO_VERSION`.** Without this, the nightly
+   `{466, latest}` matrix is silently testing 466 against itself. Low effort, high value — do this
+   before trusting any other integration-test result.
+2. **Re-enable and validate `ci.yml` and `nightly.yml`.** Their real triggers are currently disabled
+   in favour of `workflow_dispatch` only. With Docker now available locally, run each workflow's
+   integration and Docker-gated jobs locally (`act`, or by hand) before restoring the real triggers,
+   so re-enabling doesn't immediately go red.
+3. **Close gate G2 (Q2/Q3 — Zstandard/LZ4 codec sourcing).** This blocks Phase 5 entry and is the
+   only open gate standing between "Phase 4 is done" and "Phase 5 can start." Recommended option
+   (a separate `TriQL.Client.Compression` package) is already reflected in the project layout; it
+   just needs to be ratified in `requirements.md` §23.
+4. **Implement Phase 5 Lanes A–B (P5-T1…T9).** This is the largest real gap in the project relative
+   to what the plan's checklists implied — spooling is currently a stub that refuses spooled
+   responses, not an untested implementation. Do this before anything else in Phase 5 or 7.
+5. **Backfill the missing integration-test tasks now that Docker works locally:** P3-T17 (type
+   round-trips), P4-T24 (ADO.NET/`GetSchema`/DDL against a live container), then P5-T15 (spooling
+   fallback proof) once step 4 lands.
+6. **Wire `TriQL.AotSmoke` into CI against the live container fixture (P6-T9).** Currently dormant;
+   it already supports a live-container path via `TRINO_TEST_SERVER` but nothing sets it in CI.
+7. **Stand up Phase 7 infrastructure (P7-T1…T4: MinIO fixture, spooling-configured Trino container,
+   shared network).** Sequence this after step 4 — there is nothing to validate until the client can
+   decode a spooled response. Docker being available locally means this can now be built and
+   iterated on the dev machine before it ever needs to run in CI.
+8. **Delete or fold in `FixtureSmokeTests.cs` (P0-T12)** now that `ClientConnectionTests.cs`
+   (P1-T21) supersedes it, per the task's own throwaway intent.
+9. **Reconcile decision gates G4 (Q7 — `Prepare()` semantics) and G5 (Q9 — benchmark variance
+   strategy)** — both still open in `requirements.md` §23 and both have recommended defaults
+   already stated in [§4](#4-decision-gates); closing them in writing is a low-effort unblock for
+   the remaining P4-T8 and P5-T12 work.
+10. **Confirm actual publish status.** `artifacts/` holds locally packed `1.0.0-preview.1` packages
+    for all four projects; verify whether `release.yml` has ever actually run against `nuget.org`
+    before treating Phase 6's release exit criteria as met.
+
 ---
 
 ## 3. Dependency Graph
@@ -149,15 +284,17 @@ starts.
 | Gate | Question | Blocks | Why it blocks | Status / decision |
 |---|---|---|---|---|
 | **G1** | Q1 — minimum supported Trino server version | ~~Phase 0 exit~~ | Determines container image tags in every integration test from Phase 1 onward, and the size of the TEST-6 matrix. | **CLOSED 2026-08-25 — floor is 466.** The release that introduced spooling (27 Nov 2024). Latest is 483 (17 Jul 2026); cadence has slowed sharply, so the floor spans only ~17 releases. CI matrix `{466, latest}`. No formal OSS LTS exists. |
-| **G2** | Q2/Q3 — Zstandard and LZ4 codec sourcing | **Phase 5 entry** | Determines whether a fourth project (`TriQL.Client.Compression`) exists. Does **not** block Phases 0–4. | Open. Recommend option (b): separate `TriQL.Client.Compression` package, keeping `TriQL.Client` dependency-free per REQ-ARCH-4. |
+| **G2** | Q2/Q3 — Zstandard and LZ4 codec sourcing | ~~Phase 5 entry~~ | Determines whether a fourth project (`TriQL.Client.Compression`) exists. Does **not** block Phases 0–4. | **CLOSED 2026-09-22 — option (b).** Separate `TriQL.Client.Compression` package, keeping `TriQL.Client` dependency-free per REQ-ARCH-4. The empty project stub already exists; Phase 5 (P5-T2, P5-T3) fills it in with the actual codecs. |
 | **G3** | Q6 — segment URI origin restriction default | ~~Phase 5, P5-T9~~ | Too strict breaks object-storage spooling; too loose is an SSRF hole (SEC-7). | **CLOSED 2026-08-25.** Segments are written to S3/Azure/GCS and are legitimately off-origin by design; they are SSE-C encrypted and scoped to the initiating client. Restrict `ackUri` to session origin; allow segment `uri` off-origin but require `https` with no scheme downgrade, plus an optional host allowlist. |
-| **G4** | Q7 — `Prepare()` semantics | **Phase 4, P4-T8** | Trivial to implement either way but breaking to change after publication. | Open. Recommend a documented no-op rather than throwing. |
-| **G5** | Q9 — benchmark variance strategy | **Phase 5, P5-T12** | Determines whether the CI perf gate is trustworthy or a source of false failures. | Open. Recommend same-run baseline comparison rather than absolute thresholds. |
+| **G4** | Q7 — `Prepare()` semantics | ~~Phase 4, P4-T8~~ | Trivial to implement either way but breaking to change after publication. | **CLOSED 2026-09-22 — documented no-op.** Already implemented this way at `TrinoCommand.Prepare()`; this closure just ratifies it in writing. |
+| **G5** | Q9 — benchmark variance strategy | ~~Phase 5, P5-T12~~ | Determines whether the CI perf gate is trustworthy or a source of false failures. | **CLOSED 2026-09-22 — same-run baseline.** No dedicated self-hosted runner exists, so compare against a same-run baseline rather than an absolute threshold when P5-T12 builds the perf gate. |
 | **G6** | Q5, Q8 — transactions, complex-type depth | **Deferred to 1.1** | Already resolved as out of scope for 1.0. No action. | Closed — out of scope. |
 | **G7** | **Q10 — should spooling be on by default in 1.0?** | ~~Phase 5 exit~~ | CI runs no MinIO, so the spooled path is never verified against a real coordinator plus object store before release. | **CLOSED 2026-08-25 — no.** 1.0.0 ships spooling implemented but **opt-in** (`QueryDataEncodings` defaults to empty) and documented as experimental. **Phase 7** reinstates MinIO, validates the spooled path end to end, and promotes it to default in 1.1. |
 
-> **G1 and G3 are now closed, so Phase 0 is unblocked.** G2, G4, G5, and G7 can all be resolved
-> during Phases 1–4 while implementation proceeds.
+> **All seven gates are now closed.** Nothing in [§23 of requirements.md](requirements.md) blocks
+> any phase from proceeding; Phase 5 in particular has no remaining decision gate standing between
+> it and implementation (see [§2.2](#22-actual-status--2026-09-22-docker-unlock) for why it still
+> hasn't started at the code level).
 
 ---
 
@@ -647,34 +784,78 @@ dotnet test tests/TriQL.IntegrationTests --filter Category=Phase4
 **Entry criteria:** Phase 2 exit criteria met; **G2** closed. **G3 is closed.** **G5** closed
 before P5-T12; **G7** (Q10 — spooling on by default?) closed before phase exit.
 
+> **Status as of 2026-09-22: Lanes A and B done and verified; Lane C (performance) deliberately
+> deferred.** Codecs (`json`, `json+lz4` via K4os.Compression.LZ4, `json+zstd` via ZstdSharp.Port),
+> encoding negotiation, segment fetching (inline + spooled, concurrent up to
+> `SegmentFetchParallelism`, `rowOffset`-ordered), the acknowledgement pipeline, and SSRF guards are
+> all implemented and covered by unit tests (`tests/TriQL.Client.Tests/Codecs/`, `Security/`,
+> `Spooling/`) plus a real-container fallback-proof integration test
+> (`tests/TriQL.IntegrationTests/SpoolingFallbackTests.cs`). `QueryDataEncodings` still defaults to
+> empty (P5-T17/G7), so this is all inert until a caller opts in. **Two real divergences from this
+> document's original FR-5.2.1/FR-5.2.2 wording were found by cross-checking the official Python and
+> Go reference clients** (more authoritative than the prose docs — this is exactly risk **X4**) and
+> have been corrected in [requirements.md](requirements.md): `uncompressedSize`/`rowsCount` are
+> conditionally present, not always; and the session credential is attached to a segment/ack fetch
+> only when it shares the coordinator's origin, never to off-origin object storage (which instead
+> relies on the segment's own `headers`). P5-T10/T11/T12 (benchmarks, tuning, the CI perf gate) were
+> explicitly deferred to a later pass, not forgotten.
+
 > **Verification constraint.** CI runs no MinIO container, so the spooled path is exercised only
 > against the `FakeTrinoCoordinator`. No test in this plan proves spooling against a real
 > coordinator plus object store. This is the single largest unverified surface in the project and
 > drives risk **X11** and gate **G7**.
 
-### Lane A — Codecs
+### Lane A — Codecs ✅ done 2026-09-22
 
 | Id | Task | Deliverable | Depends on | Size |
 |---|---|---|---|---|
-| P5-T1 | Codec registry designed for extension so Arrow can be added in 1.1 without a breaking change. `json` codec. | `src/TriQL.Client/Encoding/CodecRegistry.cs` | — | M |
-| P5-T2 | `json+lz4` codec, uncompressed length taken from segment metadata. | `Encoding/Lz4Codec.cs` | P5-T1, G2 | M |
-| P5-T3 | `json+zstd` codec per the G2 packaging decision. | `Encoding/ZstdCodec.cs` | P5-T1, G2 | M |
-| P5-T4 | **Decompression bounds (SEC-6):** decoded size exceeding `max(uncompressedSize, ceiling)` raises `TrinoProtocolException`. Pooled `ArrayPool<byte>` buffers returned on **all** paths including exceptional ones. | `Encoding/BoundedDecoder.cs` | P5-T1 | M |
+| P5-T1 | Codec registry designed for extension so Arrow can be added in 1.1 without a breaking change. `json` codec. | `src/TriQL.Client/Codecs/CodecRegistry.cs` (actual path — `Encoding` was renamed `Codecs`, see note below) | — | M |
+| P5-T2 | `json+lz4` codec, uncompressed length taken from segment metadata. | `src/TriQL.Client.Compression/Lz4Codec.cs` (K4os.Compression.LZ4 1.3.8) | P5-T1, G2 | M |
+| P5-T3 | `json+zstd` codec per the G2 packaging decision. | `src/TriQL.Client.Compression/ZstdCodec.cs` (ZstdSharp.Port 0.8.8) | P5-T1, G2 | M |
+| P5-T4 | **Decompression bounds (SEC-6):** decoded size exceeding `max(uncompressedSize, ceiling)` raises `TrinoProtocolException`. Pooled `ArrayPool<byte>` buffers returned on **all** paths including exceptional ones. | `src/TriQL.Client/Codecs/BoundedDecoder.cs` | P5-T1 | M |
 
-### Lane B — Negotiation and segments
+> **Implementation notes.** The planned `Encoding/` folder was renamed `Codecs/` — `TriQL.Client.Encoding`
+> as a namespace shadows `System.Text.Encoding` for every file in the assembly, silently breaking
+> `Encoding.UTF8` elsewhere. `BoundedDecoder`'s bound is enforced literally per FR-5.3.4
+> (`max(uncompressedSize, ceiling)`, so an honest declaration above the ceiling is not itself
+> rejected), plus a defense-in-depth `Array.MaxLength` guard in each codec so an absurdly large
+> declared size fails cleanly rather than throwing an unhandled `OverflowException` from the
+> `ArrayPool` rent — a real bug hit and fixed during implementation.
+
+### Lane B — Negotiation and segments ✅ done 2026-09-22
 
 | Id | Task | Deliverable | Depends on | Size |
 |---|---|---|---|---|
 | P5-T5 | Encoding negotiation: `X-Trino-Query-Data-Encoding` in preference order; `data` **shape detection** (array-of-arrays vs `encoding`+`segments`); transparent fallback with no error; empty list forces direct protocol; undecodable encoding raises naming the encoding. | `Internal/EncodingNegotiator.cs` | P5-T1 | L |
-| P5-T6 | `SegmentClient`: `inline` base64 decode in place; `spooled` fetch by `uri` carrying the session credential; metadata validation — decoded length vs `segmentSize` and row count vs `rowsCount` mismatch raises. | `Internal/SegmentClient.cs` | P5-T5 | L |
+| P5-T6 | `SegmentClient`: `inline` base64 decode in place; `spooled` fetch by `uri` carrying the session credential **only when the URI shares the coordinator's origin** (corrected FR-5.2.2, see below); metadata validation — decoded length vs `segmentSize` and row count vs `rowsCount` (when present) mismatch raises. | `Internal/SegmentClient.cs` | P5-T5 | L |
 | P5-T7 | Acknowledgement pipeline: `ackUri` after consumer hand-off, fire-and-forget w.r.t. consumer latency, retried per FR-3.3, failure logged at `Warning` **without failing the query**. Best-effort ack sweep on cancellation, bounded by the P2-T8 timeout. | `Internal/SegmentAcknowledger.cs` | P5-T6 | L |
-| P5-T8 | Ordering by `rowOffset` with concurrent fetch up to a configurable degree (default 4), subject to the P2-T10 byte budget. | `SegmentClient.cs` | P5-T6 | L |
-| P5-T9 | **SSRF guards (SEC-7)** per the closed **G3** decision: scheme check on `nextUri`/`uri`/`ackUri`; no `https`→`http` downgrade; `ackUri` restricted to the session origin; segment `uri` permitted off-origin (object storage) with an optional host allowlist and a `Debug` log of the segment host on first use. | `Internal/UriGuard.cs` | P5-T6 | M |
+| P5-T8 | Ordering by `rowOffset` with concurrent fetch up to a configurable degree (default 4, `TrinoSessionOptions.SegmentFetchParallelism`). | `SegmentClient.cs` | P5-T6 | L |
+| P5-T9 | **SSRF guards (SEC-7)** per the closed **G3** decision: `https` required unconditionally (stricter than a downgrade-only check) on `uri`/`ackUri`; `ackUri` restricted to the session origin; segment `uri` permitted off-origin (object storage) with an optional host allowlist (`TrinoSessionOptions.SegmentHostAllowlist`) and a `Debug` log of the segment host on first use. | `Internal/UriGuard.cs` | P5-T6 | M |
 
 > **P5-T7's failure semantics are deliberate.** A failed acknowledgement leaks server-side storage
 > but must never fail a query that has already returned correct rows to the consumer.
+>
+> **Real protocol divergences found (risk X4 in practice).** Cross-checking the official Python and
+> Go reference Trino clients (more authoritative on actual wire behavior than prose documentation)
+> surfaced two corrections, now folded into [requirements.md](requirements.md) FR-5.2.1/FR-5.2.2:
+> (1) `uncompressedSize` is present only when a segment was actually compressed — its absence means
+> plain JSON regardless of the negotiated encoding — and `rowsCount` isn't reliably present before
+> server release 475 (below this client's 466 floor), so both are optional, validated only when
+> present; (2) the session credential is attached to a segment/ack fetch only when same-origin with
+> the coordinator, never to off-origin object storage, which instead relies solely on the
+> server-supplied per-segment `headers`. Sending a Trino bearer token to S3/Azure/GCS would do
+> nothing useful and would leak it.
+>
+> **Architecture note.** Segment resolution happens inside `StatementClient.ReadEnvelopeAsync`
+> (already async, runs for every page) rather than being deferred into `PageReader`, so
+> `PageReader`/`PageBuffer`/`TrinoResultSet` needed zero changes. Trade-off: FR-5.2.5's "subject to
+> the buffer byte budget" is satisfied only indirectly — parallelism *within* one page is bounded by
+> `SegmentFetchParallelism`, and cross-page overlap is bounded by the existing page-level
+> `PageBuffer` backpressure (at most one page's segments are ever in flight). True byte-budget-aware
+> segment prefetch across pages would need deeper `PageBuffer` restructuring; a reasonable scope
+> call for Lanes A/B, not an oversight — revisit if profiling in a later pass shows it matters.
 
-### Lane C — Performance
+### Lane C — Performance — deliberately deferred, not started
 
 | Id | Task | Deliverable | Depends on | Size |
 |---|---|---|---|---|
@@ -682,29 +863,29 @@ before P5-T12; **G7** (Q10 — spooling on by default?) closed before phase exit
 | P5-T11 | Tuning pass driven by P5-T10 findings: buffer sizing, backoff constants, decoder hot path, segment parallelism. | Across the pipeline | P5-T10 | L |
 | P5-T12 | CI perf gate per the **G5** decision, failing beyond 10 % regression. | `.github/workflows/perf.yml` | P5-T10, G5 | M |
 
-### Lane D — Verification
+### Lane D — Verification (correctness tests done; P5-T16 doc not yet written)
 
 | Id | Task | Deliverable | Depends on | Size |
 |---|---|---|---|---|
-| P5-T13 | Unit tests: each codec round-trip; decompression-bomb rejection; segment metadata mismatch; ordering under concurrent fetch; ack retry and failure tolerance; URI guard rejections. | `tests/TriQL.Client.Tests/Encoding/` | Lanes A–B | L |
-| P5-T14 | **Fake-coordinator spooling suite.** Since CI runs no object store, `FakeTrinoCoordinator` MUST be extended to serve realistic spooled responses: inline and spooled segments, an off-origin segment host, `ackUri` endpoints, all three encodings, out-of-order arrival, and metadata mismatches. This is the primary correctness evidence for FR-5. | `tests/TriQL.Client.Tests/Spooling/` | Lanes A–B | L |
-| P5-T15 | **Integration fallback proof (TEST-6).** Against real `466` and `latest` containers with spooling unconfigured, assert the client requests spooled encodings and transparently receives direct-protocol data with no error — proving FR-5.1.3 on real servers even though the spooled path itself cannot be. | `tests/TriQL.IntegrationTests/` | P5-T5 | M |
-| P5-T16 | **Manual validation checklist** for a real spooling deployment (documented, not automated). Serves as the interim defence while spooling is opt-in, and becomes the direct input to Phase 7's automated suite (P7-T6). | `docs/spooling-validation.md` | Lanes A–B | S |
-| P5-T17 | Set the `QueryDataEncodings` default to **empty** for 1.0 per the closed **G7** decision, so spooling is opt-in. Record the FR-1.1.1 specified default as the Phase 7 target. | `TrinoSessionOptions.cs` | P5-T5 | S |
+| P5-T13 | Unit tests: each codec round-trip; decompression-bomb rejection; segment metadata mismatch; ordering under concurrent fetch; ack retry and failure tolerance; URI guard rejections. | `tests/TriQL.Client.Tests/Codecs/`, `Security/UriGuardTests.cs` | Lanes A–B | L — **done** |
+| P5-T14 | **Fake-coordinator spooling suite.** `FakeTrinoCoordinator` extended with URI-keyed routing to serve inline/spooled segments, out-of-order concurrent delivery, metadata mismatches, unknown encodings, and origin-gated credential attachment. | `tests/TriQL.Client.Tests/Spooling/` | Lanes A–B | L — **done** |
+| P5-T15 | **Integration fallback proof (TEST-6).** Against the real container (spooling unconfigured), assert the client requests the full `QueryDataEncodings` preference list and transparently receives correct direct-protocol data with no error. | `tests/TriQL.IntegrationTests/SpoolingFallbackTests.cs` | P5-T5 | M — **done, passing (2/2)** |
+| P5-T16 | **Manual validation checklist** for a real spooling deployment (documented, not automated). | `docs/spooling-validation.md` | Lanes A–B | S — **not started** |
+| P5-T17 | Set the `QueryDataEncodings` default to **empty** for 1.0 per the closed **G7** decision, so spooling is opt-in. | `TrinoSessionOptions.cs` | P5-T5 | S — **already true**, unchanged by this work |
 
 ### Exit Criteria
 
-- [ ] Spooled reads verified against the fake coordinator across all three encodings, inline and spooled segments, and off-origin segment hosts.
-- [ ] Fallback to the direct protocol verified against **real** `466` and `latest` containers, with no error and no configuration change.
-- [ ] Per-query fallback handled: a session mixing spooled and direct responses works (FR-5.1.3b).
-- [ ] All three codecs round-trip; decompression bombs are rejected.
-- [ ] Segments are delivered in `rowOffset` order under concurrent fetch.
-- [ ] Segment acknowledgement failure logs a warning and does not fail the query.
-- [ ] SSRF guards reject scheme downgrade and off-origin `ackUri`, while permitting off-origin segment URIs.
-- [ ] NFR-PERF-1…4 targets met, or a documented renegotiation recorded.
-- [ ] Perf gate active in CI with acceptable variance.
-- [ ] **G7 closed:** spooling ships **opt-in** in 1.0; `QueryDataEncodings` defaults to empty (P5-T17).
-- [ ] Manual validation checklist written (P5-T16), ready to drive Phase 7.
+- [ ] Spooled reads verified against the fake coordinator across all three encodings, inline and spooled segments, and off-origin segment hosts. *(codecs + negotiation + segments done; off-origin-host coverage present in `UriGuardTests`/`SpoolingTests`, not yet re-confirmed against Phase 7's real object storage — that's Phase 7's job.)*
+- [x] Fallback to the direct protocol verified against a **real** container with no error and no configuration change (P5-T15, `SpoolingFallbackTests.cs`, 2/2 passing). *Only one server version tested so far — extend to the `{466, latest}` matrix when convenient.*
+- [ ] Per-query fallback handled: a session mixing spooled and direct responses works (FR-5.1.3b). *Not explicitly tested — every negotiation test so far is single-query. Worth a dedicated test before relying on this.*
+- [x] All three codecs round-trip; decompression bombs are rejected.
+- [x] Segments are delivered in `rowOffset` order under concurrent fetch.
+- [x] Segment acknowledgement failure logs a warning and does not fail the query.
+- [x] SSRF guards reject scheme downgrade and off-origin `ackUri`, while permitting off-origin segment URIs.
+- [ ] NFR-PERF-1…4 targets met, or a documented renegotiation recorded. — **deliberately deferred (Lane C).**
+- [ ] Perf gate active in CI with acceptable variance. — **deliberately deferred (Lane C).**
+- [x] **G7 closed:** spooling ships **opt-in**; `QueryDataEncodings` defaults to empty (P5-T17, unchanged).
+- [ ] Manual validation checklist written (P5-T16), ready to drive Phase 7. — **not started**, do this before or during Phase 7.
 
 ### Verification
 
@@ -819,6 +1000,12 @@ dotnet pack -c Release
 NFR-PERF-2, TEST-5, TEST-6, Q10/G7 closure.
 
 **Entry criteria:** 1.0.0 published (Phase 6 complete) with spooling shipped opt-in.
+
+> **Status as of 2026-09-22 ([§2.2](#22-actual-status--2026-09-22-docker-unlock)): not started.**
+> No MinIO fixture, spooling-configured Trino container, or `docs/spooling-validation.md` exists
+> yet. This phase is also logically blocked on Phase 5 landing first — there is no spooled decoding
+> in the client to validate. Docker being available locally now makes it possible to build and
+> iterate on this phase's fixtures on the dev machine ahead of CI.
 
 > **Why this phase is sequenced after release.** Spooling is the one subsystem specified entirely
 > from documentation and verified entirely against a test double built from that same
@@ -967,7 +1154,7 @@ audit at each phase exit to confirm nothing was silently dropped.
 | **X1** | Session propagation defects produce silently wrong results rather than errors. | 1 | Medium | High | Combination testing in P1-T19; `SessionChanged` gives an observable hook; integration tests assert `USE` and `SET SESSION` take effect. |
 | **X2** | Throughput parity with the JDBC driver (NFR-PERF-2) proves unreachable on the JSON hot path. | 3, 5 | Medium | Medium | P3-T6 prototypes the decoder early. If the gap is structural, renegotiate NFR-PERF-2 with measurements before Phase 5 rather than failing at the gate. |
 | **X3** | Sync-over-async deadlocks in consumer synchronization contexts. | 4 | Medium | High | Single audited bridge (P4-T5); analyzer bans ad-hoc `.Result`; P4-T22 tests under a captured context. |
-| **X4** | Spooled protocol details differ from the specification written from documentation. | 5 | **High** | Medium | Compounded by X11 while it stands — the fake coordinator (P5-T14) can only reproduce what the documentation describes, so a specification misreading reproduces itself in the test double and passes. P1-T18's walking skeleton catches direct-protocol drift only. **Resolved in Phase 7**, whose exit criteria require writing any divergence back into the requirements. |
+| **X4** | Spooled protocol details differ from the specification written from documentation. | 5 | ~~**High**~~ **Confirmed 2026-09-22 — mitigated, not eliminated.** | Medium | **This materialized during Phase 5 implementation**, exactly as predicted: `requirements.md` FR-5.2.1/FR-5.2.2 had the wrong impression of `uncompressedSize`/`rowsCount` presence and segment-credential scoping. It was caught by cross-checking the official Python/Go reference clients (not just the fake coordinator) before Phase 7 rather than during it, and both requirements.md and this plan were corrected the same day. Residual risk: the reference-client cross-check is still documentation-adjacent, not a real server — **Phase 7's real-coordinator verification remains the only way to fully retire this**, so it stays open, just de-risked earlier than planned. |
 | **X5** | Protocol drift between Trino releases breaks the client silently. | All | Medium | High | Nightly integration run against `trinodb/trino:latest` with alerting (P0-T16); Appendix A verified in P1-T9. |
 | **X6** | Codec dependencies violate the zero-dependency goal. | 5 | High | Low | G2 resolved at Phase 0; recommended split into `TriQL.Client.Compression`. |
 | **X7** | Abandoned readers leave queries running, exhausting cluster resources. | 2 | Medium | High | P2-T14 disposal semantics; P2-T21 confirms termination server-side via `/v1/query/{id}`, not merely client-side. |

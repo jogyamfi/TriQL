@@ -637,10 +637,18 @@ stateDiagram-v2
 | Kind | Handling |
 |---|---|
 | `inline` | Base64 payload embedded in the page; decode in place, no additional request. |
-| `spooled` | `uri` to `GET` for the payload; `ackUri` to signal consumption; `metadata` carries `segmentSize`, `rowOffset`, `rowsCount`, and optionally `uncompressedSize`. |
+| `spooled` | `uri` to `GET` for the payload; `ackUri` to signal consumption; `metadata` carries `segmentSize` and `rowOffset` always. `uncompressedSize` is present **only when that segment was actually compressed** — its absence means the segment is plain JSON regardless of the page's negotiated top-level `encoding`, and MUST be decoded with the `json` codec rather than the negotiated one. `rowsCount` is **not reliably present on servers below release 475** (a Trino bug tracked in its issue history left it unenforced as mandatory before then); since this client's floor is 466, `rowsCount` MUST be treated as optional and validated only when present. Both facts were confirmed against the official Python and Go reference client implementations during Phase 5 (2026-09-22), which is more authoritative on wire behavior than the prose documentation. `spooled` segments also carry an optional `headers` map (header name → list of values) that MUST be applied to both the segment fetch and its acknowledgement request — see FR-5.2.2. |
 
-> **FR-5.2.2** — Spooled segment fetches MUST carry the session's authentication credential
-> (FR-2.1.2), because the segment URI may point at a coordinator-proxied endpoint.
+> **FR-5.2.2** — ~~Spooled segment fetches MUST carry the session's authentication credential
+> (FR-2.1.2), because the segment URI may point at a coordinator-proxied endpoint.~~ **Corrected
+> 2026-09-22, per the same reference-client cross-check as FR-5.2.1:** the session credential MUST
+> be attached to a segment/ack fetch **only when that URI shares the coordinator's origin**
+> (scheme, host, and port) — the coordinator-proxied case this requirement originally described.
+> For an off-origin URI (real object storage), the client MUST NOT attach the session credential —
+> sending a Trino bearer token to S3/Azure/GCS would do nothing useful and would leak it — and
+> instead relies solely on the segment's own `headers` (FR-5.2.1), which carry whatever
+> presigned-URL or SSE-C key material the server-side spooling manager requires. Every segment and
+> acknowledgement fetch MUST still apply `headers` when present, regardless of origin.
 > **FR-5.2.3** — After a spooled segment's rows have been handed to the consumer, the client MUST
 > acknowledge it via its `ackUri` so the server can release storage. Acknowledgement MUST be
 > fire-and-forget with respect to consumer latency, MUST be retried per FR-3.3, and MUST NOT fail
@@ -1312,14 +1320,14 @@ TrinoException                      (abstract base : Exception)
 | # | Item | Impact | Proposed resolution |
 |---|---|---|---|
 | Q1 | ~~Minimum supported Trino server version.~~ **Resolved 2026-08-25: floor is 466.** | Scope of FR-5, size of the conformance matrix. | 466 (27 Nov 2024) is the release that introduced the spooling protocol; below it, an in-scope feature cannot function at all. Latest at time of decision is 483 (17 Jul 2026), so the floor spans ~17 releases. Release cadence has slowed markedly (33 releases in 2024, 11 in 2025, 4 in 2026 to date), keeping the matrix small. CI matrix is `{466, latest}`. Trino has no formal OSS LTS. |
-| Q2 | Zstandard codec source. The BCL does not currently expose Zstandard on all target TFMs. | Violates the zero-dependency goal for `TriQL.Client`. | Options: (a) accept one vetted native/managed package; (b) move `json+zstd` support into a separate `TriQL.Client.Compression` package, keeping the core dependency-free; (c) ship only `json` and `json+lz4` in 1.0. Recommend (b). |
-| Q3 | LZ4 codec source. | Same as Q2. | Same resolution path as Q2. |
+| Q2 | ~~Zstandard codec source. The BCL does not currently expose Zstandard on all target TFMs.~~ **Resolved 2026-09-22: option (b).** | Violates the zero-dependency goal for `TriQL.Client`. | `json+zstd` (and `json+lz4`, Q3) ship from the separate `TriQL.Client.Compression` package, keeping `TriQL.Client` dependency-free per REQ-ARCH-4. The empty project stub already exists at `src/TriQL.Client.Compression/`; Phase 5 (P5-T2, P5-T3) fills it in. |
+| Q3 | ~~LZ4 codec source.~~ **Resolved 2026-09-22: same as Q2.** | Same as Q2. | Same resolution as Q2 — `TriQL.Client.Compression`. |
 | Q4 | ~~Root namespace and package prefix.~~ **Resolved 2026-08-25: `TriQL`.** | Public API, package identity. | Package ids `TriQL.Client`, `TriQL.Client.Auth`, `TriQL.Data.ADO` confirmed available on nuget.org. Residual note: "TriQL" is also the name of a dormant academic query language for RDF named graphs (NG4J project) — different domain, no known trademark registration, assessed as low risk. |
 | Q5 | Transaction support. | Some tooling calls `BeginTransaction` unconditionally. | 1.0 throws `NotSupportedException`. Revisit for 1.1 with a session-scoped `START TRANSACTION` implementation. |
 | Q6 | ~~Segment URI origin restriction default (SEC-7).~~ **Resolved 2026-08-25.** | Too strict breaks object-storage spooling; too loose is an SSRF surface. | Spooled segments are written to S3/Azure/GCS and are therefore **legitimately off-origin by design**. Segments are SSE-C encrypted, compressed, and scoped to the initiating client, which materially reduces the exposure. Decision: restrict `ackUri` to the session origin; allow segment `uri` off-origin but require `https` (no scheme downgrade) plus an optional host allowlist, default permissive with a `Debug` log of the segment host on first use. |
-| Q7 | `Prepare()` semantics (FR-9.2.8). | Tooling compatibility. | Recommend a documented no-op over throwing. |
+| Q7 | ~~`Prepare()` semantics (FR-9.2.8).~~ **Resolved 2026-09-22: documented no-op.** | Tooling compatibility. | Already implemented this way at `TrinoCommand.Prepare()` (`src/TriQL.Data.ADO/TrinoCommand.cs`) — this entry now records that as the ratified decision rather than an open recommendation. |
 | Q8 | Complex-type materialization depth. | API surface and performance. | 1.0 surfaces `array`/`map`/`row` as `object?[]` / `IReadOnlyDictionary` / `ITrinoRowValue`; generic POCO mapping deferred to 1.1. |
-| Q9 | Benchmark runner variance in CI. | False regression failures. | Use a dedicated self-hosted runner or compare against a same-run baseline rather than an absolute threshold. |
+| Q9 | ~~Benchmark runner variance in CI.~~ **Resolved 2026-09-22: same-run baseline.** | False regression failures. | Compare against a same-run baseline rather than an absolute threshold — no dedicated self-hosted runner exists, and a same-run comparison avoids depending on one. Applies to the CI perf gate built in Phase 5 (P5-T12). |
 | **Q10** | ~~Should the spooled protocol be enabled by default in 1.0?~~ **Resolved 2026-08-25: no.** | Shipping an unverified-against-real-server code path on by default risks failures that only appear in customer environments. | 1.0 ships spooling implemented but **opt-in** (`QueryDataEncodings` defaults to empty) and documented as experimental, per FR-5.1.6. A dedicated post-1.0 phase stands up MinIO plus a spooling-configured coordinator, validates the path end to end, and promotes it to default in 1.1. See Phase 7 of the [implementation plan](implementation-plan.md). |
 | R1 | **Risk:** protocol drift between Trino releases. | Silent breakage. | Nightly integration run against `trinodb/trino:latest` with alerting. |
 | R2 | **Risk:** performance parity with the JDBC driver may be hard to reach on the JSON hot path. | NFR-PERF-2 miss. | Prototype the `Utf8JsonReader` row decoder early in M2 and measure before committing to the target. |
