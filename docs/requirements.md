@@ -613,10 +613,31 @@ stateDiagram-v2
 > (S3/Azure/GCS), and a 256-bit shared secret key on the coordinator. A fully current server with
 > spooling unconfigured returns direct-protocol data. Fallback is therefore a permanent runtime
 > path, not a legacy-server accommodation, and MUST NOT be treated as a deprecated branch.
-> **FR-5.1.3b** — Trino also falls back to the direct protocol on a per-query basis for queries
-> that would not benefit from spooling. The client MUST therefore handle a session in which some
-> queries return spooled data and others return direct data, and MUST NOT cache a per-session
-> conclusion about which protocol is in use.
+> **Confirmed against a real spooling-configured Trino 466 coordinator in Phase 7 (2026-09-22):**
+> `UriGuard`'s unconditional `https` requirement on segment/ack URIs (SEC-7/G3) means a real
+> spooling deployment needs the **coordinator itself** on HTTPS too, not merely the object store —
+> a plain-HTTP coordinator with spooling configured (a normal enough Trino deployment otherwise)
+> will have every segment acknowledgement rejected client-side with `TrinoProtocolException`. This
+> is a real cluster-configuration prerequisite this client imposes and should be called out to
+> anyone deploying spooling, not just an implementation detail.
+> **FR-5.1.3b** — ~~Trino also falls back to the direct protocol on a per-query basis for queries
+> that would not benefit from spooling.~~ **Corrected 2026-09-22, per Phase 7's real-coordinator
+> testing:** against a real Trino 466 coordinator with spooling cluster-enabled, **no query of any
+> size was ever observed to return a literal array-of-arrays `data` shape** — even a 5-row
+> `SELECT * FROM tpch.tiny.region` returned the spooled `{encoding, segments}` envelope, just with
+> a single `inline`-kind segment (the payload base64-embedded directly in the page) below Trino's
+> `protocol.spooling.inlining.max-rows`/`max-size` thresholds. What the Trino documentation and
+> this client's own design call "falling back to the direct protocol per query" appears to
+> actually be implemented as **spooled-envelope-with-inlining**, not a literal reversion to the
+> array-of-arrays shape — functionally equivalent (no extra round trip either way, and this
+> client's `EncodingNegotiator`/`SegmentClient` already handle `inline` segments as a first-class
+> case per FR-5.2.1) but structurally different on the wire than this requirement originally
+> implied. The client MUST still handle a session mixing genuinely-spooled and inline-within-spooled
+> responses, and MUST NOT cache a per-session conclusion about segment kind. The literal
+> array-of-arrays direct-protocol shape was only ever observed when `QueryDataEncodings` was set to
+> empty client-side (FR-5.1.5) or against a coordinator with spooling not configured at all
+> (FR-5.1.3) — i.e. as a client- or cluster-level configuration state, not a per-query server
+> decision as this requirement previously implied.
 > **FR-5.1.4** — If the server returns an encoding the client cannot decode, the client MUST
 > raise `TrinoProtocolException` naming the encoding, and the documentation MUST direct the user
 > to narrow `QueryDataEncodings`.

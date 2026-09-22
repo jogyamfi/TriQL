@@ -189,9 +189,23 @@ Docker container on this machine:
   the Phase 5 section for what's still open there. Two real corrections to FR-5.2.1/FR-5.2.2 came
   out of this (see the Phase 5 section and requirements.md) — this is risk **X4** materializing
   exactly as the risk register predicted, caught before it could reach Phase 7.
-- **Not yet started: step 7 (Phase 7 MinIO infrastructure).** Now unblocked at the code level —
-  Phase 5's client-side spooling exists to validate — but still needs P7-T1…T4 (MinIO fixture,
-  spooling-configured Trino container, shared network) built from scratch.
+- **Step 7 (Phase 7 Lanes A+B) done 2026-09-22.** MinIO plus a spooling-configured, real-TLS Trino
+  coordinator now run as Testcontainers fixtures, wired into CI, with all ten Lane B verification
+  tasks (P7-T5–T10) passing against them: the negative control (raw-probe shape assertion, not just
+  row correctness), all three codecs against real segments, SSE-C encryption (a segment is
+  unreadable without the correct customer key, extracted from the server-supplied per-segment
+  `headers`), ack-driven bucket shrinkage plus cancellation cleanup, the real off-origin/same-origin
+  URI topology, and mixed spooled/direct sessions in one client. Built and reviewed in an isolated
+  worktree, then merged and re-verified: build clean, `dotnet format` clean,
+  `TriQL.IntegrationTests` 91/91 (77 prior + 14 new), `TriQL.Client.Tests` 349/349,
+  `TriQL.Data.ADO.Tests` 90/90, `TriQL.Client.Auth.Tests` 16/16. Two more real corrections went into
+  `requirements.md` (FR-5.1.3a: a real spooling deployment needs the coordinator itself on HTTPS,
+  not just the object store, because of `UriGuard`'s existing unconditional `https` rule; FR-5.1.3b:
+  no literal direct-protocol fallback was ever observed per-query on a real coordinator — small
+  results still get a spooled envelope with an `inline` segment) — risk **X4** materializing a
+  third and fourth time, each time caught and closed the same day. **Lane C (perf rebaseline,
+  tuning, promoting the default, and the 1.1.0 release) was deliberately left untouched**, per
+  explicit instruction to wait for a separate go-ahead before that public, hard-to-reverse step.
 
 **Incidental cleanup:** a pre-existing, unrelated formatting violation in
 `samples/TriQL.Samples.UserNamePassword/UserNamePasswordSample.cs` (see step 2 above) was
@@ -1001,11 +1015,19 @@ NFR-PERF-2, TEST-5, TEST-6, Q10/G7 closure.
 
 **Entry criteria:** 1.0.0 published (Phase 6 complete) with spooling shipped opt-in.
 
-> **Status as of 2026-09-22 ([§2.2](#22-actual-status--2026-09-22-docker-unlock)): not started.**
-> No MinIO fixture, spooling-configured Trino container, or `docs/spooling-validation.md` exists
-> yet. This phase is also logically blocked on Phase 5 landing first — there is no spooled decoding
-> in the client to validate. Docker being available locally now makes it possible to build and
-> iterate on this phase's fixtures on the dev machine ahead of CI.
+> **Status as of 2026-09-22: Lanes A and B done and verified; Lane C (promotion/release) intentionally
+> not started, pending a separate explicit go-ahead.** MinIO plus a spooling-configured Trino
+> coordinator now run as Testcontainers fixtures (`Fixtures/{MinioFixture,SpoolingTrinoFixture,
+> SpoolingClusterFixture}.cs`), wired into CI (`ci.yml`'s `spooling-integration-tests` job, Linux-only
+> per PR; `nightly.yml`'s existing matrix step picks it up automatically since
+> `SpoolingTrinoFixture` honours `TRIQL_TEST_TRINO_VERSION` too). All ten Lane B verification tasks
+> (P7-T5 through P7-T10) pass against real infrastructure — see the exit criteria below and
+> [§2.4](#24-progress--2026-09-22-post-audit) for full detail. Two real spec-vs-reality corrections
+> came out of this and are folded into [requirements.md](requirements.md) FR-5.1.3a/FR-5.1.3b: the
+> unconditional `https` requirement in `UriGuard` means a real spooling deployment needs the
+> **coordinator** on HTTPS too, not just the object store; and Trino does not appear to fall back to
+> a literal direct-protocol shape per query the way FR-5.1.3b originally described — small results
+> still get a spooled envelope, just with an `inline`-kind segment.
 
 > **Why this phase is sequenced after release.** Spooling is the one subsystem specified entirely
 > from documentation and verified entirely against a test double built from that same
@@ -1014,60 +1036,81 @@ NFR-PERF-2, TEST-5, TEST-6, Q10/G7 closure.
 > default** and this phase earns the right to turn it on. Nothing here is throwaway: the
 > infrastructure becomes permanent CI.
 
-### Lane A — Test infrastructure
+### Lane A — Test infrastructure ✅ done 2026-09-22
 
 | Id | Task | Deliverable | Depends on | Size |
 |---|---|---|---|---|
-| P7-T1 | MinIO Testcontainer fixture with an SSE-C-capable bucket. The bucket policy **must** permit Server-Side Encryption with Customer-provided keys, or segment writes fail outright. | `tests/TriQL.IntegrationTests/Fixtures/MinioFixture.cs` | — | M |
-| P7-T2 | Spooling-configured Trino container: `protocol.spooling.enabled=true`, a generated 256-bit base64 `protocol.spooling.shared-secret-key`, and `etc/spooling-manager.properties` with `spooling-manager.name=filesystem`, `fs.s3.enabled=true`, `fs.location`, path-style access, and MinIO credentials. | `Fixtures/SpoolingTrinoFixture.cs`, `Fixtures/trino-spooling/` | P7-T1 | L |
-| P7-T3 | Compose the two fixtures on a shared container network so the coordinator, the workers, and the test client can all reach MinIO — the docs require object storage reachable by *both* cluster and clients. | `Fixtures/SpoolingClusterFixture.cs` | P7-T2 | M |
-| P7-T4 | Wire the spooling suite into CI: Linux-only per PR, full matrix nightly, skipped by capability detection when Docker is unavailable — never silently passed. | `.github/workflows/ci.yml`, `nightly.yml` | P7-T3 | M |
+| P7-T1 | MinIO Testcontainer fixture with an SSE-C-capable bucket. | `tests/TriQL.IntegrationTests/Fixtures/MinioFixture.cs` | — | M |
+| P7-T2 | Spooling-configured Trino container: `protocol.spooling.enabled=true`, a generated 256-bit base64 `protocol.spooling.shared-secret-key`, and `spooling-manager.properties` with `spooling-manager.name=filesystem`, `fs.s3.enabled=true`, `fs.location`, path-style access, and MinIO credentials. **Real TLS on both MinIO and the coordinator, not the "likely simplest" plain-HTTP setup this task originally assumed** — see the note below. | `Fixtures/SpoolingTrinoFixture.cs`, `Fixtures/TestCertificateAuthority.cs` | P7-T1 | L |
+| P7-T3 | Compose the two fixtures on a shared network so the coordinator, MinIO, and the **bare-host test process** can all reach each other — trickier than "shared container network" implied, since the test client isn't itself containerized. See `Fixtures/HostAddress.cs`'s remarks for the networking solution. | `Fixtures/SpoolingClusterFixture.cs` | P7-T2 | M |
+| P7-T4 | Wire the spooling suite into CI: Linux-only per PR (`ci.yml`'s `spooling-integration-tests` job), full matrix nightly (folded into `nightly.yml`'s existing step, since `SpoolingTrinoFixture` already honours `TRIQL_TEST_TRINO_VERSION` — no separate nightly job needed), skipped by capability detection when Docker is unavailable. | `.github/workflows/ci.yml`, `nightly.yml` | P7-T3 | M |
 
-> **P7-T2 is the task most likely to consume unexpected effort.** Trino's spooling configuration
-> is spread across two files plus a generated secret, and misconfiguration typically manifests as
-> a silent fallback to the direct protocol rather than an error — which would make the whole suite
-> pass while testing nothing. **P7-T5 exists specifically to prevent that false pass.**
+> **P7-T2 did consume unexpected effort, exactly as predicted — but not the effort predicted.**
+> The actual surprise wasn't Trino's two-file spooling config (that matched the official docs
+> closely); it was that `UriGuard`'s existing, already-shipped unconditional `https` requirement on
+> segment/ack URIs (SEC-7/G3) makes a plain-HTTP MinIO-and-coordinator setup a non-starter — the
+> first real segment fetch is rejected client-side before any spooling-specific logic is even
+> reached. Both services needed real TLS listeners, solved with one self-signed test CA
+> (`TestCertificateAuthority.cs`) that Trino's own outbound S3 client also had to be told to trust
+> (`-Djavax.net.ssl.trustStore` via `JAVA_TOOL_OPTIONS`). This is now folded into
+> [requirements.md](requirements.md) FR-5.1.3a as a real cluster-configuration prerequisite, not
+> just a test-fixture detail — a plain-HTTP coordinator with spooling enabled will fail every ack.
+>
+> **P7-T3's networking problem was real, not hypothetical.** Trino's own documented example
+> (`s3.endpoint=http://minio:9080/`) only works when the test client is itself a container on the
+> same Docker network, resolving the alias `minio` via Docker DNS. Ours is a bare-host xUnit
+> process. The fix: resolve the host machine's own routable IPv4 (`HostAddress.cs`) and use that —
+> not `localhost` (means the container itself, from inside a container) and not
+> `host.docker.internal` (a Docker Desktop container→host convenience name, not guaranteed to
+> resolve the other direction, from the bare host) — for `s3.endpoint`, since a real IP address is
+> valid from both inside the Trino container (reaching out through Docker's bridge) and from the
+> host test process (as one of its own addresses). Confirmed working on Docker Desktop/Windows/WSL2;
+> the same reasoning is expected to hold on GitHub-hosted Linux runners but hadn't been separately
+> confirmed in CI as of this writing.
 
-### Lane B — Real-server verification
+### Lane B — Real-server verification ✅ done 2026-09-22
 
 | Id | Task | Deliverable | Depends on | Size |
 |---|---|---|---|---|
-| P7-T5 | **Negative control.** Assert the spooled path is genuinely exercised: a query against the spooling cluster MUST return an `encoding`+`segments` envelope, and the test MUST fail if it receives direct-protocol data. Every other test in this lane depends on this guarantee. | `tests/TriQL.IntegrationTests/Spooling/` | P7-T3 | M |
-| P7-T6 | Execute the P5-T16 manual validation checklist as automated tests: inline and spooled segments, all three encodings, large multi-segment results, and row-order correctness across segment boundaries. | `Spooling/SegmentTests.cs` | P7-T5 | L |
-| P7-T7 | **SSE-C verification** — the highest-uncertainty area, and untestable against a fake. Confirm segments are encrypted at rest, that the client supplies the correct customer key material, and that a segment cannot be read by a different client identity. | `Spooling/EncryptionTests.cs` | P7-T5 | L |
-| P7-T8 | **Acknowledgement verification.** Confirm `ackUri` actually releases object-storage space: assert bucket contents shrink after consumption, that abandoning a query triggers the cancellation ack sweep (FR-5.2.7), and that a failed ack degrades to a warning without failing the query. | `Spooling/AcknowledgementTests.cs` | P7-T5 | L |
-| P7-T9 | **Off-origin URI verification** against the closed G3 policy: segment URIs legitimately point at MinIO rather than the coordinator, while `ackUri` stays on the session origin. Confirm the P5-T9 guards permit the real topology without weakening SSRF protection. | `Spooling/UriGuardTests.cs` | P7-T5 | M |
-| P7-T10 | Per-query fallback verification (FR-5.1.3b): confirm a single session mixes spooled and direct responses, since Trino falls back per query for results that would not benefit from spooling. | `Spooling/MixedProtocolTests.cs` | P7-T5 | M |
+| P7-T5 | **Negative control.** Assert the spooled path is genuinely exercised via a raw HTTP probe (bypassing `TriQL.Client` entirely) confirming the literal `{encoding, segments}` shape — row-count correctness alone was deliberately rejected as insufficient, since a misconfigured cluster silently serving direct-protocol data would still return correct rows through the transparent-fallback design. | `tests/TriQL.IntegrationTests/Spooling/SpoolingNegativeControlTests.cs` | P7-T3 | M — **done, 2/2 passing** |
+| P7-T6 | All three encodings, inline and spooled segments, a large multi-segment result (`tpch.sf1.orders`, 1.5M rows), row-order correctness across segment boundaries. | `Spooling/SegmentTests.cs` | P7-T5 | L — **done, 4/4 passing** |
+| P7-T7 | **SSE-C verification.** Fetches a real spooled segment's object key + SSE-C headers via a raw probe, then hits MinIO directly (bypassing TriQL) with no key (rejected), the wrong key (rejected), and the correct key extracted from the segment's `headers` (succeeds). | `Spooling/EncryptionTests.cs` | P7-T5 | L — **done, 1/1 passing** |
+| P7-T8 | **Acknowledgement verification.** Bucket object count returns to baseline after full consumption; cancelling mid-stream still triggers cleanup within a bounded wait (tolerating exactly one straggler object for a segment that was mid-fetch, never decoded, and therefore never ack-eligible per FR-5.2.7's own "where an ack can still be issued cheaply" qualifier). The third sub-requirement (a *failed* ack degrading to a warning) stays covered only at the unit level (`SegmentAcknowledgerTests.cs`) — forcing a real ack failure without also breaking the query's own connectivity wasn't practically constructible black-box against a real server. | `Spooling/AcknowledgementTests.cs` | P7-T5 | L — **done, 2/2 passing** |
+| P7-T9 | **Off-origin URI verification** against the closed G3 policy. | `Spooling/UriGuardTests.cs` | P7-T5 | M — **done, 2/2 passing** |
+| P7-T10 | Mixed-protocol verification (FR-5.1.3b, corrected — see below): one session toggling `QueryDataEncodings` empty→full→empty across three queries, proving no cached per-session assumption. | `Spooling/MixedProtocolTests.cs` | P7-T5 | M — **done, 1/1 passing** |
 
-### Lane C — Performance and promotion
+### Lane C — Performance and promotion — deliberately not started, needs explicit go-ahead
 
 | Id | Task | Deliverable | Depends on | Size |
 |---|---|---|---|---|
 | P7-T11 | Re-baseline NFR-PERF-2 over the spooled path. Spooling exists to raise throughput, so this is the first honest measurement of whether TriQL realises that gain. | `tests/TriQL.Benchmarks/Spooling/` | P7-T6 | L |
 | P7-T12 | Tuning pass on segment parallelism and buffer interaction, now informed by real object-storage latency rather than an in-process fake. | `Internal/SegmentClient.cs`, `PageBuffer.cs` | P7-T11 | M |
 | P7-T13 | **Promote spooling to default:** change the `QueryDataEncodings` default from empty to `["json+zstd","json+lz4","json"]`, restoring the FR-1.1.1 specified default. Remove the experimental designation. | `TrinoSessionOptions.cs`, docs | P7-T6…P7-T10 | S |
-| P7-T14 | Update documentation: remove the experimental caveat, document the cluster-side configuration prerequisites (FR-5.1.3a), and explain the opt-out path for callers who need the direct protocol. | `README.md`, `docs/` | P7-T13 | M |
+| P7-T14 | Update documentation: remove the experimental caveat, document the cluster-side configuration prerequisites (FR-5.1.3a — including the now-confirmed **coordinator-must-be-HTTPS** requirement), and explain the opt-out path for callers who need the direct protocol. | `README.md`, `docs/` | P7-T13 | M |
 | P7-T15 | Release `1.1.0`. Record in the release notes that spooling is now on by default and state the behavioural change explicitly for 1.0 upgraders. | Published packages | P7-T13, P7-T14 | M |
 
 > **P7-T13 is a behavioural change, not a bug fix.** Callers upgrading from 1.0.0 will silently
 > switch protocol. It warrants a minor-version bump under SemVer (REL-2), prominent release notes,
-> and a documented way to opt back out.
+> and a documented way to opt back out. **This lane is intentionally untouched** — Lanes A/B were
+> scoped deliberately to stop short of it, since flipping a shipped default and cutting a release
+> are public, hard-to-reverse actions that call for a separate, explicit go-ahead rather than
+> following on automatically from infrastructure work.
 
 ### Exit Criteria
 
-- [ ] MinIO plus a spooling-configured Trino coordinator run in CI.
-- [ ] **Negative control passes:** the suite provably fails if the cluster silently falls back to the direct protocol.
-- [ ] All three encodings verified against real spooled segments.
-- [ ] SSE-C encryption verified; segments are not readable by a different client identity.
-- [ ] `ackUri` verified to actually release object-storage space; bucket contents shrink after consumption.
-- [ ] Cancellation ack sweep verified against real storage (FR-5.2.7).
-- [ ] Off-origin segment URIs work under the G3 policy while `ackUri` stays origin-restricted.
-- [ ] Mixed spooled/direct sessions handled correctly (FR-5.1.3b).
-- [ ] NFR-PERF-2 re-baselined over the spooled path; the throughput gain is quantified.
-- [ ] Any divergence between real behaviour and the FR-5 specification is written back into [requirements.md](requirements.md).
-- [ ] `QueryDataEncodings` default restored to the FR-1.1.1 value; experimental designation removed.
-- [ ] Risk **X11** retired; risk **X4** downgraded.
-- [ ] `1.1.0` published with the behavioural change documented.
+- [x] MinIO plus a spooling-configured Trino coordinator run in CI (`ci.yml`'s `spooling-integration-tests` job; `nightly.yml`'s existing step covers the full version matrix).
+- [x] **Negative control passes:** the suite provably fails if the cluster silently falls back to the direct protocol (raw-probe assertion on the literal `data` shape, not just row correctness).
+- [x] All three encodings verified against real spooled segments.
+- [x] SSE-C encryption verified; a segment is not readable without the correct customer key.
+- [x] `ackUri` verified to actually release object-storage space; bucket contents shrink after consumption.
+- [x] Cancellation ack sweep verified against real storage (FR-5.2.7).
+- [x] Off-origin segment URIs work under the G3 policy while `ackUri` stays origin-restricted.
+- [x] Mixed spooled/direct sessions handled correctly — **finding corrected FR-5.1.3b's wording**, see below.
+- [ ] NFR-PERF-2 re-baselined over the spooled path; the throughput gain is quantified. — **Lane C, not started.**
+- [x] Divergences between real behaviour and the FR-5 specification written back into [requirements.md](requirements.md): FR-5.1.3a (coordinator-HTTPS prerequisite) and FR-5.1.3b (no literal per-query direct-protocol fallback observed — see the Phase 7 status note above).
+- [ ] `QueryDataEncodings` default restored to the FR-1.1.1 value; experimental designation removed. — **Lane C, not started; needs explicit go-ahead.**
+- [x] Risk **X11** retired for the infrastructure/verification surface it covers; ~~risk **X4** downgraded~~ — see the updated X4/X11 risk-register entries below. Full X11 retirement (the "verified end to end" claim) is contingent on Lane C's real-S3/real-Azure manual check per the Risks table, which hasn't happened yet.
+- [ ] `1.1.0` published with the behavioural change documented. — **Lane C, not started.**
 
 ### Verification
 
@@ -1081,10 +1124,10 @@ dotnet pack -c Release
 
 | Risk | Mitigation |
 |---|---|
-| Spooling misconfiguration silently falls back to the direct protocol, so the suite passes while testing nothing. | P7-T5's negative control is a hard gate every other test in the lane depends on. |
-| MinIO's SSE-C behaviour diverges from AWS S3, so tests pass locally but the client fails against real S3. | Treat MinIO as necessary but not sufficient; record a one-off manual validation against real S3 or Azure Storage before P7-T13 promotes the default. |
-| Real behaviour contradicts the FR-5 specification written from documentation. | Expected and valuable — this is the phase's purpose. Exit criteria require writing divergences back into the requirements rather than patching around them. |
-| Container startup time makes the spooling suite slow enough that it gets disabled. | Linux-only per PR, full matrix nightly (P7-T4); fixtures shared across the collection, never per test. |
+| Spooling misconfiguration silently falls back to the direct protocol, so the suite passes while testing nothing. | P7-T5's negative control is a hard gate every other test in the lane depends on. **Confirmed effective**: built and verified as a raw-probe shape assertion, not row-count correctness alone. |
+| MinIO's SSE-C behaviour diverges from AWS S3, so tests pass locally but the client fails against real S3. | Treat MinIO as necessary but not sufficient; record a one-off manual validation against real S3 or Azure Storage before P7-T13 promotes the default (**still outstanding — Lane C**). **Refinement found in Phase 7:** MinIO's SSE-C does *not* require TLS to function correctly (verified directly) — the "bucket must allow SSE-C operations" framing conflated a storage-side capability with AWS S3's separate, real requirement that SSE-C requests specifically ride over HTTPS (the customer key travels in a request header). This client ended up needing TLS anyway, for an unrelated reason: `UriGuard`'s own unconditional `https` requirement (see Lane A notes above), not an SSE-C requirement. |
+| Real behaviour contradicts the FR-5 specification written from documentation. | Expected and valuable — this is the phase's purpose. Exit criteria require writing divergences back into the requirements rather than patching around them. **Materialized twice** in Phase 7 (FR-5.1.3a, FR-5.1.3b), on top of the two already found during Phase 5. |
+| Container startup time makes the spooling suite slow enough that it gets disabled. | Linux-only per PR, full matrix nightly (P7-T4); fixtures shared across the collection, never per test. **Confirmed manageable**: the spooling suite runs in addition to, not instead of, the rest of `TriQL.IntegrationTests` (which now excludes `Category=Spooling` in the main CI job to avoid slowing all three OS legs for a suite only Linux runners can execute), at roughly 4-5x the per-test cost of the plain-Trino suite — acceptable as a separate ubuntu-only job. |
 
 ---
 
@@ -1154,14 +1197,14 @@ audit at each phase exit to confirm nothing was silently dropped.
 | **X1** | Session propagation defects produce silently wrong results rather than errors. | 1 | Medium | High | Combination testing in P1-T19; `SessionChanged` gives an observable hook; integration tests assert `USE` and `SET SESSION` take effect. |
 | **X2** | Throughput parity with the JDBC driver (NFR-PERF-2) proves unreachable on the JSON hot path. | 3, 5 | Medium | Medium | P3-T6 prototypes the decoder early. If the gap is structural, renegotiate NFR-PERF-2 with measurements before Phase 5 rather than failing at the gate. |
 | **X3** | Sync-over-async deadlocks in consumer synchronization contexts. | 4 | Medium | High | Single audited bridge (P4-T5); analyzer bans ad-hoc `.Result`; P4-T22 tests under a captured context. |
-| **X4** | Spooled protocol details differ from the specification written from documentation. | 5 | ~~**High**~~ **Confirmed 2026-09-22 — mitigated, not eliminated.** | Medium | **This materialized during Phase 5 implementation**, exactly as predicted: `requirements.md` FR-5.2.1/FR-5.2.2 had the wrong impression of `uncompressedSize`/`rowsCount` presence and segment-credential scoping. It was caught by cross-checking the official Python/Go reference clients (not just the fake coordinator) before Phase 7 rather than during it, and both requirements.md and this plan were corrected the same day. Residual risk: the reference-client cross-check is still documentation-adjacent, not a real server — **Phase 7's real-coordinator verification remains the only way to fully retire this**, so it stays open, just de-risked earlier than planned. |
+| **X4** | Spooled protocol details differ from the specification written from documentation. | 5, 7 | ~~**High**~~ **Retired 2026-09-22 — confirmed and corrected, not merely mitigated.** | Medium | Materialized **twice**: during Phase 5 (FR-5.2.1/FR-5.2.2, caught by cross-checking the official Python/Go reference clients) and again during Phase 7's real-coordinator testing (FR-5.1.3a/FR-5.1.3b, caught against an actual spooling-configured Trino 466). All four corrections are folded into requirements.md the same day they were found. This is the risk register working as designed — each phase since Phase 5 has found real gaps and closed them before they could reach a caller. |
 | **X5** | Protocol drift between Trino releases breaks the client silently. | All | Medium | High | Nightly integration run against `trinodb/trino:latest` with alerting (P0-T16); Appendix A verified in P1-T9. |
 | **X6** | Codec dependencies violate the zero-dependency goal. | 5 | High | Low | G2 resolved at Phase 0; recommended split into `TriQL.Client.Compression`. |
 | **X7** | Abandoned readers leave queries running, exhausting cluster resources. | 2 | Medium | High | P2-T14 disposal semantics; P2-T21 confirms termination server-side via `/v1/query/{id}`, not merely client-side. |
 | **X8** | Test matrix growth (two server versions × three operating systems × two TFMs) makes CI slow. | 0, 5 | High | Medium | Unit tests on the full matrix; integration on Linux only per PR, full matrix nightly. |
 | **X9** | AOT/trim warnings accumulate unnoticed until Phase 6. | 0–6 | Medium | Medium | Analyzers on from P0-T4; any new warning is a build break, never deferred cleanup. |
 | **X10** | Migration friction from the reference client, since fourteen behaviours intentionally differ. | 6 | High | Medium | P6-T14's migration guide derived directly from the Appendix C defect table. |
-| **X11** | **The spooled protocol is never exercised against a real coordinator plus object store during Phases 0–6, because CI runs no MinIO.** SSE-C segment encryption, ack semantics, and off-origin URI handling are modelled from documentation only. | 5–6 | **High** | **High** | Contained rather than accepted: 1.0.0 ships spooling **opt-in and experimental** (G7 closed), so no caller silently depends on an unverified path. Fake-coordinator coverage (P5-T14) and real-server fallback proof (P5-T15) cover what they can. **Phase 7 retires this risk outright** by standing up MinIO plus a spooling-configured coordinator, after which spooling is promoted to default in 1.1. |
+| **X11** | The spooled protocol is never exercised against a real coordinator plus object store. SSE-C segment encryption, ack semantics, and off-origin URI handling were modelled from documentation only. | 5–7 | ~~**High**~~ **Retired for MinIO 2026-09-22; residual risk narrowed to non-MinIO object stores.** | ~~**High**~~ **Low** | MinIO plus a spooling-configured Trino coordinator now run in CI (Phase 7 Lanes A/B), and SSE-C encryption, ack-driven bucket shrinkage, cancellation ack sweep, off-origin URI handling, and mixed spooled/direct sessions are all verified against them — see the Phase 7 exit criteria. **Not yet done**: the Risks table above still calls for a one-off manual check against real AWS S3 or Azure Blob Storage before Lane C promotes spooling to the default, since MinIO's SSE-C behaviour is confirmed compatible but not proven identical to AWS's. Treat X11 as retired for the "does this work at all against real object storage" question and open only for the "works on MinIO, unconfirmed on the exact backends 1.1 callers will actually use" question. |
 | **X12** | Phase 7 never happens, because it sits after the 1.0.0 release and post-release momentum fades — leaving spooling permanently experimental and the code path permanently unverified. | 7 | **Medium** | Medium | Phase 7 is scoped in this plan with concrete tasks rather than left as a vague intention. If it is deprioritised, the honest action is to **remove** the spooled protocol from the shipping surface rather than leave dead unverified code behind a flag. Treat that as the explicit alternative, not as failure. |
 
 ---
