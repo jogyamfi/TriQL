@@ -38,7 +38,10 @@ jobs:
       - name: Integration tests against trinodb/trino:${{ matrix.trino-version }}
         env:
           TRIQL_TEST_TRINO_VERSION: ${{ matrix.trino-version }}
+        # Phase 7 (P7-T4): unlike ci.yml, nightly does not filter out Category=Spooling — this one
+        # unfiltered run already exercises MinioFixture/SpoolingTrinoFixture (P7-T1/P7-T2) and the
+        # Lane B tests in tests/TriQL.IntegrationTests/Spooling/ across the full trino-version
+        # matrix (both the NFR-COMPAT-2 floor version and latest), since
+        # SpoolingTrinoFixture.RequestedVersion honours the same TRIQL_TEST_TRINO_VERSION env var as
+        # TrinoContainerFixture. No separate job is needed for that reason.
         run: dotnet test tests/TriQL.IntegrationTests -c Release --no-build
-
-      # TODO (Phase 7): add the MinIO + spooling-configured Trino job here once the spooled
-      # protocol is validated against a real object store (see docs/implementation-plan.md).

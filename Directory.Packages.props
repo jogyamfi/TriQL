@@ -33,6 +33,14 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Testcontainers" Version="4.14.0" />
+    <!-- Phase 7: MinIO Testcontainers module for spooling-validation infrastructure. -->
+    <PackageVersion Include="Testcontainers.Minio" Version="4.14.0" />
+    <!--
+      Phase 7 test-only dependency: talks to MinIO directly (bucket setup, raw-object verification
+      bypassing TriQL) so Lane B tests can assert on object-storage state independent of the
+      client under test. Confined to TriQL.IntegrationTests; never referenced by shipping src/.
+    -->
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.103.3" />
 
     <!-- Benchmarks -->
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />

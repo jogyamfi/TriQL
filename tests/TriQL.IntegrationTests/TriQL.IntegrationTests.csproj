@@ -6,6 +6,8 @@
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Testcontainers" />
+    <PackageReference Include="Testcontainers.Minio" />
+    <PackageReference Include="AWSSDK.S3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +18,7 @@
     <ProjectReference Include="..\..\src\TriQL.Client\TriQL.Client.csproj" />
     <ProjectReference Include="..\..\src\TriQL.Data.ADO\TriQL.Data.ADO.csproj" />
     <ProjectReference Include="..\..\src\TriQL.Client.Auth\TriQL.Client.Auth.csproj" />
+    <ProjectReference Include="..\..\src\TriQL.Client.Compression\TriQL.Client.Compression.csproj" />
   </ItemGroup>
 
 </Project>

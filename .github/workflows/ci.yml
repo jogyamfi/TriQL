@@ -108,7 +108,12 @@ jobs:
 
       - name: Integration tests
         if: steps.docker-check.outputs.available == 'true'
-        run: dotnet test tests/TriQL.IntegrationTests -c Release --no-build
+        # The Phase 7 spooling suite (Category=Spooling) is excluded here and run instead by the
+        # dedicated spooling-integration-tests job below: it starts two containers (MinIO plus a
+        # spooling-configured coordinator) instead of one, measured at roughly 4-5x the runtime of
+        # the rest of this suite, so folding it into this 3-OS matrix would slow every PR on every
+        # OS for a suite that (per the docker-check gate above) only Linux runners can even execute.
+        run: dotnet test tests/TriQL.IntegrationTests -c Release --no-build --filter "Category!=Spooling"
 
   aot-smoke:
     # TEST-12 / P6-T9: publish with PublishAot=true and prove it queries a live coordinator with
@@ -155,3 +160,42 @@ jobs:
       - name: Stop the coordinator
         if: always()
         run: docker rm -f trino-aot-smoke
+
+  spooling-integration-tests:
+    # Phase 7 (P7-T4): MinIO plus a spooling-configured Trino coordinator, real-server verification
+    # of the spooled protocol (P7-T5...P7-T10). Ubuntu-only per PR — Docker is not reliably
+    # available on GitHub-hosted Windows/macOS runners, and this suite's two-container networking
+    # approach (see tests/TriQL.IntegrationTests/Fixtures/HostAddress.cs) is validated against
+    # Linux Docker bridge networking. The full Trino version matrix runs this suite nightly instead
+    # (see .github/workflows/nightly.yml).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore (locked mode)
+        run: dotnet restore TriQL.slnx --locked-mode
+
+      - name: Build (Release, warnings as errors)
+        run: dotnet build TriQL.slnx -c Release --no-restore
+
+      - name: Check for Docker
+        id: docker-check
+        shell: bash
+        run: |
+          if docker info > /dev/null 2>&1; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Docker is not available on this runner — the spooling suite is explicitly skipped, not silently passed (see Phase 0 risk register, P7-T4)."
+          fi
+
+      - name: Spooling integration tests (MinIO + spooling-configured Trino)
+        if: steps.docker-check.outputs.available == 'true'
+        run: dotnet test tests/TriQL.IntegrationTests -c Release --no-build --filter "Category=Spooling"
