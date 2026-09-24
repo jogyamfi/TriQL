@@ -21,8 +21,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            10.0.x
+          global-json-file: global.json
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -43,8 +42,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            10.0.x
+          global-json-file: global.json
 
       - name: Restore (locked mode)
         run: dotnet restore TriQL.slnx --locked-mode

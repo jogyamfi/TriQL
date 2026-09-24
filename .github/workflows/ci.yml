@@ -28,8 +28,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            10.0.x
+          global-json-file: global.json
 
       - name: Restore (locked mode)
         run: dotnet restore TriQL.slnx --locked-mode
@@ -125,8 +124,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            10.0.x
+          global-json-file: global.json
 
       - name: Publish AOT smoke app
         run: dotnet publish tests/TriQL.AotSmoke -c Release -r linux-x64 -p:PublishAot=true -o ./aot-smoke-publish
@@ -173,8 +171,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            10.0.x
+          global-json-file: global.json
 
       - name: Restore (locked mode)
         run: dotnet restore TriQL.slnx --locked-mode
