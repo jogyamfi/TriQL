@@ -27,8 +27,18 @@
     <VersionPrefix>1.0.0</VersionPrefix>
   </PropertyGroup>
 
+  <!--
+    MSBuildProjectDirectory uses '\' on Windows and '/' on Linux/macOS, so path checks below test
+    a normalized copy for '/src/', '/tests/', '/samples/' rather than matching one separator only
+    (a Windows-only backslash check silently drops these properties, including TargetFramework, on
+    Linux/macOS CI runners).
+  -->
+  <PropertyGroup>
+    <_NormalizedProjectDirectory>$(MSBuildProjectDirectory.Replace('\', '/'))/</_NormalizedProjectDirectory>
+  </PropertyGroup>
+
   <!-- Shipping libraries under src/ are trim- and AOT-compatible, fully documented, and produce a NuGet package. -->
-  <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('\src\'))">
+  <PropertyGroup Condition="$(_NormalizedProjectDirectory.Contains('/src/'))">
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <IsTrimmable>true</IsTrimmable>
     <IsAotCompatible>true</IsAotCompatible>
@@ -50,13 +60,13 @@
     <PackageTags>$(CommonPackageTags)</PackageTags>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('\src\'))">
+  <ItemGroup Condition="$(_NormalizedProjectDirectory.Contains('/src/'))">
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
     <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\" Visible="false" />
   </ItemGroup>
 
   <!-- Test, benchmark, and sample projects are not packaged and target net10.0 only. -->
-  <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('\tests\')) OR $(MSBuildProjectDirectory.Contains('\samples\'))">
+  <PropertyGroup Condition="$(_NormalizedProjectDirectory.Contains('/tests/')) OR $(_NormalizedProjectDirectory.Contains('/samples/'))">
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -70,7 +80,7 @@
     surface (TEST-9): calling DbCommand.ExecuteReader()/DbDataReader.Read() etc. synchronously is
     the point of those tests, not an oversight. Suppressed for test projects only.
   -->
-  <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('\tests\'))">
+  <PropertyGroup Condition="$(_NormalizedProjectDirectory.Contains('/tests/'))">
     <NoWarn>$(NoWarn);CA1707;CA1711;CA2007;CA1849</NoWarn>
   </PropertyGroup>
 
@@ -79,11 +89,11 @@
     caller's synchronization context, which is irrelevant to top-level application/demo code that
     owns its own entry point (P6-T10 samples).
   -->
-  <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('\samples\'))">
+  <PropertyGroup Condition="$(_NormalizedProjectDirectory.Contains('/samples/'))">
     <NoWarn>$(NoWarn);CA2007</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('\src\'))">
+  <ItemGroup Condition="$(_NormalizedProjectDirectory.Contains('/src/'))">
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
