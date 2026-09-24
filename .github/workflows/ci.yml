@@ -94,11 +94,13 @@ jobs:
         id: docker-check
         shell: bash
         run: |
-          if docker info > /dev/null 2>&1; then
+          # Require a Linux-container engine, not just any Docker: windows-latest ships Docker in
+          # Windows-container mode, where `docker info` succeeds but trinodb/trino cannot be pulled.
+          if [ "$(docker info --format '{{.OSType}}' 2>/dev/null)" = "linux" ]; then
             echo "available=true" >> "$GITHUB_OUTPUT"
           else
             echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Docker is not available on this runner — integration tests are explicitly skipped, not silently passed (see Phase 0 risk register)."
+            echo "::notice::A Linux-container Docker engine is not available on this runner — integration tests are explicitly skipped, not silently passed (see Phase 0 risk register)."
           fi
 
       - name: Integration tests
