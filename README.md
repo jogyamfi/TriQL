@@ -31,7 +31,7 @@ shipping package is locked by `PublicAPI.Shipped.txt` baselines and enforced at 
 
 ## Requirements
 
-- .NET 8.0 or .NET 10.0. `netstandard2.0` and .NET Framework are not supported.
+- .NET 10.0. `netstandard2.0` and .NET Framework are not supported.
 - **Trino server 466 or later** (27 Nov 2024, the release that introduced the spooling protocol).
   This is the minimum version the conformance suite verifies against; the CI matrix covers
   `{466, latest}`.

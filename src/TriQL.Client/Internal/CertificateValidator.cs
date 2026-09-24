@@ -122,9 +122,5 @@ internal static class CertificateValidator
     }
 
     private static X509Certificate2 LoadRootFromFile(string path) =>
-#if NET9_0_OR_GREATER
         X509CertificateLoader.LoadCertificateFromFile(path);
-#else
-        new X509Certificate2(path);
-#endif
 }

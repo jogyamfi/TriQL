@@ -39,7 +39,7 @@
 
   <!-- Shipping libraries under src/ are trim- and AOT-compatible, fully documented, and produce a NuGet package. -->
   <PropertyGroup Condition="$(_NormalizedProjectDirectory.Contains('/src/'))">
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <IsTrimmable>true</IsTrimmable>
     <IsAotCompatible>true</IsAotCompatible>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>

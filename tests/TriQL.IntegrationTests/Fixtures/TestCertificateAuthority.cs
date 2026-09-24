@@ -67,11 +67,7 @@ public sealed class TestCertificateAuthority : IDisposable
         // key handle across all platforms; re-import from PFX to get a stable, exportable instance.
         var exported = ca.Export(X509ContentType.Pfx, TrustStorePassword);
         ca.Dispose();
-#if NET9_0_OR_GREATER
         var reimported = X509CertificateLoader.LoadPkcs12(exported, TrustStorePassword, X509KeyStorageFlags.Exportable);
-#else
-        var reimported = new X509Certificate2(exported, TrustStorePassword, X509KeyStorageFlags.Exportable);
-#endif
         return new TestCertificateAuthority(reimported);
     }
 
@@ -127,11 +123,7 @@ public sealed class TestCertificateAuthority : IDisposable
         // (needed for both the PEM export below and the PKCS12 keystore export).
         var exported = leafWithKey.Export(X509ContentType.Pfx, KeystorePassword);
         leafWithKey.Dispose();
-#if NET9_0_OR_GREATER
         return X509CertificateLoader.LoadPkcs12(exported, KeystorePassword, X509KeyStorageFlags.Exportable);
-#else
-        return new X509Certificate2(exported, KeystorePassword, X509KeyStorageFlags.Exportable);
-#endif
     }
 
     /// <summary>PEM-encodes a leaf certificate's public certificate (for MinIO's <c>certs/public.crt</c>).</summary>
@@ -217,11 +209,7 @@ public sealed class TestCertificateAuthority : IDisposable
 
     private static X509Certificate2 X509CertificateLoaderExtensions_CertificateOnly(X509Certificate2 withKey)
     {
-#if NET9_0_OR_GREATER
         return X509CertificateLoader.LoadCertificate(withKey.Export(X509ContentType.Cert));
-#else
-        return new X509Certificate2(withKey.Export(X509ContentType.Cert));
-#endif
     }
 
     public void Dispose() => _caWithKey.Dispose();

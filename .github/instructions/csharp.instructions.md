@@ -1,12 +1,12 @@
 ---
 name: "C# and .NET Coding Standards"
-description: "Use when writing, reviewing, or refactoring C# code. Covers async/await and ConfigureAwait, cancellation, nullable reference types, exception design, IDisposable/IAsyncDisposable, Span and ArrayPool allocation, LINQ, culture-sensitive formatting, logging, and secure coding for .NET 8 and .NET 10."
+description: "Use when writing, reviewing, or refactoring C# code. Covers async/await and ConfigureAwait, cancellation, nullable reference types, exception design, IDisposable/IAsyncDisposable, Span and ArrayPool allocation, LINQ, culture-sensitive formatting, logging, and secure coding for .NET 10."
 applyTo: "**/*.cs"
 ---
 
 # C# and .NET Coding Standards
 
-Target frameworks are `net8.0` and `net10.0`. Use modern BCL APIs freely; do not write for
+Target framework is `net10.0`. Use modern BCL APIs freely; do not write for
 .NET Framework or `netstandard2.0` compatibility.
 
 Builds run with `TreatWarningsAsErrors`, nullable enabled, and trim/AOT analyzers on. Code that

@@ -79,7 +79,7 @@ In priority order:
 
 | Area | Included |
 |---|---|
-| Target frameworks | `net8.0`, `net10.0` |
+| Target frameworks | `net10.0` |
 | Serialization | `System.Text.Json` with source-generated contexts |
 | Protocol | `POST /v1/statement` direct protocol; `nextUri` paging |
 | Protocol | Spooled protocol (`json`, `json+lz4`, `json+zstd`) with fallback — **opt-in and experimental in 1.0** (FR-5.1.6) |
@@ -134,7 +134,7 @@ In priority order:
 | **Session property** | A key/value setting scoped to the client session, sent via `X-Trino-Session` and mutated by the server via `X-Trino-Set-Session`. |
 | **Read-ahead** | Background prefetching of pages into a bounded buffer while the consumer processes earlier pages. |
 | **Backpressure** | Suspension of read-ahead when the buffer's byte budget is exhausted. |
-| **TFM** | Target Framework Moniker (`net8.0`, `net10.0`). |
+| **TFM** | Target Framework Moniker (e.g. `net10.0`). |
 
 ---
 
@@ -688,7 +688,7 @@ stateDiagram-v2
 > **FR-5.3.1** — `json` (uncompressed) MUST be supported.
 > **FR-5.3.2** — `json+lz4` MUST be supported. The payload is LZ4 block-compressed; the
 > uncompressed length is taken from segment metadata.
-> **FR-5.3.3** — `json+zstd` MUST be supported. On `net8.0` and `net10.0` the implementation MUST
+> **FR-5.3.3** — `json+zstd` MUST be supported. On `net10.0` the implementation MUST
 > prefer a BCL or built-in Zstandard facility where available and otherwise use a vetted,
 > actively maintained package recorded in [§23](#23-open-questions-and-risks).
 > **FR-5.3.4** — Decompression MUST be bounded: a decoded segment exceeding
@@ -1145,7 +1145,8 @@ TrinoException                      (abstract base : Exception)
 
 ### 17.3 Compatibility and portability
 
-> **NFR-COMPAT-1** — Supported TFMs are `net8.0` and `net10.0`. `netstandard2.0` and .NET
+> **NFR-COMPAT-1** — The supported TFM is `net10.0` (`net8.0` was dropped before 1.0 because its
+> support ends 10 Nov 2026). `netstandard2.0` and .NET
 > Framework are explicitly unsupported.
 > **NFR-COMPAT-2** — The minimum supported Trino server version is **466** (27 Nov 2024), the
 > release in which the spooling protocol was introduced. It MUST be stated in the README and

@@ -366,7 +366,7 @@ SEC-8, SEC-9, SEC-10, REL-3, REL-4, REL-5, TEST-11.
 | Id | Task | Deliverable | Depends on | Size |
 |---|---|---|---|---|
 | P0-T3 | Create solution and empty projects per [requirements.md §4.1](requirements.md). | `triql/TriQL.sln`, `src/TriQL.Client/`, `src/TriQL.Client.Auth/`, `src/TriQL.Data.ADO/` | P0-T2 | S |
-| P0-T4 | Author `Directory.Build.props`: `net8.0;net10.0`, `Nullable=enable`, `TreatWarningsAsErrors`, `IsTrimmable`, `IsAotCompatible`, `EnableTrimAnalyzer`, deterministic build, Source Link, `EmbedUntrackedSources`, `.snupkg`. | `triql/Directory.Build.props` | P0-T3 | M |
+| P0-T4 | Author `Directory.Build.props`: `net10.0` (originally `net8.0;net10.0`; net8.0 dropped pre-1.0), `Nullable=enable`, `TreatWarningsAsErrors`, `IsTrimmable`, `IsAotCompatible`, `EnableTrimAnalyzer`, deterministic build, Source Link, `EmbedUntrackedSources`, `.snupkg`. | `triql/Directory.Build.props` | P0-T3 | M |
 | P0-T5 | Author `Directory.Packages.props` (central package management) and enable `RestorePackagesWithLockFile`. | `triql/Directory.Packages.props`, `packages.lock.json` | P0-T3 | S |
 | P0-T6 | Author `.editorconfig` with style and analyzer severities. Enable CA1305 as error, `ConfigureAwait` analyzer, banned-symbols for `Console.Write*`. | `triql/.editorconfig`, `BannedSymbols.txt` | P0-T3 | M |
 | P0-T7 | Add `PublicAPI.Shipped.txt` / `PublicAPI.Unshipped.txt` to all three shipping projects with the public-API analyzer. | Per-project API baseline files | P0-T3 | S |
@@ -983,7 +983,7 @@ TEST-12.
 - [ ] Public API frozen in `PublicAPI.Shipped.txt`.
 - [ ] All REL-8 documentation deliverables complete.
 - [ ] Package metadata carries `trino` tags and implies no endorsement.
-- [ ] `1.0.0` published; packages install cleanly on `net8.0` and `net10.0`; a `trino` search surfaces them.
+- [ ] `1.0.0` published; packages install cleanly on `net10.0`; a `trino` search surfaces them.
 
 ### Verification
 
