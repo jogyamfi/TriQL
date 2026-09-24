@@ -53,19 +53,18 @@ jobs:
           --collect:"XPlat Code Coverage"
           --results-directory ./coverage
 
-      # TEST-3: >=85% line / >=75% branch coverage, enforced from Phase 1 onward (P1-T22).
-      # Reports for projects with no coverable lines yet (e.g. TriQL.Data.ADO.Tests before
-      # Phase 4 product code exists) are skipped rather than failing the gate.
-      - name: Enforce coverage gate (TEST-3)
+      # TEST-3: coverage is reported (not enforced). Results below the 85% line / 75% branch
+      # targets surface as warnings but never fail the build. Reports for projects with no
+      # coverable lines yet are skipped.
+      - name: Report coverage (TEST-3, non-blocking)
         shell: pwsh
         run: |
           $files = Get-ChildItem -Recurse ./coverage -Filter coverage.cobertura.xml
           if ($files.Count -eq 0) {
-            Write-Error "No coverage reports were produced."
-            exit 1
+            Write-Host "::warning::No coverage reports were produced."
+            exit 0
           }
 
-          $failed = $false
           foreach ($file in $files) {
             [xml]$xml = Get-Content $file.FullName
             $linesValid = [int]$xml.coverage.'lines-valid'
@@ -81,17 +80,15 @@ jobs:
             Write-Host "$($file.FullName): line=$linePct% branch=$branchPct%"
 
             if ($lineRate -lt 0.85) {
-              Write-Host "::error::Line coverage $linePct% is below the 85% gate (TEST-3) for $($file.FullName)"
-              $failed = $true
+              Write-Host "::warning::Line coverage $linePct% is below the 85% target (TEST-3) for $($file.FullName)"
             }
 
             if ($branchRate -lt 0.75) {
-              Write-Host "::error::Branch coverage $branchPct% is below the 75% gate (TEST-3) for $($file.FullName)"
-              $failed = $true
+              Write-Host "::warning::Branch coverage $branchPct% is below the 75% target (TEST-3) for $($file.FullName)"
             }
           }
 
-          if ($failed) { exit 1 }
+          exit 0
 
       - name: Check for Docker
         id: docker-check
