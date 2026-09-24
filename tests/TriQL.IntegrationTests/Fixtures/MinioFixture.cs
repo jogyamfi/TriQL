@@ -50,7 +50,10 @@ public sealed class MinioFixture : IAsyncLifetime, IDisposable
         var certPem = TestCertificateAuthority.ToCertificatePem(leaf);
         var keyPem = TestCertificateAuthority.ToPrivateKeyPem(leaf);
 
-        _container = new MinioBuilder("quay.io/minio/minio:latest")
+        // Upstream MinIO no longer publishes public images (quay.io/minio/minio and Docker Hub
+        // minio/minio both return 401), so use the pgsty community rebuild: same entrypoint and
+        // filesystem layout, pinned so CI stays reproducible.
+        _container = new MinioBuilder("pgsty/minio:RELEASE.2026-08-04T00-00-00Z")
             .WithUsername(_accessKey)
             .WithPassword(_secretKey)
             .WithPortBinding(MinioBuilder.MinioPort, assignRandomHostPort: true)
