@@ -92,8 +92,9 @@ Phases 0–4 constitute a **usable client**. If scope must be cut, the viable re
 - **After Phase 2** — an internal-only preview usable from the SDK surface with `object` values.
 - **After Phase 4** — a credible `0.9.0-preview` on NuGet: full ADO.NET, full types, no spooling,
   no cloud auth.
-- **After Phase 6** — `1.0.0`, with the spooled protocol implemented but **opt-in and documented
-  as experimental**, because it has not yet been exercised against a real object store.
+- **After Phase 6** — `1.0.0`, with the spooled protocol implemented but **opt-in**. (In the
+  event, Phase 7 Lanes A/B landed before 1.0.0, so 1.0.0 ships spooling verified against MinIO
+  but still off by default — see [§2.5](#25-status--2026-09-25-100-release).)
 - **After Phase 7** — `1.1.0`, with spooling validated end to end and promoted to the default
   encoding preference.
 
@@ -211,6 +212,25 @@ Docker container on this machine:
 `samples/TriQL.Samples.UserNamePassword/UserNamePasswordSample.cs` (see step 2 above) was
 independently hit and fixed by both this session's direct work and the Phase 5 worktree agent;
 the two fixes were identical and merged without conflict.
+
+### 2.5 Status — 2026-09-25 (1.0.0 release)
+
+The project is being cut as **`1.0.0`** (stable), superseding `1.0.0-preview.1`. Scope of the
+release relative to the phases:
+
+- **Phases 0–4, 6** — shipped. `PublicAPI.Unshipped.txt` for every package has been folded into
+  `PublicAPI.Shipped.txt` (P6-T11), so the 1.0.0 surface — including the Phase 5 additions
+  (`CompressionCodecs`, `SegmentFetchParallelism`, `MaxDecompressedSegmentBytes`,
+  `SegmentHostAllowlist`) — is now the SemVer baseline.
+- **Phase 5** — Lanes A/B and D shipped; Lane C (perf tuning and the CI perf gate) remains deferred.
+- **Phase 7** — Lanes A/B done before release (spooling verified against real MinIO + Trino in CI).
+  Lane C (S3/Azure check, spooled-path benchmarks, flipping the default, `1.1.0`) is unchanged and
+  still needs an explicit go-ahead. Spooling ships **opt-in** in 1.0.0; README and troubleshooting
+  now describe it as opt-in rather than experimental and document the coordinator-HTTPS prerequisite.
+- **Deferred from 1.0.0:** P6-T14 (migration guide from the reference client) — not written; the
+  dangling link to it was removed from `docs/api-reference.md`.
+- **Release mechanics still to confirm** (see step 10 in §2.4): `release.yml` has never completed
+  successfully; do a `workflow_dispatch` dry run before pushing the `v1.0.0` tag.
 
 ### 2.3 Immediate Next Steps
 

@@ -23,5 +23,4 @@ The generated reference documents *what* every member does. For *how* to use the
 - [Connection-string reference](connection-string-reference.md)
 - [Type-mapping reference](type-mapping-reference.md)
 - [Troubleshooting guide](troubleshooting.md)
-- [Migration guide](migration.md)
 - [README quick starts](../README.md)

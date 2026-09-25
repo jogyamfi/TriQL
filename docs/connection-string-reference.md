@@ -37,7 +37,7 @@ whitespace must be quoted per the standard `DbConnectionStringBuilder` rules.
 | `RequestTimeout` | int (s) | `100` | `RequestTimeout` |
 | `ReadAheadBufferBytes` | long | `52428800` | `ReadAheadBufferBytes` |
 | `TargetResultSizeBytes` | long | `5242880` | `TargetResultSizeBytes` |
-| `QueryDataEncoding` | string | **1.0:** empty (opt-in) | `QueryDataEncodings`; empty forces the direct protocol. Set `json+zstd,json+lz4,json` to enable spooling — see [README § Spooling protocol](../README.md#spooling-protocol-experimental). |
+| `QueryDataEncoding` | string | **1.0:** empty (opt-in) | `QueryDataEncodings`; empty forces the direct protocol. Set `json+zstd,json+lz4,json` to enable spooling — see [README § Spooling protocol](../README.md#spooling-protocol-opt-in). |
 | `CompressionDisabled` | bool | `false` | `CompressionDisabled` |
 | `TestConnection` | bool | `false` | `TestConnectionOnOpen` |
 | `AllowSelfSignedCertificate` | bool | `false` | `Tls.AllowSelfSignedCertificate` |

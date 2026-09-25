@@ -23,11 +23,13 @@ for the phased delivery plan.
 
 ## Status
 
-⚠️ **Pre-release.** TriQL has not yet shipped a stable 1.0.0. Published `1.0.0-preview.*`
-packages are functional but their APIs and package layout may still change before 1.0.0. From
-1.0.0 onward TriQL follows [Semantic Versioning](https://semver.org): breaking public-API changes
-only in a major version, additive API in minors, fixes in patches. The public API surface of each
-shipping package is locked by `PublicAPI.Shipped.txt` baselines and enforced at build time.
+**Stable — 1.0.0.** TriQL follows [Semantic Versioning](https://semver.org): breaking public-API
+changes only in a major version, additive API in minors, fixes in patches. The public API surface
+of each shipping package is locked by `PublicAPI.Shipped.txt` baselines and enforced at build time.
+
+The one deliberately conservative default in 1.0 is the spooling protocol, which ships implemented
+and tested but **opt-in** — see [Spooling protocol](#spooling-protocol-opt-in). Release notes for
+every version are published on [GitHub Releases](https://github.com/jogyamfi/TriQL/releases).
 
 ## Requirements
 
@@ -42,9 +44,8 @@ shipping package is locked by `PublicAPI.Shipped.txt` baselines and enforced at 
 dotnet add package TriQL.Client        # streaming SDK
 dotnet add package TriQL.Data.ADO      # ADO.NET provider
 dotnet add package TriQL.Client.Auth   # optional: Entra ID / OAuth2 authentication
+dotnet add package TriQL.Client.Compression  # optional: json+lz4 / json+zstd spooling codecs
 ```
-
-While TriQL is in preview, add `--prerelease` to each command.
 
 ## Quick start: TriQL SDK (streaming)
 
@@ -97,7 +98,7 @@ More runnable examples — including Microsoft Entra ID authentication and `IAsy
 consumption — live in
 [samples/TriQL.Samples.Console](https://github.com/jogyamfi/TriQL/blob/main/samples/TriQL.Samples.Console/Program.cs).
 
-## Spooling protocol (experimental)
+## Spooling protocol (opt-in)
 
 Trino's spooling protocol (compressed, object-storage-backed result segments) is implemented but
 ships **off by default and opt-in** in 1.0: `TrinoSessionOptions.QueryDataEncodings` defaults to
@@ -118,10 +119,25 @@ Add a `<PackageReference Include="TriQL.Client.Compression" />` to your project,
 `QueryDataEncodings = ["json"]` to enable spooling with the built-in uncompressed codec only,
 which needs no extra package or registration call.
 
-Spooling is opt-in in 1.0 because it is verified against a scripted test double rather than a
-real spooling-configured cluster; see
-[docs/implementation-plan.md](https://github.com/jogyamfi/TriQL/blob/main/docs/implementation-plan.md#phase-7--spooling-validation-and-promotion)
-for the plan to validate it against real object storage and promote it to the default in 1.1.0.
+Cluster prerequisites:
+
+- The coordinator must be spooling-configured (`protocol.spooling.enabled=true`, an object-storage
+  spooling manager, and a shared secret key). A cluster without spooling simply returns
+  direct-protocol data, which TriQL handles transparently.
+- **The coordinator must be served over HTTPS**, as well as the object store. TriQL requires
+  `https` on every segment and acknowledgement URI, so a plain-HTTP coordinator with spooling
+  enabled fails with `TrinoProtocolException`.
+
+Related options on `TrinoSessionOptions`: `SegmentFetchParallelism` (default 4),
+`MaxDecompressedSegmentBytes` (default 256 MiB), and `SegmentHostAllowlist` (restricts which
+object-storage hosts segments may be fetched from; empty allows any `https` host).
+
+The spooled path is verified in CI against a real spooling-configured Trino coordinator backed by
+MinIO (all three codecs, SSE-C encryption, segment acknowledgement, and cancellation cleanup). It
+stays opt-in for 1.0 because it has not yet been checked against AWS S3 or Azure Blob Storage, and
+throughput over the spooled path has not been benchmarked. Making it the default is planned for
+1.1.0; that release will call out the behaviour change, and setting `QueryDataEncodings = []` will
+keep the direct protocol.
 
 ## Documentation
 
@@ -130,7 +146,7 @@ for the plan to validate it against real object storage and promote it to the de
 - [Troubleshooting guide](https://github.com/jogyamfi/TriQL/blob/main/docs/troubleshooting.md)
 - [Benchmarks](https://github.com/jogyamfi/TriQL/blob/main/docs/benchmarks.md)
 - [API reference](https://github.com/jogyamfi/TriQL/blob/main/docs/api-reference.md) (generated from XML doc comments)
-- [Publishing guide](https://github.com/jogyamfi/TriQL/blob/main/docs/publishing.md) (maintainers: release and NuGet process)
+- [Release notes](https://github.com/jogyamfi/TriQL/releases)
 
 ## License
 

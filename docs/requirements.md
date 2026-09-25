@@ -6,10 +6,10 @@
 |---|---|
 | Document | Requirements Specification |
 | Product | TriQL — .NET Trino Client & ADO.NET Provider |
-| Version | 0.1 (Draft) |
-| Date | 2026-08-25 |
-| Status | Draft — pending review |
-| Target release | 1.0.0 |
+| Version | 1.0 |
+| Date | 2026-09-25 |
+| Status | Baselined for the 1.0.0 release (2026-09-25) |
+| Target release | 1.0.0 (released); 1.1.0 for spooling-by-default |
 
 ---
 
@@ -82,7 +82,7 @@ In priority order:
 | Target frameworks | `net10.0` |
 | Serialization | `System.Text.Json` with source-generated contexts |
 | Protocol | `POST /v1/statement` direct protocol; `nextUri` paging |
-| Protocol | Spooled protocol (`json`, `json+lz4`, `json+zstd`) with fallback — **opt-in and experimental in 1.0** (FR-5.1.6) |
+| Protocol | Spooled protocol (`json`, `json+lz4`, `json+zstd`) with fallback — **opt-in in 1.0** (FR-5.1.6) |
 | Protocol | `GET /v1/info` — server version and readiness |
 | Protocol | `GET /v1/query/{queryId}` — query info |
 | Protocol | `DELETE` on `nextUri` — query cancellation |
@@ -643,10 +643,11 @@ stateDiagram-v2
 > to narrow `QueryDataEncodings`.
 > **FR-5.1.5** — `QueryDataEncodings` MUST be settable to empty to force the direct protocol.
 > **FR-5.1.6** — **Staged rollout.** In 1.0 the default value of `QueryDataEncodings` MUST be
-> empty, making the spooled protocol opt-in, and the documentation MUST describe it as
-> experimental. This is a deliberate consequence of the spooled path being verified only against
-> a test double before 1.0 (see §23 Q10). Once the path has been validated against a real
-> coordinator plus object store, the default MUST be restored to
+> empty, making the spooled protocol opt-in. This was originally a consequence of the spooled
+> path being verified only against a test double (see §23 Q10). **Updated 2026-09-25:** Phase 7
+> has since verified it against a real spooling-configured coordinator plus MinIO in CI, but 1.0
+> still ships it opt-in because validation against AWS S3/Azure Blob Storage and the NFR-PERF-2
+> spooled-path benchmark (Phase 7 Lane C) remain outstanding. Once those are done, the default MUST be restored to
 > `["json+zstd","json+lz4","json"]` in 1.1. That change alters runtime behaviour for existing
 > callers and therefore requires a minor-version bump, prominent release notes, and a documented
 > opt-out.
@@ -1350,7 +1351,7 @@ TrinoException                      (abstract base : Exception)
 | Q7 | ~~`Prepare()` semantics (FR-9.2.8).~~ **Resolved 2026-09-22: documented no-op.** | Tooling compatibility. | Already implemented this way at `TrinoCommand.Prepare()` (`src/TriQL.Data.ADO/TrinoCommand.cs`) — this entry now records that as the ratified decision rather than an open recommendation. |
 | Q8 | Complex-type materialization depth. | API surface and performance. | 1.0 surfaces `array`/`map`/`row` as `object?[]` / `IReadOnlyDictionary` / `ITrinoRowValue`; generic POCO mapping deferred to 1.1. |
 | Q9 | ~~Benchmark runner variance in CI.~~ **Resolved 2026-09-22: same-run baseline.** | False regression failures. | Compare against a same-run baseline rather than an absolute threshold — no dedicated self-hosted runner exists, and a same-run comparison avoids depending on one. Applies to the CI perf gate built in Phase 5 (P5-T12). |
-| **Q10** | ~~Should the spooled protocol be enabled by default in 1.0?~~ **Resolved 2026-08-25: no.** | Shipping an unverified-against-real-server code path on by default risks failures that only appear in customer environments. | 1.0 ships spooling implemented but **opt-in** (`QueryDataEncodings` defaults to empty) and documented as experimental, per FR-5.1.6. A dedicated post-1.0 phase stands up MinIO plus a spooling-configured coordinator, validates the path end to end, and promotes it to default in 1.1. See Phase 7 of the [implementation plan](implementation-plan.md). |
+| **Q10** | ~~Should the spooled protocol be enabled by default in 1.0?~~ **Resolved 2026-08-25: no.** | Shipping an unverified-against-real-server code path on by default risks failures that only appear in customer environments. | 1.0 ships spooling implemented but **opt-in** (`QueryDataEncodings` defaults to empty) and documented as experimental, per FR-5.1.6. A dedicated post-1.0 phase stands up MinIO plus a spooling-configured coordinator, validates the path end to end, and promotes it to default in 1.1. See Phase 7 of the [implementation plan](implementation-plan.md). **Update 2026-09-25:** the MinIO-backed validation is done (Phase 7 Lanes A/B); 1.0.0 still ships opt-in pending Lane C. |
 | R1 | **Risk:** protocol drift between Trino releases. | Silent breakage. | Nightly integration run against `trinodb/trino:latest` with alerting. |
 | R2 | **Risk:** performance parity with the JDBC driver may be hard to reach on the JSON hot path. | NFR-PERF-2 miss. | Prototype the `Utf8JsonReader` row decoder early in M2 and measure before committing to the target. |
 | R3 | **Risk:** AOT/trimming constraints conflict with reflection-based connection-string auth resolution. | Build warnings. | FR-1.3.5 already mandates a static registry instead of reflective type loading. |

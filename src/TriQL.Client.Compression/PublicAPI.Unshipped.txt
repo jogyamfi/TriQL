@@ -1,3 +1,1 @@
 ﻿#nullable enable
-TriQL.Client.Compression.CompressionCodecs
-static TriQL.Client.Compression.CompressionCodecs.RegisterAll() -> void

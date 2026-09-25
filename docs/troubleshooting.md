@@ -46,10 +46,20 @@ them uniformly.
 
 ## Spooling protocol
 
-Spooling is opt-in in 1.0 (`TrinoSessionOptions.QueryDataEncodings` defaults to empty). If you
-enable it (`["json+zstd","json+lz4","json"]`) and still see the direct protocol, the cluster
-itself is not spooling-configured — Trino falls back per query, not per client, when spooling
-isn't available for a given result (FR-5.1.3). This is expected and does not indicate a client bug.
+Spooling is opt-in in 1.0 (`TrinoSessionOptions.QueryDataEncodings` defaults to empty).
+
+- **Enabled but still getting the direct protocol** — the cluster is not spooling-configured
+  (`protocol.spooling.enabled`, a spooling manager, and a shared secret key are all required).
+  TriQL falls back transparently; this is not a client bug. On a spooling-configured cluster, small
+  results still arrive in the spooled envelope as a single `inline` segment rather than as
+  direct-protocol rows.
+- **`TrinoProtocolException` about a non-`https` URI** — TriQL requires `https` on every segment
+  and acknowledgement URI. Serve both the coordinator and the object store over TLS.
+- **`TrinoProtocolException` naming an encoding** — the server chose `json+lz4` or `json+zstd`
+  but the codec is not registered. Reference `TriQL.Client.Compression` and call
+  `CompressionCodecs.RegisterAll()` at startup, or narrow `QueryDataEncodings` to `["json"]`.
+- **Segment fetch rejected by host** — `SegmentHostAllowlist` is non-empty and does not include
+  the object store's host.
 
 ## Observability
 
