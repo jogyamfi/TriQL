@@ -61,7 +61,11 @@ public sealed class TestCertificateAuthority : IDisposable
 
         var notBefore = DateTimeOffset.UtcNow.AddMinutes(-5);
         var notAfter = DateTimeOffset.UtcNow.AddDays(2);
-        var ca = request.CreateSelfSigned(notBefore, notAfter);
+        // Not CreateSelfSigned: its internally chosen random serial can intermittently be a
+        // non-minimal DER integer, which the encoder rejects. See NewSerialNumber.
+        var generator = X509SignatureGenerator.CreateForRSA(caKey, RSASignaturePadding.Pkcs1);
+        using var caPublicOnly = request.Create(request.SubjectName, generator, notBefore, notAfter, NewSerialNumber());
+        var ca = caPublicOnly.CopyWithPrivateKey(caKey);
 
         // CreateSelfSigned's returned certificate does not reliably retain an exportable private
         // key handle across all platforms; re-import from PFX to get a stable, exportable instance.
@@ -103,8 +107,7 @@ public sealed class TestCertificateAuthority : IDisposable
 
         request.CertificateExtensions.Add(sanBuilder.Build());
 
-        var serial = new byte[16];
-        RandomNumberGenerator.Fill(serial);
+        var serial = NewSerialNumber();
 
         var notBefore = DateTimeOffset.UtcNow.AddMinutes(-5);
         // Must not exceed the CA's own NotAfter, or CertificateRequest.Create throws. The CA was
@@ -210,6 +213,19 @@ public sealed class TestCertificateAuthority : IDisposable
     private static X509Certificate2 X509CertificateLoaderExtensions_CertificateOnly(X509Certificate2 withKey)
     {
         return X509CertificateLoader.LoadCertificate(withKey.Export(X509ContentType.Cert));
+    }
+
+    /// <summary>
+    /// A random 16-byte serial that is always positive and minimally DER-encoded. Raw random bytes
+    /// fail ~1 in 256 times ("The first 9 bits of the integer value all have the same value") when
+    /// the leading byte is redundant (0x00 before a byte &lt; 0x80, or 0xFF before one &gt;= 0x80).
+    /// </summary>
+    private static byte[] NewSerialNumber()
+    {
+        var serial = new byte[16];
+        RandomNumberGenerator.Fill(serial);
+        serial[0] = (byte)((serial[0] & 0x7F) | 0x40);
+        return serial;
     }
 
     public void Dispose() => _caWithKey.Dispose();

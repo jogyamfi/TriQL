@@ -1,6 +1,7 @@
 using System.Net;
 using System.Reflection;
 using TriQL.Client.Internal;
+using TriQL.Client.Tests.Fakes;
 
 namespace TriQL.Client.Tests;
 
@@ -40,7 +41,7 @@ public sealed class HttpHandlerFactoryTests
         using var rsa = System.Security.Cryptography.RSA.Create(2048);
         var request = new System.Security.Cryptography.X509Certificates.CertificateRequest(
             "CN=triql-test", rsa, System.Security.Cryptography.HashAlgorithmName.SHA256, System.Security.Cryptography.RSASignaturePadding.Pkcs1);
-        using var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        using var certificate = TestCertificates.CreateSelfSigned(request, rsa, DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
 
         var options = new TrinoSessionOptions { Server = new Uri("https://trino.example.com/") };
         options.Tls.ClientCertificates.Add(certificate);

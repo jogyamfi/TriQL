@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using TriQL.Client.Auth;
+using TriQL.Client.Tests.Fakes;
 
 namespace TriQL.Client.Tests;
 
@@ -40,7 +41,7 @@ public sealed class ClientCertificateAuthenticatorTests
     {
         using var rsa = RSA.Create(2048);
         var request = new CertificateRequest("CN=triql-test-client", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        using var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        using var certificate = TestCertificates.CreateSelfSigned(request, rsa, DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
 
         var certificatePem = certificate.ExportCertificatePem();
         var privateKeyPem = rsa.ExportPkcs8PrivateKeyPem();
@@ -78,7 +79,7 @@ public sealed class ClientCertificateAuthenticatorTests
     {
         using var rsa = RSA.Create(2048);
         var request = new CertificateRequest("CN=triql-test-client", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        using var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        using var certificate = TestCertificates.CreateSelfSigned(request, rsa, DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
         return (certificate.Export(X509ContentType.Pfx, "test-password"), "test-password");
     }
 }

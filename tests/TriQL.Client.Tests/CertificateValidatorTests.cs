@@ -2,6 +2,7 @@ using System.Net.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using TriQL.Client.Internal;
+using TriQL.Client.Tests.Fakes;
 
 namespace TriQL.Client.Tests;
 
@@ -119,11 +120,11 @@ public sealed class CertificateValidatorTests
         using var rootKey = RSA.Create(2048);
         var rootRequest = new CertificateRequest("CN=triql-test-root", rootKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         rootRequest.CertificateExtensions.Add(new X509BasicConstraintsExtension(true, false, 0, true));
-        using var root = rootRequest.CreateSelfSigned(notBefore, notAfter);
+        using var root = TestCertificates.CreateSelfSigned(rootRequest, rootKey, notBefore, notAfter);
 
         using var leafKey = RSA.Create(2048);
         var leafRequest = new CertificateRequest("CN=triql-test-leaf", leafKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        using var leaf = leafRequest.Create(root, notBefore, notAfter, Guid.NewGuid().ToByteArray());
+        using var leaf = leafRequest.Create(root, notBefore, notAfter, TestCertificates.NewSerialNumber());
         using var leafWithKey = leaf.CopyWithPrivateKey(leafKey);
 
         var options = new TrinoTlsOptions();
@@ -139,7 +140,7 @@ public sealed class CertificateValidatorTests
     {
         using var rsa = RSA.Create(2048);
         var request = new CertificateRequest("CN=triql-test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        return request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        return TestCertificates.CreateSelfSigned(request, rsa, DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
     }
 
     private static X509Chain BuildChainFor(X509Certificate2 certificate)
