@@ -22,6 +22,7 @@ public sealed record CapturedRequest(HttpMethod Method, Uri? RequestUri, IReadOn
 public sealed class FakeTrinoCoordinator : HttpMessageHandler
 {
     private readonly Queue<ScriptedResponse> _responses = new();
+    private readonly Dictionary<Uri, Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>> _routes = new();
     private readonly List<CapturedRequest> _receivedRequests = [];
     private readonly Lock _gate = new();
 
@@ -47,12 +48,69 @@ public sealed class FakeTrinoCoordinator : HttpMessageHandler
         }
     }
 
+    /// <summary>
+    /// Routes any request to the exact <paramref name="uri"/> to a response built by
+    /// <paramref name="respond"/>, independent of the FIFO <see cref="Enqueue"/> queue and checked
+    /// before it. Needed for spooled-segment fetch/ack testing (P5-T14), where requests arrive
+    /// concurrently and out of order and so cannot be scripted as a single sequence.
+    /// </summary>
+    public void Route(Uri uri, Func<HttpRequestMessage, HttpResponseMessage> respond) =>
+        RouteAsync(uri, (request, _) => Task.FromResult(respond(request)));
+
+    /// <summary>
+    /// As <see cref="Route"/>, but <paramref name="respond"/> may itself <c>await</c> (e.g.
+    /// <see cref="Task.Delay(TimeSpan, CancellationToken)"/> to simulate network latency for
+    /// out-of-order arrival tests) without blocking a thread.
+    /// </summary>
+    public void RouteAsync(Uri uri, Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> respond)
+    {
+        lock (_gate)
+        {
+            _routes[uri] = respond;
+        }
+    }
+
+    /// <summary>A <see cref="Route"/> convenience for a fixed status/body/headers response, usable from multiple concurrent requests.</summary>
+    public void RouteFixed(
+        Uri uri, HttpStatusCode statusCode, byte[]? body = null, string contentType = "application/octet-stream",
+        IReadOnlyDictionary<string, string>? headers = null) =>
+        Route(uri, _ =>
+        {
+            var response = new HttpResponseMessage(statusCode);
+            if (body is not null)
+            {
+                response.Content = new ByteArrayContent(body);
+                response.Content.Headers.TryAddWithoutValidation("Content-Type", contentType);
+            }
+
+            if (headers is not null)
+            {
+                foreach (var (name, value) in headers)
+                {
+                    response.Headers.TryAddWithoutValidation(name, value);
+                }
+            }
+
+            return response;
+        });
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var body = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         lock (_gate)
         {
             _receivedRequests.Add(Capture(request, body));
+        }
+
+        Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>>? route;
+        lock (_gate)
+        {
+            route = request.RequestUri is { } uri && _routes.TryGetValue(uri, out var found) ? found : null;
+        }
+
+        if (route is not null)
+        {
+            return await route(request, cancellationToken).ConfigureAwait(false);
         }
 
         ScriptedResponse? scripted;

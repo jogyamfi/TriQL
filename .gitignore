@@ -30,3 +30,4 @@ Thumbs.db
 ## NuGet local caches (never the checked-in lock files)
 *.nupkg
 *.snupkg
+tests/TriQL.IntegrationTests/NUL

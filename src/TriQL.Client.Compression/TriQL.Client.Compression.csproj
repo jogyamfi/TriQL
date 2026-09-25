@@ -11,4 +11,9 @@
     <ProjectReference Include="..\TriQL.Client\TriQL.Client.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="K4os.Compression.LZ4" />
+    <PackageReference Include="ZstdSharp.Port" />
+  </ItemGroup>
+
 </Project>

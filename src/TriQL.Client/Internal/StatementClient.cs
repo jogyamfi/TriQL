@@ -23,6 +23,8 @@ internal sealed class StatementClient
     private readonly TrinoSessionOptions _options;
     private readonly TrinoSession _session;
     private readonly ILogger? _logger;
+    private readonly SegmentAcknowledger _segmentAcknowledger;
+    private readonly SegmentClient _segmentClient;
     private Uri? _lastNextUri;
     private Uri? _lastPartialCancelUri;
     private int _cancelRequested;
@@ -33,6 +35,8 @@ internal sealed class StatementClient
         _options = options;
         _session = session;
         _logger = logger;
+        _segmentAcknowledger = new SegmentAcknowledger(logger);
+        _segmentClient = new SegmentClient(invoker, options, logger, _segmentAcknowledger);
     }
 
     /// <summary>
@@ -98,29 +102,32 @@ internal sealed class StatementClient
         }
 
         var target = _lastNextUri ?? _lastPartialCancelUri;
-        if (target is null)
+        if (target is not null)
         {
-            return;
+            using var cts = new CancellationTokenSource(CancelTimeout);
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Delete, target);
+                ProtocolHeaders.WriteFollowUpHeaders(request, _options);
+                using var response = await _invoker.SendAsync(request, cts.Token).ConfigureAwait(false);
+                if (response.StatusCode is not (HttpStatusCode.OK or HttpStatusCode.NoContent) && _logger is not null)
+                {
+                    Log.CancellationRequestFailedWithStatus(_logger, target, (int)response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (_logger is not null)
+                {
+                    Log.CancellationRequestFailed(_logger, target, ex);
+                }
+            }
         }
 
-        using var cts = new CancellationTokenSource(CancelTimeout);
-        try
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Delete, target);
-            ProtocolHeaders.WriteFollowUpHeaders(request, _options);
-            using var response = await _invoker.SendAsync(request, cts.Token).ConfigureAwait(false);
-            if (response.StatusCode is not (HttpStatusCode.OK or HttpStatusCode.NoContent) && _logger is not null)
-            {
-                Log.CancellationRequestFailedWithStatus(_logger, target, (int)response.StatusCode);
-            }
-        }
-        catch (Exception ex)
-        {
-            if (_logger is not null)
-            {
-                Log.CancellationRequestFailed(_logger, target, ex);
-            }
-        }
+        // FR-5.2.7: best-effort ack sweep, bounded by the same 10 s cancellation timeout as the
+        // DELETE above, so abandoning a query does not leave cheaply-acknowledgeable segments
+        // unacknowledged on the object store.
+        await _segmentAcknowledger.DrainAsync(CancelTimeout).ConfigureAwait(false);
     }
 
     private Uri BuildPollUri(Uri nextUri)
@@ -180,6 +187,15 @@ internal sealed class StatementClient
         if (envelope.PartialCancelUri is not null)
         {
             _lastPartialCancelUri = envelope.PartialCancelUri;
+        }
+
+        // FR-5.1.2/FR-5.2: the mapper only detects the spooled shape and parses its segment
+        // descriptors synchronously; resolving them is async I/O, done here since this method
+        // already runs in an async context (see SegmentClient's remarks for why).
+        if (envelope.PendingSpooling is { } pending)
+        {
+            var rows = await _segmentClient.ResolveAsync(pending, envelope.Columns, cancellationToken).ConfigureAwait(false);
+            envelope = envelope with { Rows = rows, ValuesAreDecoded = true, PendingSpooling = null };
         }
 
         return envelope;

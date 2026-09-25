@@ -98,11 +98,7 @@ public sealed class ClientCertificateAuthenticator : ITrinoAuthenticator, IDispo
         try
         {
             pkcs12 = ephemeral.Export(X509ContentType.Pkcs12);
-#if NET9_0_OR_GREATER
             return X509CertificateLoader.LoadPkcs12(pkcs12, password: null);
-#else
-            return new X509Certificate2(pkcs12, (string?)null, X509KeyStorageFlags.DefaultKeySet);
-#endif
         }
         finally
         {
@@ -116,16 +112,8 @@ public sealed class ClientCertificateAuthenticator : ITrinoAuthenticator, IDispo
     }
 
     private static X509Certificate2 LoadFromFile(string path, string? password) =>
-#if NET9_0_OR_GREATER
         password is null ? X509CertificateLoader.LoadCertificateFromFile(path) : X509CertificateLoader.LoadPkcs12FromFile(path, password);
-#else
-        password is null ? new X509Certificate2(path) : new X509Certificate2(path, password);
-#endif
 
     private static X509Certificate2 LoadFromBytes(byte[] rawData, string? password) =>
-#if NET9_0_OR_GREATER
         password is null ? X509CertificateLoader.LoadCertificate(rawData) : X509CertificateLoader.LoadPkcs12(rawData, password);
-#else
-        password is null ? new X509Certificate2(rawData) : new X509Certificate2(rawData, password);
-#endif
 }

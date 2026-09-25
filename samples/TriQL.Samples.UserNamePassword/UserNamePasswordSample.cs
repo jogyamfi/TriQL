@@ -19,8 +19,8 @@ public static class UserNamePasswordSample
 
     public static async Task Main()
     {
-        
-        var password= "Your password";
+
+        var password = "Your password";
 
 
         var connectionString = new TrinoConnectionStringBuilder

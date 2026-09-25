@@ -100,6 +100,28 @@ public sealed class TrinoSessionOptions
     /// </summary>
     public IReadOnlyList<string> QueryDataEncodings { get; set; } = [];
 
+    /// <summary>
+    /// The maximum number of bytes a single decoded (decompressed) spooled segment may occupy. A
+    /// segment whose decoded size would exceed <c>max(metadata.uncompressedSize, this value)</c> is
+    /// rejected with <see cref="Exceptions.TrinoProtocolException"/> instead of allocating unbounded
+    /// memory (FR-5.3.4, SEC-6). Default 256 MB.
+    /// </summary>
+    public long MaxDecompressedSegmentBytes { get; set; } = 268_435_456;
+
+    /// <summary>
+    /// The maximum number of spooled segments fetched concurrently for a single page (FR-5.2.5).
+    /// Default 4.
+    /// </summary>
+    public int SegmentFetchParallelism { get; set; } = 4;
+
+    /// <summary>
+    /// An optional allowlist of hosts a spooled segment <c>uri</c> may point at. Empty (the
+    /// default) permits any host, subject to the mandatory <c>https</c> requirement (SEC-7, the
+    /// closed G3 decision in requirements.md §23 Q6). Does not apply to a segment's <c>ackUri</c>,
+    /// which is always restricted to the coordinator's own origin regardless of this setting.
+    /// </summary>
+    public IReadOnlyList<string> SegmentHostAllowlist { get; set; } = [];
+
     /// <summary>Issue a <c>/v1/info</c> request on <c>Open()</c> to confirm the server is ready. Default <see langword="false"/>.</summary>
     public bool TestConnectionOnOpen { get; set; }
 
@@ -183,6 +205,16 @@ public sealed class TrinoSessionOptions
         if (PollingBackoffMaxDelay < PollingBackoffInitialDelay)
         {
             throw new ArgumentOutOfRangeException(nameof(PollingBackoffMaxDelay), PollingBackoffMaxDelay, "PollingBackoffMaxDelay must be at least PollingBackoffInitialDelay.");
+        }
+
+        if (MaxDecompressedSegmentBytes <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(MaxDecompressedSegmentBytes), MaxDecompressedSegmentBytes, "MaxDecompressedSegmentBytes must be positive.");
+        }
+
+        if (SegmentFetchParallelism <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(SegmentFetchParallelism), SegmentFetchParallelism, "SegmentFetchParallelism must be positive.");
         }
     }
 

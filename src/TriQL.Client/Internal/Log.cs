@@ -36,4 +36,16 @@ internal static partial class Log
 
     [LoggerMessage(EventId = 10, Level = LogLevel.Debug, Message = "Page received for query {QueryId}: {RowCount} rows.")]
     public static partial void PageReceived(ILogger logger, string queryId, int rowCount);
+
+    [LoggerMessage(EventId = 11, Level = LogLevel.Debug, Message = "Fetched spooled segment from {Uri} ({ByteLength} bytes).")]
+    public static partial void SegmentFetched(ILogger logger, Uri uri, long byteLength);
+
+    [LoggerMessage(EventId = 12, Level = LogLevel.Debug, Message = "First use of spooled segment host '{Host}' for this query.")]
+    public static partial void SegmentHostFirstUse(ILogger logger, string host);
+
+    [LoggerMessage(EventId = 13, Level = LogLevel.Warning, Message = "Acknowledgement of spooled segment {AckUri} returned status {StatusCode}.")]
+    public static partial void SegmentAcknowledgementFailedWithStatus(ILogger logger, Uri ackUri, int statusCode);
+
+    [LoggerMessage(EventId = 14, Level = LogLevel.Warning, Message = "Acknowledgement of spooled segment {AckUri} failed.")]
+    public static partial void SegmentAcknowledgementFailed(ILogger logger, Uri ackUri, Exception exception);
 }

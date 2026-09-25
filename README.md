@@ -31,7 +31,7 @@ shipping package is locked by `PublicAPI.Shipped.txt` baselines and enforced at 
 
 ## Requirements
 
-- .NET 8.0 or .NET 10.0. `netstandard2.0` and .NET Framework are not supported.
+- .NET 10.0. `netstandard2.0` and .NET Framework are not supported.
 - **Trino server 466 or later** (27 Nov 2024, the release that introduced the spooling protocol).
   This is the minimum version the conformance suite verifies against; the CI matrix covers
   `{466, latest}`.
@@ -105,8 +105,18 @@ an empty list, which forces the direct protocol. Enable it explicitly once your 
 configured for spooling:
 
 ```csharp
+// The json+lz4 and json+zstd codecs live in the separate TriQL.Client.Compression package
+// (kept out of TriQL.Client to stay dependency-free) and must be registered before executing
+// a query that can select them, or the client throws TrinoProtocolException once the server
+// picks an encoding it can't decode.
+TriQL.Client.Compression.CompressionCodecs.RegisterAll();
+
 options.QueryDataEncodings = ["json+zstd", "json+lz4", "json"];
 ```
+
+Add a `<PackageReference Include="TriQL.Client.Compression" />` to your project, or set
+`QueryDataEncodings = ["json"]` to enable spooling with the built-in uncompressed codec only,
+which needs no extra package or registration call.
 
 Spooling is opt-in in 1.0 because it is verified against a scripted test double rather than a
 real spooling-configured cluster; see

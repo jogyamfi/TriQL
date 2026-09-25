@@ -17,4 +17,5 @@ internal sealed record TrinoPageEnvelope(
     TrinoQueryStats? Stats,
     StatementErrorDto? Error,
     string? UpdateType,
-    long? UpdateCount);
+    long? UpdateCount,
+    SpooledPageData? PendingSpooling = null);

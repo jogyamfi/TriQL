@@ -1,1 +1,7 @@
 ﻿#nullable enable
+TriQL.Client.TrinoSessionOptions.MaxDecompressedSegmentBytes.get -> long
+TriQL.Client.TrinoSessionOptions.MaxDecompressedSegmentBytes.set -> void
+TriQL.Client.TrinoSessionOptions.SegmentFetchParallelism.get -> int
+TriQL.Client.TrinoSessionOptions.SegmentFetchParallelism.set -> void
+TriQL.Client.TrinoSessionOptions.SegmentHostAllowlist.get -> System.Collections.Generic.IReadOnlyList<string!>!
+TriQL.Client.TrinoSessionOptions.SegmentHostAllowlist.set -> void

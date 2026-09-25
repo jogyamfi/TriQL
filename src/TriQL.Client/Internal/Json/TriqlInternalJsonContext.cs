@@ -35,4 +35,5 @@ internal sealed class ServerInfoDto
 [JsonSerializable(typeof(ServerInfoDto))]
 [JsonSerializable(typeof(StatementResponseDto))]
 [JsonSerializable(typeof(QueryInfoDto))]
+[JsonSerializable(typeof(SpooledDataEnvelopeDto))]
 internal sealed partial class TriqlInternalJsonContext : JsonSerializerContext;

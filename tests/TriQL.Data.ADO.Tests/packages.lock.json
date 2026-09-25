@@ -199,11 +199,22 @@
           "Microsoft.Extensions.Logging.Abstractions": "[10.0.0, )"
         }
       },
+      "triql.client.compression": {
+        "type": "Project",
+        "dependencies": {
+          "K4os.Compression.LZ4": "[1.3.8, )",
+          "TriQL.Client": "[1.0.0, )",
+          "ZstdSharp.Port": "[0.8.8, )"
+        }
+      },
       "triql.client.tests": {
         "type": "Project",
         "dependencies": {
+          "K4os.Compression.LZ4": "[1.3.8, )",
           "Microsoft.NET.Test.Sdk": "[17.14.1, )",
           "TriQL.Client": "[1.0.0, )",
+          "TriQL.Client.Compression": "[1.0.0, )",
+          "ZstdSharp.Port": "[0.8.8, )",
           "coverlet.collector": "[6.0.4, )",
           "xunit": "[2.9.3, )",
           "xunit.runner.visualstudio": "[3.1.4, )"
@@ -215,6 +226,12 @@
           "Microsoft.Extensions.Http": "[10.0.0, )",
           "TriQL.Client": "[1.0.0, )"
         }
+      },
+      "K4os.Compression.LZ4": {
+        "type": "CentralTransitive",
+        "requested": "[1.3.8, )",
+        "resolved": "1.3.8",
+        "contentHash": "LhwlPa7c1zs1OV2XadMtAWdImjLIsqFJPoRcIWAadSRn0Ri1DepK65UbWLPmt4riLqx2d40xjXRk0ogpqNtK7g=="
       },
       "Microsoft.Extensions.Http": {
         "type": "CentralTransitive",
@@ -238,6 +255,12 @@
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0"
         }
+      },
+      "ZstdSharp.Port": {
+        "type": "CentralTransitive",
+        "requested": "[0.8.8, )",
+        "resolved": "0.8.8",
+        "contentHash": "UIDFkA5DC3en3tOJ3Mof11yBx9kUQLsaeo/oFdvN6Bbkr9E9+VCqfIadHci8cu+I51K2Sl7XYWVl2R/mA75NBQ=="
       }
     }
   }

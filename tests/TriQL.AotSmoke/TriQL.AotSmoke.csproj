@@ -3,6 +3,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <PublishAot>true</PublishAot>
+    <!--
+      PublishAot without explicit RuntimeIdentifiers makes the SDK infer the host RID, so a lock file
+      restored on Windows (win-x64) fails locked-mode restore on Linux/macOS CI (NU1004). Pin the
+      RIDs of every CI runner so packages.lock.json is identical on all platforms.
+    -->
+    <RuntimeIdentifiers>linux-x64;win-x64;osx-arm64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>

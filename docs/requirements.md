@@ -79,7 +79,7 @@ In priority order:
 
 | Area | Included |
 |---|---|
-| Target frameworks | `net8.0`, `net10.0` |
+| Target frameworks | `net10.0` |
 | Serialization | `System.Text.Json` with source-generated contexts |
 | Protocol | `POST /v1/statement` direct protocol; `nextUri` paging |
 | Protocol | Spooled protocol (`json`, `json+lz4`, `json+zstd`) with fallback — **opt-in and experimental in 1.0** (FR-5.1.6) |
@@ -134,7 +134,7 @@ In priority order:
 | **Session property** | A key/value setting scoped to the client session, sent via `X-Trino-Session` and mutated by the server via `X-Trino-Set-Session`. |
 | **Read-ahead** | Background prefetching of pages into a bounded buffer while the consumer processes earlier pages. |
 | **Backpressure** | Suspension of read-ahead when the buffer's byte budget is exhausted. |
-| **TFM** | Target Framework Moniker (`net8.0`, `net10.0`). |
+| **TFM** | Target Framework Moniker (e.g. `net10.0`). |
 
 ---
 
@@ -613,10 +613,31 @@ stateDiagram-v2
 > (S3/Azure/GCS), and a 256-bit shared secret key on the coordinator. A fully current server with
 > spooling unconfigured returns direct-protocol data. Fallback is therefore a permanent runtime
 > path, not a legacy-server accommodation, and MUST NOT be treated as a deprecated branch.
-> **FR-5.1.3b** — Trino also falls back to the direct protocol on a per-query basis for queries
-> that would not benefit from spooling. The client MUST therefore handle a session in which some
-> queries return spooled data and others return direct data, and MUST NOT cache a per-session
-> conclusion about which protocol is in use.
+> **Confirmed against a real spooling-configured Trino 466 coordinator in Phase 7 (2026-09-22):**
+> `UriGuard`'s unconditional `https` requirement on segment/ack URIs (SEC-7/G3) means a real
+> spooling deployment needs the **coordinator itself** on HTTPS too, not merely the object store —
+> a plain-HTTP coordinator with spooling configured (a normal enough Trino deployment otherwise)
+> will have every segment acknowledgement rejected client-side with `TrinoProtocolException`. This
+> is a real cluster-configuration prerequisite this client imposes and should be called out to
+> anyone deploying spooling, not just an implementation detail.
+> **FR-5.1.3b** — ~~Trino also falls back to the direct protocol on a per-query basis for queries
+> that would not benefit from spooling.~~ **Corrected 2026-09-22, per Phase 7's real-coordinator
+> testing:** against a real Trino 466 coordinator with spooling cluster-enabled, **no query of any
+> size was ever observed to return a literal array-of-arrays `data` shape** — even a 5-row
+> `SELECT * FROM tpch.tiny.region` returned the spooled `{encoding, segments}` envelope, just with
+> a single `inline`-kind segment (the payload base64-embedded directly in the page) below Trino's
+> `protocol.spooling.inlining.max-rows`/`max-size` thresholds. What the Trino documentation and
+> this client's own design call "falling back to the direct protocol per query" appears to
+> actually be implemented as **spooled-envelope-with-inlining**, not a literal reversion to the
+> array-of-arrays shape — functionally equivalent (no extra round trip either way, and this
+> client's `EncodingNegotiator`/`SegmentClient` already handle `inline` segments as a first-class
+> case per FR-5.2.1) but structurally different on the wire than this requirement originally
+> implied. The client MUST still handle a session mixing genuinely-spooled and inline-within-spooled
+> responses, and MUST NOT cache a per-session conclusion about segment kind. The literal
+> array-of-arrays direct-protocol shape was only ever observed when `QueryDataEncodings` was set to
+> empty client-side (FR-5.1.5) or against a coordinator with spooling not configured at all
+> (FR-5.1.3) — i.e. as a client- or cluster-level configuration state, not a per-query server
+> decision as this requirement previously implied.
 > **FR-5.1.4** — If the server returns an encoding the client cannot decode, the client MUST
 > raise `TrinoProtocolException` naming the encoding, and the documentation MUST direct the user
 > to narrow `QueryDataEncodings`.
@@ -637,10 +658,18 @@ stateDiagram-v2
 | Kind | Handling |
 |---|---|
 | `inline` | Base64 payload embedded in the page; decode in place, no additional request. |
-| `spooled` | `uri` to `GET` for the payload; `ackUri` to signal consumption; `metadata` carries `segmentSize`, `rowOffset`, `rowsCount`, and optionally `uncompressedSize`. |
+| `spooled` | `uri` to `GET` for the payload; `ackUri` to signal consumption; `metadata` carries `segmentSize` and `rowOffset` always. `uncompressedSize` is present **only when that segment was actually compressed** — its absence means the segment is plain JSON regardless of the page's negotiated top-level `encoding`, and MUST be decoded with the `json` codec rather than the negotiated one. `rowsCount` is **not reliably present on servers below release 475** (a Trino bug tracked in its issue history left it unenforced as mandatory before then); since this client's floor is 466, `rowsCount` MUST be treated as optional and validated only when present. Both facts were confirmed against the official Python and Go reference client implementations during Phase 5 (2026-09-22), which is more authoritative on wire behavior than the prose documentation. `spooled` segments also carry an optional `headers` map (header name → list of values) that MUST be applied to both the segment fetch and its acknowledgement request — see FR-5.2.2. |
 
-> **FR-5.2.2** — Spooled segment fetches MUST carry the session's authentication credential
-> (FR-2.1.2), because the segment URI may point at a coordinator-proxied endpoint.
+> **FR-5.2.2** — ~~Spooled segment fetches MUST carry the session's authentication credential
+> (FR-2.1.2), because the segment URI may point at a coordinator-proxied endpoint.~~ **Corrected
+> 2026-09-22, per the same reference-client cross-check as FR-5.2.1:** the session credential MUST
+> be attached to a segment/ack fetch **only when that URI shares the coordinator's origin**
+> (scheme, host, and port) — the coordinator-proxied case this requirement originally described.
+> For an off-origin URI (real object storage), the client MUST NOT attach the session credential —
+> sending a Trino bearer token to S3/Azure/GCS would do nothing useful and would leak it — and
+> instead relies solely on the segment's own `headers` (FR-5.2.1), which carry whatever
+> presigned-URL or SSE-C key material the server-side spooling manager requires. Every segment and
+> acknowledgement fetch MUST still apply `headers` when present, regardless of origin.
 > **FR-5.2.3** — After a spooled segment's rows have been handed to the consumer, the client MUST
 > acknowledge it via its `ackUri` so the server can release storage. Acknowledgement MUST be
 > fire-and-forget with respect to consumer latency, MUST be retried per FR-3.3, and MUST NOT fail
@@ -659,7 +688,7 @@ stateDiagram-v2
 > **FR-5.3.1** — `json` (uncompressed) MUST be supported.
 > **FR-5.3.2** — `json+lz4` MUST be supported. The payload is LZ4 block-compressed; the
 > uncompressed length is taken from segment metadata.
-> **FR-5.3.3** — `json+zstd` MUST be supported. On `net8.0` and `net10.0` the implementation MUST
+> **FR-5.3.3** — `json+zstd` MUST be supported. On `net10.0` the implementation MUST
 > prefer a BCL or built-in Zstandard facility where available and otherwise use a vetted,
 > actively maintained package recorded in [§23](#23-open-questions-and-risks).
 > **FR-5.3.4** — Decompression MUST be bounded: a decoded segment exceeding
@@ -1116,7 +1145,8 @@ TrinoException                      (abstract base : Exception)
 
 ### 17.3 Compatibility and portability
 
-> **NFR-COMPAT-1** — Supported TFMs are `net8.0` and `net10.0`. `netstandard2.0` and .NET
+> **NFR-COMPAT-1** — The supported TFM is `net10.0` (`net8.0` was dropped before 1.0 because its
+> support ends 10 Nov 2026). `netstandard2.0` and .NET
 > Framework are explicitly unsupported.
 > **NFR-COMPAT-2** — The minimum supported Trino server version is **466** (27 Nov 2024), the
 > release in which the spooling protocol was introduced. It MUST be stated in the README and
@@ -1312,14 +1342,14 @@ TrinoException                      (abstract base : Exception)
 | # | Item | Impact | Proposed resolution |
 |---|---|---|---|
 | Q1 | ~~Minimum supported Trino server version.~~ **Resolved 2026-08-25: floor is 466.** | Scope of FR-5, size of the conformance matrix. | 466 (27 Nov 2024) is the release that introduced the spooling protocol; below it, an in-scope feature cannot function at all. Latest at time of decision is 483 (17 Jul 2026), so the floor spans ~17 releases. Release cadence has slowed markedly (33 releases in 2024, 11 in 2025, 4 in 2026 to date), keeping the matrix small. CI matrix is `{466, latest}`. Trino has no formal OSS LTS. |
-| Q2 | Zstandard codec source. The BCL does not currently expose Zstandard on all target TFMs. | Violates the zero-dependency goal for `TriQL.Client`. | Options: (a) accept one vetted native/managed package; (b) move `json+zstd` support into a separate `TriQL.Client.Compression` package, keeping the core dependency-free; (c) ship only `json` and `json+lz4` in 1.0. Recommend (b). |
-| Q3 | LZ4 codec source. | Same as Q2. | Same resolution path as Q2. |
+| Q2 | ~~Zstandard codec source. The BCL does not currently expose Zstandard on all target TFMs.~~ **Resolved 2026-09-22: option (b).** | Violates the zero-dependency goal for `TriQL.Client`. | `json+zstd` (and `json+lz4`, Q3) ship from the separate `TriQL.Client.Compression` package, keeping `TriQL.Client` dependency-free per REQ-ARCH-4. The empty project stub already exists at `src/TriQL.Client.Compression/`; Phase 5 (P5-T2, P5-T3) fills it in. |
+| Q3 | ~~LZ4 codec source.~~ **Resolved 2026-09-22: same as Q2.** | Same as Q2. | Same resolution as Q2 — `TriQL.Client.Compression`. |
 | Q4 | ~~Root namespace and package prefix.~~ **Resolved 2026-08-25: `TriQL`.** | Public API, package identity. | Package ids `TriQL.Client`, `TriQL.Client.Auth`, `TriQL.Data.ADO` confirmed available on nuget.org. Residual note: "TriQL" is also the name of a dormant academic query language for RDF named graphs (NG4J project) — different domain, no known trademark registration, assessed as low risk. |
 | Q5 | Transaction support. | Some tooling calls `BeginTransaction` unconditionally. | 1.0 throws `NotSupportedException`. Revisit for 1.1 with a session-scoped `START TRANSACTION` implementation. |
 | Q6 | ~~Segment URI origin restriction default (SEC-7).~~ **Resolved 2026-08-25.** | Too strict breaks object-storage spooling; too loose is an SSRF surface. | Spooled segments are written to S3/Azure/GCS and are therefore **legitimately off-origin by design**. Segments are SSE-C encrypted, compressed, and scoped to the initiating client, which materially reduces the exposure. Decision: restrict `ackUri` to the session origin; allow segment `uri` off-origin but require `https` (no scheme downgrade) plus an optional host allowlist, default permissive with a `Debug` log of the segment host on first use. |
-| Q7 | `Prepare()` semantics (FR-9.2.8). | Tooling compatibility. | Recommend a documented no-op over throwing. |
+| Q7 | ~~`Prepare()` semantics (FR-9.2.8).~~ **Resolved 2026-09-22: documented no-op.** | Tooling compatibility. | Already implemented this way at `TrinoCommand.Prepare()` (`src/TriQL.Data.ADO/TrinoCommand.cs`) — this entry now records that as the ratified decision rather than an open recommendation. |
 | Q8 | Complex-type materialization depth. | API surface and performance. | 1.0 surfaces `array`/`map`/`row` as `object?[]` / `IReadOnlyDictionary` / `ITrinoRowValue`; generic POCO mapping deferred to 1.1. |
-| Q9 | Benchmark runner variance in CI. | False regression failures. | Use a dedicated self-hosted runner or compare against a same-run baseline rather than an absolute threshold. |
+| Q9 | ~~Benchmark runner variance in CI.~~ **Resolved 2026-09-22: same-run baseline.** | False regression failures. | Compare against a same-run baseline rather than an absolute threshold — no dedicated self-hosted runner exists, and a same-run comparison avoids depending on one. Applies to the CI perf gate built in Phase 5 (P5-T12). |
 | **Q10** | ~~Should the spooled protocol be enabled by default in 1.0?~~ **Resolved 2026-08-25: no.** | Shipping an unverified-against-real-server code path on by default risks failures that only appear in customer environments. | 1.0 ships spooling implemented but **opt-in** (`QueryDataEncodings` defaults to empty) and documented as experimental, per FR-5.1.6. A dedicated post-1.0 phase stands up MinIO plus a spooling-configured coordinator, validates the path end to end, and promotes it to default in 1.1. See Phase 7 of the [implementation plan](implementation-plan.md). |
 | R1 | **Risk:** protocol drift between Trino releases. | Silent breakage. | Nightly integration run against `trinodb/trino:latest` with alerting. |
 | R2 | **Risk:** performance parity with the JDBC driver may be hard to reach on the JSON hot path. | NFR-PERF-2 miss. | Prototype the `Utf8JsonReader` row decoder early in M2 and measure before committing to the target. |

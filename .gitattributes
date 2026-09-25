@@ -1,0 +1,5 @@
+# Match .editorconfig (end_of_line = crlf) on every OS, so `dotnet format --verify-no-changes`
+# passes on Linux/macOS CI runners too. Files are stored as LF in the repo and checked out as CRLF.
+* text=auto eol=crlf
+
+*.png binary

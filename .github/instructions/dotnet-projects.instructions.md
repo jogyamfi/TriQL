@@ -8,7 +8,7 @@ applyTo: ["**/*.csproj", "**/Directory.Build.props", "**/Directory.Packages.prop
 
 ## Target frameworks
 
-- Multi-target `net8.0;net10.0`. Do not add `netstandard2.0` or .NET Framework targets.
+- Target `net10.0` only (`net8.0` was dropped before 1.0 because it leaves support in Nov 2026). Do not add `netstandard2.0` or .NET Framework targets.
 - Set `LangVersion` to `latest` only in `Directory.Build.props`, never per project.
 
 ## Central package management
