@@ -124,6 +124,15 @@ public sealed class SpoolingTrinoFixture : IAsyncLifetime, IDisposable
 
     public void Dispose() => _trinoCa.Dispose();
 
+    /// <remarks>
+    /// The inlining thresholds are pinned to the floor version's defaults (1000 rows / 128kB), and
+    /// the initial segment size lowered from its 8MB default, so the ~60k-row (~1.2MB)
+    /// <c>tpch.tiny.lineitem</c> query the Lane B tests rely on genuinely spools on every version in
+    /// the matrix. Newer Trino (observed on 483) raised the inlining defaults to 50000 rows / 3MB and
+    /// also inlines a final buffer smaller than the initial segment size rather than spooling it, so
+    /// without these overrides that query comes back entirely as <c>"inline"</c> segments on
+    /// <c>latest</c> and never touches MinIO.
+    /// </remarks>
     private static string BuildConfigProperties(string secretKeyBase64) =>
         $"""
         #single node install config
@@ -140,6 +149,9 @@ public sealed class SpoolingTrinoFixture : IAsyncLifetime, IDisposable
 
         protocol.spooling.enabled=true
         protocol.spooling.shared-secret-key={secretKeyBase64}
+        protocol.spooling.inlining.max-rows=1000
+        protocol.spooling.inlining.max-size=128kB
+        protocol.spooling.initial-segment-size=256kB
         """;
 
     private string BuildSpoolingManagerProperties() =>
