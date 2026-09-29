@@ -80,6 +80,7 @@ public sealed class AcknowledgementTests(SpoolingClusterFixture cluster)
         var before = await CountObjectsAsync(s3);
 
         var options = cluster.CreateBaseOptions();
+        var stragglerTolerance = options.SegmentFetchParallelism;
         await using (var client = new TrinoClient(options))
         {
             var resultSet = await client.ExecuteAsync("SELECT orderkey FROM tpch.sf1.orders ORDER BY orderkey");
@@ -107,7 +108,7 @@ public sealed class AcknowledgementTests(SpoolingClusterFixture cluster)
         do
         {
             after = await CountObjectsAsync(s3);
-            if (after <= before + 1)
+            if (after <= before + stragglerTolerance)
             {
                 break;
             }
@@ -116,15 +117,17 @@ public sealed class AcknowledgementTests(SpoolingClusterFixture cluster)
         }
         while (DateTime.UtcNow < deadline);
 
-        // Allow exactly one straggler: with SegmentFetchParallelism (default 4), up to a handful of
-        // segments can be mid-fetch — not yet decoded, so never reaching FR-5.2.3's "rows handed to
-        // the consumer" trigger for scheduling an ack — at the instant DisposeAsync cancels the
+        // Allow up to one prefetch window of stragglers: with SegmentFetchParallelism segments in
+        // flight, each can be mid-fetch — not yet decoded, so never reaching FR-5.2.3's "rows handed
+        // to the consumer" trigger for scheduling an ack — at the instant DisposeAsync cancels the
         // pump. FR-5.2.7 itself only requires the sweep "where an ack can still be issued cheaply";
         // a segment whose fetch was itself cancelled mid-flight has no completed acknowledgeable
-        // outcome to sweep, and ages out via the coordinator's own fs.segment.ttl instead.
+        // outcome to sweep, and ages out via the coordinator's own fs.segment.ttl instead. With the
+        // fixture's small initial-segment-size, 100k rows span many segments, so this window is
+        // routinely more than one segment deep.
         Assert.True(
-            after <= before + 1,
-            $"Expected cancellation's best-effort ack sweep to bring the bucket back near its pre-query baseline ({before}, +1 straggler tolerance); it was still {after} after the wait.");
+            after <= before + stragglerTolerance,
+            $"Expected cancellation's best-effort ack sweep to bring the bucket back near its pre-query baseline ({before}, +{stragglerTolerance} straggler tolerance); it was still {after} after the wait.");
     }
 
     private async Task<long> CountObjectsAsync(Amazon.S3.AmazonS3Client s3)
