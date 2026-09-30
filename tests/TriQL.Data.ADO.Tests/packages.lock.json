@@ -4,9 +4,9 @@
     "net10.0": {
       "coverlet.collector": {
         "type": "Direct",
-        "requested": "[6.0.4, )",
-        "resolved": "6.0.4",
-        "contentHash": "lkhqpF8Pu2Y7IiN7OntbsTtdbpR1syMsm2F3IgX6ootA4ffRqWL5jF7XipHuZQTdVuWG/gVAAcf8mjk8Tz0xPg=="
+        "requested": "[10.1.0, )",
+        "resolved": "10.1.0",
+        "contentHash": "SlYCIHnBYxINSUpR75SiM5JEmnx11pqT+Ac/C/fUqTTA0dLPl9eYzmFXKKuxmQhL3ZdTQl4PBD3YdAxAauaKLQ=="
       },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
@@ -215,7 +215,7 @@
           "TriQL.Client": "[1.0.0, )",
           "TriQL.Client.Compression": "[1.0.0, )",
           "ZstdSharp.Port": "[0.8.8, )",
-          "coverlet.collector": "[6.0.4, )",
+          "coverlet.collector": "[10.1.0, )",
           "xunit": "[2.9.3, )",
           "xunit.runner.visualstudio": "[3.1.4, )"
         }
