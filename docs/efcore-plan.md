@@ -7,7 +7,7 @@
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
 | Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
 | Date | 2026-10-07 |
-| Status | Draft — scope agreed, not started |
+| Status | Phase 0 complete (2026-10-07, branch `feature/efcore-provider`); Phase 1 next |
 
 ---
 
