@@ -82,6 +82,52 @@ public sealed class AdoDdlDmlTests : IAsyncLifetime, IDisposable
     }
 
     [Fact]
+    public async Task ExecuteReader_ForAnInsert_RecordsAffectedIsTheUpdateCount()
+    {
+        if (_writableCatalog is null)
+        {
+            return;
+        }
+
+        var schemaName = $"triql_it_{Guid.NewGuid():N}";
+        var qualifiedTable = $"{_writableCatalog}.{schemaName}.widgets";
+
+        using var createSchema = _connection.CreateCommand();
+        createSchema.CommandText = $"CREATE SCHEMA {_writableCatalog}.{schemaName}";
+        await createSchema.ExecuteNonQueryAsync();
+
+        try
+        {
+            using var createTable = _connection.CreateCommand();
+            createTable.CommandText = $"CREATE TABLE {qualifiedTable} (id BIGINT, name VARCHAR)";
+            await createTable.ExecuteNonQueryAsync();
+
+            // A real coordinator returns DML counts as a "rows" result set as well as updateCount,
+            // so the reader has a column; RecordsAffected must still report the count (EF0-T4).
+            using var insert = _connection.CreateCommand();
+            insert.CommandText = $"INSERT INTO {qualifiedTable} (id, name) VALUES (1, 'a'), (2, 'b')";
+            await using (var reader = await insert.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                }
+
+                Assert.Equal(2, reader.RecordsAffected);
+            }
+        }
+        finally
+        {
+            using var dropTable = _connection.CreateCommand();
+            dropTable.CommandText = $"DROP TABLE IF EXISTS {qualifiedTable}";
+            await dropTable.ExecuteNonQueryAsync();
+
+            using var dropSchema = _connection.CreateCommand();
+            dropSchema.CommandText = $"DROP SCHEMA IF EXISTS {_writableCatalog}.{schemaName}";
+            await dropSchema.ExecuteNonQueryAsync();
+        }
+    }
+
+    [Fact]
     public async Task Ddl_UpdateAndDelete_OnAConnectorWithoutRowLevelSupport_ThrowTrinoQueryException()
     {
         if (_writableCatalog is null)

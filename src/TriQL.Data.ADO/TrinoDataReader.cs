@@ -89,11 +89,15 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
     public override bool IsClosed => _closed;
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// <c>-1</c> for queries. For DML, the server-reported update count — even though Trino also
+    /// returns DML counts as a one-column <c>rows</c> result set, so the reader has columns.
+    /// </remarks>
     public override int RecordsAffected
     {
         get
         {
-            if (_columns.Count > 0)
+            if (_resultSet.UpdateType is null)
             {
                 return -1;
             }
