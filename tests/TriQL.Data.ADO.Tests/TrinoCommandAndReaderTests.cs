@@ -229,6 +229,26 @@ public sealed class TrinoCommandAndReaderTests
         Assert.NotNull(submitted);
     }
 
+    [Theory]
+    [InlineData("@id")]
+    [InlineData(":id")]
+    [InlineData("id")]
+    public async Task Execute_ParameterNameWithOrWithoutPrefix_BindsToTheNamedPlaceholder(string parameterName)
+    {
+        using var fake = new FakeTrinoCoordinator();
+        fake.Enqueue(HttpStatusCode.OK, """{"id":"q1","nextUri":null,"columns":null,"data":null}""");
+
+        using var connection = await OpenConnectionAsync(fake);
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT * FROM t WHERE x = @id";
+        command.Parameters.Add(new TrinoDbParameter { ParameterName = parameterName, Value = 7 });
+
+        await command.ExecuteNonQueryAsync();
+
+        var submitted = fake.ReceivedRequests.Single(r => r.Method == HttpMethod.Post);
+        Assert.EndsWith(" USING 7", submitted.Body, StringComparison.Ordinal);
+    }
+
     private static async Task<TrinoConnection> OpenConnectionAsync(FakeTrinoCoordinator fake)
     {
         var options = new TrinoSessionOptions { Server = new Uri("https://trino.example.com/") };
