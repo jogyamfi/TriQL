@@ -1,1 +1,9 @@
 ﻿#nullable enable
+*REMOVED*TriQL.Data.ADO.TrinoDbParameter.Precision.get -> byte
+*REMOVED*TriQL.Data.ADO.TrinoDbParameter.Precision.set -> void
+*REMOVED*TriQL.Data.ADO.TrinoDbParameter.Scale.get -> byte
+*REMOVED*TriQL.Data.ADO.TrinoDbParameter.Scale.set -> void
+override TriQL.Data.ADO.TrinoDbParameter.Precision.get -> byte
+override TriQL.Data.ADO.TrinoDbParameter.Precision.set -> void
+override TriQL.Data.ADO.TrinoDbParameter.Scale.get -> byte
+override TriQL.Data.ADO.TrinoDbParameter.Scale.set -> void
