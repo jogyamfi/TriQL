@@ -7,7 +7,7 @@
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
 | Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
 | Date | 2026-10-07 |
-| Status | Phase 0 complete (2026-10-07, branch `feature/efcore-provider`); Phase 1 next |
+| Status | Phases 0–1 complete (2026-10-07, branch `feature/efcore-provider`); Phase 2 next |
 
 ---
 
@@ -382,6 +382,27 @@ PublicAPI baselines and release notes are updated.
 An empty but working provider: `UseTrino(...)` works, a `DbContext` can run
 `Database.ExecuteSqlRawAsync` and `Database.SqlQueryRaw<int>`, and EF's service-provider
 validation passes.
+
+> **Status: done.** 27 unit/SQL-baseline tests and 6 functional tests (466 and 483) pass. Deviations
+> from the steps below:
+> - **Options (EF1-T3).** `CommandTimeout` and `MaxBatchSize` are EF's built-in relational options,
+>   not new ones. `DefaultCatalog` moves to Phase 5, as the model annotation `HasDefaultCatalog`.
+>   Each overload of `UseTrino` replaces whatever connection an earlier call configured; EF's base
+>   class does not do this by itself.
+> - **Connection (EF1-T5).** `ParameterBinding` is not forced (see EF0-T1). No `AutoTransactionBehavior`
+>   hook is needed yet: `SaveChanges` throws `NotSupportedException` until Phase 6 replaces the batch
+>   factory, so EF's transactional default pipeline never runs.
+> - **Registration (EF1-T4).** `TrinoConventionSetBuilder` is registered now rather than in Phase 5:
+>   without a relational convention set builder, entity types have no table mapping.
+> - **Also added:** `Database.IsTrino()`.
+> - **Core fix found here:** ADO parameters named `@p0` (EF's naming) did not bind to `@p0`
+>   placeholders; `TrinoCommand` now strips a leading `@`/`:`.
+> - **Harness (EF1-T6).** `FakeTrino` uses the existing `FakeTrinoCoordinator` for scripted pages and
+>   EF's `CommandExecuting` event for `AssertSql`.
+> - **Functional tests (EF1-T7).** The project links `TrinoContainerFixture.cs` from the integration
+>   tests. It runs in `ci.yml` (after the integration tests) and in the nightly `{466, latest}` matrix.
+> - **Analyzers.** RS0026/RS0027 are suppressed in the EF project, because EF's API conventions
+>   require overloads with optional parameters. EF1001 is suppressed in both EF test projects.
 
 ### Implementation steps
 - **EF1-T1 — Project.** Create `src/TriQL.EntityFrameworkCore/TriQL.EntityFrameworkCore.csproj`:

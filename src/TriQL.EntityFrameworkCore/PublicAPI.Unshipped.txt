@@ -1,0 +1,96 @@
+﻿#nullable enable
+Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions
+Microsoft.Extensions.DependencyInjection.TrinoServiceCollectionExtensions
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.ApplyServices(Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> void
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.Clone() -> Microsoft.EntityFrameworkCore.Infrastructure.RelationalOptionsExtension!
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.Info.get -> Microsoft.EntityFrameworkCore.Infrastructure.DbContextOptionsExtensionInfo!
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithConnection(System.Data.Common.DbConnection? connection, bool owned) -> Microsoft.EntityFrameworkCore.Infrastructure.RelationalOptionsExtension!
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithConnectionString(string? connectionString) -> Microsoft.EntityFrameworkCore.Infrastructure.RelationalOptionsExtension!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.AcquireDatabaseLock() -> Microsoft.EntityFrameworkCore.Migrations.IMigrationsDatabaseLock!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.AcquireDatabaseLockAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.Migrations.IMigrationsDatabaseLock!>!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.Exists() -> bool
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.ExistsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.ExistsSql.get -> string!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.GetBeginIfExistsScript(string! migrationId) -> string!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.GetBeginIfNotExistsScript(string! migrationId) -> string!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.GetCreateIfNotExistsScript() -> string!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.GetEndIfScript() -> string!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.InterpretExistsResult(object? value) -> bool
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.LockReleaseBehavior.get -> Microsoft.EntityFrameworkCore.Migrations.LockReleaseBehavior
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator.Generate(System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Migrations.Operations.MigrationOperation!>! operations, Microsoft.EntityFrameworkCore.Metadata.IModel? model = null, Microsoft.EntityFrameworkCore.Migrations.MigrationsSqlGenerationOptions options = Microsoft.EntityFrameworkCore.Migrations.MigrationsSqlGenerationOptions.Default) -> System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Migrations.MigrationCommand!>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.Create() -> void
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.Delete() -> void
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.Exists() -> bool
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.ExistsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.GenerateCreateScript() -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.HasTables() -> bool
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.BeginTransaction() -> Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.BeginTransaction(System.Data.IsolationLevel isolationLevel) -> Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.BeginTransactionAsync(System.Data.IsolationLevel isolationLevel, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction!>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.BeginTransactionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction!>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.CreateDbConnection() -> System.Data.Common.DbConnection!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.EnlistTransaction(System.Transactions.Transaction? transaction) -> void
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.UseTransaction(System.Data.Common.DbTransaction? transaction) -> Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction?
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.UseTransaction(System.Data.Common.DbTransaction? transaction, System.Guid transactionId) -> Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction?
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.UseTransactionAsync(System.Data.Common.DbTransaction? transaction, System.Guid transactionId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction?>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.UseTransactionAsync(System.Data.Common.DbTransaction? transaction, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction?>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper.BatchTerminator.get -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper.StatementTerminator.get -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoTypeMappingSource.FindMapping(in Microsoft.EntityFrameworkCore.Storage.RelationalTypeMappingInfo mappingInfo) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping?
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, string? connectionString, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, System.Data.Common.DbConnection! connection, bool contextOwnsConnection, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, System.Data.Common.DbConnection! connection, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, TriQL.Client.TrinoSessionOptions! sessionOptions, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, TriQL.Data.ADO.TrinoDataSource! dataSource, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, string? connectionString, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, System.Data.Common.DbConnection! connection, bool contextOwnsConnection, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, System.Data.Common.DbConnection! connection, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, TriQL.Client.TrinoSessionOptions! sessionOptions, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, TriQL.Data.ADO.TrinoDataSource! dataSource, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.Extensions.DependencyInjection.TrinoServiceCollectionExtensions.AddEntityFrameworkTrino(this Microsoft.Extensions.DependencyInjection.IServiceCollection! serviceCollection) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper.GenerateStringLiteral(string! value) -> string!
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper.GenerateStringLiteral(System.Text.StringBuilder! builder, string! value) -> void
+TriQL.EntityFrameworkCore.Diagnostics.Internal.TrinoLoggingDefinitions
+TriQL.EntityFrameworkCore.Diagnostics.Internal.TrinoLoggingDefinitions.TrinoLoggingDefinitions() -> void
+TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension
+TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.TrinoOptionsExtension() -> void
+TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.TrinoOptionsExtension(TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension! copyFrom) -> void
+TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder
+TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder.TrinoDbContextOptionsBuilder(Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder) -> void
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.TrinoHistoryRepository(Microsoft.EntityFrameworkCore.Migrations.HistoryRepositoryDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator.TrinoMigrationsSqlGenerator(Microsoft.EntityFrameworkCore.Migrations.MigrationsSqlGeneratorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator.TrinoMigrator() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.TrinoDatabaseCreator(Microsoft.EntityFrameworkCore.Storage.RelationalDatabaseCreatorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.TrinoRelationalConnection(Microsoft.EntityFrameworkCore.Storage.RelationalConnectionDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper.TrinoSqlGenerationHelper(Microsoft.EntityFrameworkCore.Storage.RelationalSqlGenerationHelperDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoTypeMappingSource
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoTypeMappingSource.TrinoTypeMappingSource(Microsoft.EntityFrameworkCore.Storage.TypeMappingSourceDependencies! dependencies, Microsoft.EntityFrameworkCore.Storage.RelationalTypeMappingSourceDependencies! relationalDependencies) -> void
+TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory
+TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory.TrinoModificationCommandBatchFactory(Microsoft.EntityFrameworkCore.Update.ModificationCommandBatchFactoryDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator
+TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator.TrinoUpdateSqlGenerator(Microsoft.EntityFrameworkCore.Update.UpdateSqlGeneratorDependencies! dependencies) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.DataSource.get -> TriQL.Data.ADO.TrinoDataSource?
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.SessionOptions.get -> TriQL.Client.TrinoSessionOptions?
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.UseUtcSessionTimeZone.get -> bool
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithDataSource(TriQL.Data.ADO.TrinoDataSource! dataSource) -> TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension!
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithSessionOptions(TriQL.Client.TrinoSessionOptions! sessionOptions) -> TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension!
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithUseUtcSessionTimeZone(bool useUtcSessionTimeZone) -> TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension!
+virtual TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder.UseUtcSessionTimeZone(bool useUtcSessionTimeZone = true) -> TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!
+virtual TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator.GenerateScript(string? fromMigration = null, string? toMigration = null, Microsoft.EntityFrameworkCore.Migrations.MigrationsSqlGenerationOptions options = Microsoft.EntityFrameworkCore.Migrations.MigrationsSqlGenerationOptions.Default) -> string!
+virtual TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator.HasPendingModelChanges() -> bool
+virtual TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator.Migrate(string? targetMigration) -> void
+virtual TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator.MigrateAsync(string? targetMigration, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+virtual TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory.Create() -> Microsoft.EntityFrameworkCore.Update.ModificationCommandBatch!
+virtual TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory.Dependencies.get -> Microsoft.EntityFrameworkCore.Update.ModificationCommandBatchFactoryDependencies!
+Microsoft.EntityFrameworkCore.TrinoDatabaseFacadeExtensions
+static Microsoft.EntityFrameworkCore.TrinoDatabaseFacadeExtensions.IsTrino(this Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade! database) -> bool
+TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoConventionSetBuilder
+TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoConventionSetBuilder.TrinoConventionSetBuilder(Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure.ProviderConventionSetBuilderDependencies! dependencies, Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure.RelationalConventionSetBuilderDependencies! relationalDependencies) -> void

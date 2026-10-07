@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- EF1001: the provider's own tests exercise its *.Internal services directly. -->
+    <NoWarn>$(NoWarn);EF1001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Testcontainers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TriQL.EntityFrameworkCore\TriQL.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      The same Trino container fixture the core integration tests use (one coordinator per test run,
+      honouring TRIQL_TEST_TRINO_VERSION, with the writable local-disk Iceberg catalog), linked
+      rather than copied so the two suites cannot drift apart.
+    -->
+    <Compile Include="..\TriQL.IntegrationTests\Fixtures\TrinoContainerFixture.cs" Link="Fixtures\TrinoContainerFixture.cs" />
+  </ItemGroup>
+
+</Project>

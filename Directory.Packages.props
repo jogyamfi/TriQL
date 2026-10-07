@@ -23,6 +23,12 @@
     <PackageVersion Include="K4os.Compression.LZ4" Version="1.3.8" />
     <PackageVersion Include="ZstdSharp.Port" Version="0.8.8" />
 
+    <!--
+      EF Core provider (TriQL.EntityFrameworkCore). A range rather than a pin: the provider builds on
+      EF's internal ("pubternal") APIs, which may change in a major release but not within 10.x.
+    -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="[10.0.12, 11.0.0)" />
+
     <!-- Analyzers -->
     <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0" />

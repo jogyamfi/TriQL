@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- EF1001: the provider's own tests exercise its *.Internal services directly. -->
+    <NoWarn>$(NoWarn);EF1001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TriQL.EntityFrameworkCore\TriQL.EntityFrameworkCore.csproj" />
+    <!-- FakeTrinoCoordinator: the in-process scripted coordinator the core test suites already use. -->
+    <ProjectReference Include="..\TriQL.Client.Tests\TriQL.Client.Tests.csproj" />
+  </ItemGroup>
+
+</Project>
