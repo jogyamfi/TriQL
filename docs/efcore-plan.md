@@ -316,12 +316,17 @@ to the public API, or change behaviour behind an opt-in.
   Traces keep reporting the caller's original SQL. **Done.** Measurement (T6) showed the header
   path has the higher ceiling at the coordinator, so the EF provider does *not* force
   `ExecuteImmediate`; it is a documented setting for proxied deployments.
-- **EF0-T2 — HTTP connection reuse (G2).** Add a process-wide, reference-counted handler cache in
-  `TriQL.Data.ADO`, keyed by the HTTP-relevant options (server, TLS settings, proxy, timeouts,
-  authenticator identity). `TrinoConnection` borrows a shared `HttpMessageInvoker` instead of owning
-  one. A `PooledHttpHandlers=false` keyword keeps today's behaviour, and the `IHttpClientFactory`
-  constructor overload is unchanged. `SocketsHttpHandler.PooledConnectionLifetime` handles DNS
-  rotation.
+- **EF0-T2 — HTTP connection reuse (G2).** **Done, with a simpler design than first planned.** A
+  process-wide handler cache would have to be keyed on TLS settings, certificate objects and
+  credential-bearing authenticators, which is fragile and could share a handler between different
+  credentials. Instead:
+  - a `TrinoConnection` builds its handler on the first `Open()` and reuses it on every later
+    `Open()`, until it is disposed or its `ConnectionString` changes. EF reuses one `DbConnection`
+    per `DbContext`, and context pooling reuses those;
+  - a `TrinoDataSource` owns one handler that all its connections share, disposed with the data
+    source. EF exposes it through `UseTrino(TrinoDataSource)` (EF1-T3) for sharing across contexts.
+
+  The `IHttpClientFactory` constructor overload is unchanged. No new connection-string keyword.
 - **EF0-T3 — Converting `GetFieldValue<T>` (G3).** Replace the exact-type check with a conversion
   table. Unwrap `Nullable<T>` first. Cover:
   - checked numeric widening and narrowing across `sbyte`/`byte`/`short`/`ushort`/`int`/`uint`/`long`/`ulong`/`float`/`double`/`decimal`;
@@ -819,7 +824,7 @@ produces a compiling `DbContext` and entities for existing tables and views.
 | # | Risk | Likelihood | Mitigation |
 |---|---|---|---|
 | R1 | Large parameterized statements exceed header limits of proxies/gateways in front of the coordinator | Medium | Opt-in `ParameterBinding=ExecuteImmediate` (done); documented in `efcore.md` troubleshooting |
-| R2 | Per-query HTTP handshakes make EF slow | High (without EF0-T2) | Shared handler cache; benchmark in EF7-T6 |
+| R2 | Per-query HTTP handshakes make EF slow | Low (EF0-T2 done) | Handler reused per connection and per data source; benchmark in EF7-T6 |
 | R3 | Non-atomic `SaveChanges` surprises users | High | Decision 2: no fake transactions; a warning event; prominent docs; combined inserts are atomic |
 | R4 | Iceberg metadata-only `DELETE` reports no `updateCount` → false concurrency failures | Medium | Verify in EF6-T2; key-predicate deletes are row-level; fall back to the `rows` column |
 | R5 | Correlated-subquery limits break common EF patterns | Medium | Live verification in EF3-T8; clear translation errors; docs steer to joins and split queries |

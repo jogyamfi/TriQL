@@ -242,7 +242,8 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
         return ValueTask.CompletedTask;
     }
 
-    private static HttpMessageInvoker CreateOwnedInvoker(TrinoSessionOptions options, ILoggerFactory? loggerFactory)
+    /// <summary>Builds the configured HTTP pipeline (TLS, client certificates, authenticator handler hooks, redirects) for <paramref name="options"/>.</summary>
+    internal static HttpMessageInvoker CreateOwnedInvoker(TrinoSessionOptions options, ILoggerFactory? loggerFactory)
     {
         ArgumentNullException.ThrowIfNull(options);
         options.Validate();
