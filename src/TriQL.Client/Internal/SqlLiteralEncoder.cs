@@ -18,7 +18,10 @@ internal static class SqlLiteralEncoder
 
         if (parameter.Value is null)
         {
-            return "NULL";
+            // A typed NULL when the type is known: an untyped NULL is `unknown` to the analyzer, which
+            // makes overloaded functions ambiguous (e.g. date_add(unit, n, NULL) fails with
+            // AMBIGUOUS_FUNCTION_CALL) and lets others resolve to a surprising type (abs(NULL) is tinyint).
+            return ResolveTypeName(parameter) is { } nullType ? $"CAST(NULL AS {nullType})" : "NULL";
         }
 
         if (parameter.TrinoType is { Length: > 0 } explicitType)
@@ -31,13 +34,35 @@ internal static class SqlLiteralEncoder
             return encoded;
         }
 
-        if (parameter.DbType is { } dbType && DbTypeMapping.ToTrinoTypeName(dbType) is { } mappedType)
+        if (parameter.DbType is not null && ResolveTypeName(parameter) is { } mappedType)
         {
             return EncodeWithExplicitType(parameter.Value, mappedType);
         }
 
         throw new TrinoParameterException(
             $"Cannot render a value of type '{parameter.Value.GetType()}' as a Trino literal. Set TrinoParameter.TrinoType or DbType explicitly.");
+    }
+
+    /// <summary>
+    /// The Trino type a parameter declares: <see cref="TrinoParameter.TrinoType"/> if set, otherwise
+    /// the mapping of <see cref="TrinoParameter.DbType"/>, with <see cref="TrinoParameter.Precision"/>
+    /// and <see cref="TrinoParameter.Scale"/> applied to <c>decimal</c>.
+    /// </summary>
+    private static string? ResolveTypeName(TrinoParameter parameter)
+    {
+        if (parameter.TrinoType is { Length: > 0 } explicitType)
+        {
+            return explicitType;
+        }
+
+        if (parameter.DbType is not { } dbType || DbTypeMapping.ToTrinoTypeName(dbType) is not { } mapped)
+        {
+            return null;
+        }
+
+        return mapped == "decimal" && parameter.Precision is { } precision
+            ? string.Create(CultureInfo.InvariantCulture, $"decimal({precision},{parameter.Scale ?? 0})")
+            : mapped;
     }
 
     private static string EncodeWithExplicitType(object value, string trinoType)

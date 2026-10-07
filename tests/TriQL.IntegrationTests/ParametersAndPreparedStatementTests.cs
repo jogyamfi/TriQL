@@ -56,6 +56,22 @@ public sealed class ParametersAndPreparedStatementTests(TrinoContainerFixture fi
     }
 
     [Fact]
+    public async Task NullParameterWithDbType_IsTyped_SoOverloadedFunctionsResolve()
+    {
+        // An untyped NULL makes date_add ambiguous (date vs time(3)) and fails with AMBIGUOUS_FUNCTION_CALL.
+        await using var client = CreateClient(fixture);
+        var parameters = new TrinoParameterCollection
+        {
+            new TrinoParameter("ts", null) { DbType = System.Data.DbType.DateTime },
+        };
+
+        var row = await ExecuteSingleRowAsync(client, "SELECT date_add('day', 1, :ts) IS NULL, typeof(:ts)", parameters);
+
+        Assert.True(row.GetBoolean(0));
+        Assert.Equal("timestamp(6)", row.GetString(1));
+    }
+
+    [Fact]
     public async Task AtSignNamedParameters_AreRewrittenAndBoundByName()
     {
         await using var client = CreateClient(fixture);

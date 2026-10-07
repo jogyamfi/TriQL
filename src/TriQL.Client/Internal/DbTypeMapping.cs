@@ -22,9 +22,11 @@ internal static class DbTypeMapping
         DbType.Binary => "varbinary",
         DbType.Guid => "uuid",
         DbType.Date => "date",
-        DbType.Time => "time",
-        DbType.DateTime or DbType.DateTime2 => "timestamp",
-        DbType.DateTimeOffset => "timestamp with time zone",
+        // Explicit precision: bare `time`/`timestamp` are time(3)/timestamp(3) in Trino, which would
+        // truncate the microseconds SqlLiteralEncoder renders for TimeOnly/DateTime/DateTimeOffset.
+        DbType.Time => "time(6)",
+        DbType.DateTime or DbType.DateTime2 => "timestamp(6)",
+        DbType.DateTimeOffset => "timestamp(6) with time zone",
         _ => null,
     };
 }

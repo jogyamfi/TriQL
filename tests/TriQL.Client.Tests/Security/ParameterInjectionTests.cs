@@ -33,6 +33,36 @@ public sealed class ParameterInjectionTests
         Assert.Equal("NULL", SqlLiteralEncoder.Encode(new TrinoParameter(null, null)));
     }
 
+    [Theory]
+    [InlineData(System.Data.DbType.Int32, "CAST(NULL AS integer)")]
+    [InlineData(System.Data.DbType.String, "CAST(NULL AS varchar)")]
+    [InlineData(System.Data.DbType.DateTime, "CAST(NULL AS timestamp(6))")]
+    [InlineData(System.Data.DbType.DateTimeOffset, "CAST(NULL AS timestamp(6) with time zone)")]
+    [InlineData(System.Data.DbType.Time, "CAST(NULL AS time(6))")]
+    [InlineData(System.Data.DbType.Object, "NULL")]
+    public void Encode_NullWithDbType_RendersTypedNull(System.Data.DbType dbType, string expected)
+    {
+        Assert.Equal(expected, SqlLiteralEncoder.Encode(new TrinoParameter(null, null) { DbType = dbType }));
+    }
+
+    [Fact]
+    public void Encode_NullWithExplicitTrinoType_RendersTypedNull()
+    {
+        var parameter = new TrinoParameter(null, null) { TrinoType = "decimal(10,2)", DbType = System.Data.DbType.String };
+
+        Assert.Equal("CAST(NULL AS decimal(10,2))", SqlLiteralEncoder.Encode(parameter));
+    }
+
+    [Fact]
+    public void Encode_DecimalDbTypeWithPrecision_AppliesPrecisionAndScale()
+    {
+        var withScale = new TrinoParameter(null, null) { DbType = System.Data.DbType.Decimal, Precision = 20, Scale = 4 };
+        var withoutScale = new TrinoParameter(null, null) { DbType = System.Data.DbType.Decimal, Precision = 20 };
+
+        Assert.Equal("CAST(NULL AS decimal(20,4))", SqlLiteralEncoder.Encode(withScale));
+        Assert.Equal("CAST(NULL AS decimal(20,0))", SqlLiteralEncoder.Encode(withoutScale));
+    }
+
     [Fact]
     public void Encode_Boolean_RendersBareKeyword()
     {
