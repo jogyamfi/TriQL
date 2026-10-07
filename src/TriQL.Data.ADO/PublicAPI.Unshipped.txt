@@ -7,3 +7,5 @@ override TriQL.Data.ADO.TrinoDbParameter.Precision.get -> byte
 override TriQL.Data.ADO.TrinoDbParameter.Precision.set -> void
 override TriQL.Data.ADO.TrinoDbParameter.Scale.get -> byte
 override TriQL.Data.ADO.TrinoDbParameter.Scale.set -> void
+TriQL.Data.ADO.TrinoConnectionStringBuilder.ParameterBinding.get -> TriQL.Client.TrinoParameterBinding
+TriQL.Data.ADO.TrinoConnectionStringBuilder.ParameterBinding.set -> void

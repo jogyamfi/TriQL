@@ -137,6 +137,9 @@ internal static class SqlLiteralEncoder
         return negative ? "-" + text : text;
     }
 
+    /// <summary>Renders <paramref name="value"/> as a single-quoted SQL string literal, doubling embedded quotes.</summary>
+    public static string EncodeStringLiteral(string value) => EscapeString(value);
+
     private static string EscapeString(string value) => "'" + value.Replace("'", "''", StringComparison.Ordinal) + "'";
 
     private static string EscapeHex(byte[] bytes) => "'" + System.Convert.ToHexString(bytes) + "'";

@@ -40,6 +40,7 @@ whitespace must be quoted per the standard `DbConnectionStringBuilder` rules.
 | `QueryDataEncoding` | string | **1.0:** empty (opt-in) | `QueryDataEncodings`; empty forces the direct protocol. Set `json+zstd,json+lz4,json` to enable spooling — see [README § Spooling protocol](../README.md#spooling-protocol-opt-in). |
 | `CompressionDisabled` | bool | `false` | `CompressionDisabled` |
 | `TestConnection` | bool | `false` | `TestConnectionOnOpen` |
+| `ParameterBinding` | enum | `PreparedStatementHeader` | `ParameterBinding`. `ExecuteImmediate` sends parameterized statements in the request body (`EXECUTE IMMEDIATE`) instead of the `X-Trino-Prepared-Statement` header — use it behind proxies or gateways with small header limits. |
 | `AllowSelfSignedCertificate` | bool | `false` | `Tls.AllowSelfSignedCertificate` |
 | `AllowHostNameMismatch` | bool | `false` | `Tls.AllowHostNameMismatch` |
 | `UseSystemTrustStore` | bool | `true` | `Tls.UseSystemTrustStore` |

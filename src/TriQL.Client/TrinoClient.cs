@@ -104,7 +104,8 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
     /// <param name="sql">
     /// The statement text. When <paramref name="parameters"/> is non-<see langword="null"/>, this may use
     /// <c>?</c>, <c>:name</c>, or <c>@name</c> placeholders, which are rewritten to positional form
-    /// (FR-8.4, FR-8.5) and bound server-side via <c>PREPARE</c>/<c>EXECUTE</c> (FR-8.1, FR-8.2).
+    /// (FR-8.4, FR-8.5) and bound server-side via <c>PREPARE</c>/<c>EXECUTE</c> (FR-8.1, FR-8.2), or via
+    /// <c>EXECUTE IMMEDIATE</c> when <see cref="TrinoSessionOptions.ParameterBinding"/> selects it.
     /// Client-side interpolation of parameter values into <paramref name="sql"/> is never performed.
     /// </param>
     /// <param name="parameters">
@@ -115,6 +116,7 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
     /// When <paramref name="parameters"/> is non-<see langword="null"/> and this is <see langword="true"/>,
     /// the generated prepared statement is left registered on <see cref="Session"/> after submission
     /// instead of being deallocated (FR-8.9). Ignored when <paramref name="parameters"/> is <see langword="null"/>.
+    /// Always uses the prepared-statement header path, whatever <see cref="TrinoSessionOptions.ParameterBinding"/> says.
     /// </param>
     /// <param name="cancellationToken">A token to cancel the initial submission.</param>
     /// <exception cref="ArgumentException"><paramref name="sql"/> is null or empty.</exception>
@@ -135,10 +137,18 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
         var (rewrittenSql, placeholderNames) = ParameterRewriter.Rewrite(sql);
         var orderedParameters = ParameterBinder.Bind(placeholderNames, parameters);
 
-        var name = "triql_" + Guid.NewGuid().ToString("N");
         var usingClause = orderedParameters.Count == 0
             ? string.Empty
             : " USING " + string.Join(", ", orderedParameters.Select(SqlLiteralEncoder.Encode));
+
+        // A retained prepared statement must be registered on the session, so it always takes the header path.
+        if (Options.ParameterBinding == TrinoParameterBinding.ExecuteImmediate && !retainPreparedStatement)
+        {
+            return await ExecuteCoreAsync(
+                $"EXECUTE IMMEDIATE {SqlLiteralEncoder.EncodeStringLiteral(rewrittenSql)}{usingClause}", sql, cancellationToken).ConfigureAwait(false);
+        }
+
+        var name = "triql_" + Guid.NewGuid().ToString("N");
 
         Session.RegisterPreparedStatement(name, rewrittenSql);
         try

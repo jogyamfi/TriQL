@@ -55,6 +55,40 @@ public sealed class ParametersAndPreparedStatementTests(TrinoContainerFixture fi
         Assert.Equal(42L, row.GetInt64(0));
     }
 
+    [Theory]
+    [InlineData(TrinoParameterBinding.PreparedStatementHeader)]
+    [InlineData(TrinoParameterBinding.ExecuteImmediate)]
+    public async Task BothBindingModes_BindNamedParameters_WithQuotesInStatementAndValues(TrinoParameterBinding binding)
+    {
+        await using var client = new TrinoClient(new TrinoSessionOptions { Server = fixture.ServerUri, ParameterBinding = binding });
+        var parameters = new TrinoParameterCollection();
+        parameters.Add("name", "O'Brien");
+        parameters.Add("n", 2);
+
+        var row = await ExecuteSingleRowAsync(client, "SELECT 'it''s' || ' ' || :name, :n * 21 -- trailing 'comment'", parameters);
+
+        Assert.Equal("it's O'Brien", row.GetString(0));
+        Assert.Equal(42L, row.GetInt64(1));
+    }
+
+    [Fact]
+    public async Task ExecuteImmediate_BindsAStatementTooLargeForATypicalProxyHeaderLimit()
+    {
+        // 5,000 placeholders make a ~45 KB statement: within the coordinator's limits on either path,
+        // but past the 8-16 KB per-header limits common in front of it, which ExecuteImmediate avoids.
+        await using var client = new TrinoClient(new TrinoSessionOptions { Server = fixture.ServerUri, ParameterBinding = TrinoParameterBinding.ExecuteImmediate });
+        var parameters = new TrinoParameterCollection();
+        for (var i = 0; i < 5_000; i++)
+        {
+            parameters.Add(i);
+        }
+
+        var sql = "SELECT count(*) FROM (VALUES 1, 4999, 5000) t(x) WHERE x IN (" + string.Join(", ", Enumerable.Repeat("?", 5_000)) + ")";
+        var row = await ExecuteSingleRowAsync(client, sql, parameters);
+
+        Assert.Equal(2L, row.GetInt64(0));
+    }
+
     [Fact]
     public async Task NullParameterWithDbType_IsTyped_SoOverloadedFunctionsResolve()
     {

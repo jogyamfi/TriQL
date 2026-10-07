@@ -132,7 +132,7 @@ relies on it. Facts marked **(verify)** are believed correct but have not yet be
 | T3 | No `RETURNING`/`OUTPUT`; Iceberg has no identity columns, sequences or column defaults. | Decision 3 |
 | T4 | Identifiers use `"double quotes"`, with `""` as the escape. **Identifiers are case-insensitive and stored lower-case**, even when quoted. | `TrinoSqlGenerationHelper`; model validation rejects names that differ only by case (Phase 5); scaffolding maps lower-case names back to PascalCase (Phase 9) |
 | T5 | String literals use `'…'` with `''` as the escape. There are no backslash escapes. `U&'…'` exists for Unicode escapes. | One escaping helper, shared with `SqlLiteralEncoder` |
-| T6 | Parameters are bound with `PREPARE`/`EXECUTE … USING` (the prepared SQL travels in the `X-Trino-Prepared-Statement` **HTTP header**) or with `EXECUTE IMMEDIATE '<sql>' USING …` (Trino 418+; the SQL travels in the body). | The header path has a size limit that large EF statements exceed. Phase 0 G1 switches to `EXECUTE IMMEDIATE`. |
+| T6 | Parameters are bound with `PREPARE`/`EXECUTE … USING` (the prepared SQL travels in the `X-Trino-Prepared-Statement` **HTTP header**) or with `EXECUTE IMMEDIATE '<sql>' USING …` (Trino 418+; the SQL travels in the body). **Measured on 466 (2026-10-07):** the coordinator accepts the header path up to ~1.7 MB of statement text (HTTP 431 by 3.5 MB); `EXECUTE IMMEDIATE` fails earlier, with `QUERY_TEXT_TOO_LARGE` (`query.max-length`, 1,000,000 characters) at ~1 MB. | The coordinator is not the constraint; proxies/gateways in front of it (8–16 KB per header is common) are. `ParameterBinding=ExecuteImmediate` (EF0-T1) is the opt-in for those deployments. |
 | T7 | Integer `/` truncates, like .NET; `%` is modulo; `\|\|` and `concat()` concatenate strings. | No integer-division rewrite (unlike Databricks); `+` on strings → `\|\|` |
 | T8 | Paging syntax is `OFFSET m ROWS` **before** `LIMIT n` (or `FETCH FIRST n ROWS ONLY`). Parameters in `LIMIT`/`OFFSET` **(verify)**. | `TrinoQuerySqlGenerator.GenerateLimitOffset`; inline `Take`/`Skip` as literals if parameters are rejected |
 | T9 | Native `BOOLEAN`; `IS [NOT] DISTINCT FROM` is supported. | No `CASE` wrapping for predicates; null-safe equality optimisation |
@@ -157,12 +157,12 @@ Findings from reading `src/TriQL.Client` and `src/TriQL.Data.ADO`:
 
 | # | Gap | Where | Impact on EF |
 |---|---|---|---|
-| G1 | Parameterized SQL is registered as a session prepared statement and sent in the `X-Trino-Prepared-Statement` header on every request. | [TrinoClient.cs:143](../src/TriQL.Client/TrinoClient.cs#L143), [ProtocolHeaders.cs:40](../src/TriQL.Client/Internal/ProtocolHeaders.cs#L40) | Multi-row inserts, large `Contains` lists and wide projections exceed coordinator header limits (`http-server.max-request-header-size`), giving "Request Header Fields Too Large". This is the most likely failure in production. |
+| G1 | Parameterized SQL is registered as a session prepared statement and sent in the `X-Trino-Prepared-Statement` header on every request. | [TrinoClient.cs:143](../src/TriQL.Client/TrinoClient.cs#L143), [ProtocolHeaders.cs:40](../src/TriQL.Client/Internal/ProtocolHeaders.cs#L40) | **Revised after measurement (T6):** the default coordinator accepts ~1.7 MB headers, so this only fails behind proxies or gateways with small header limits. Addressed by the opt-in `ExecuteImmediate` binding (EF0-T1), not by changing the default. |
 | G2 | Each `TrinoConnection.Open()` creates a new `TrinoClient` and, without an `IHttpClientFactory`, a new `SocketsHttpHandler`. `Close()` disposes it. | [TrinoConnection.cs:117-118](../src/TriQL.Data.ADO/TrinoConnection.cs#L117-L118), `TrinoClient.CreateOwnedInvoker` | EF opens and closes the connection around every command, so every query pays a TCP + TLS handshake, and sockets churn. |
 | G3 | `GetFieldValue<T>` returns only the exact CLR type (or `JsonDocument`). | `TrinoRow.GetFieldValue<T>` ([TrinoRow.cs:81-105](../src/TriQL.Client/TrinoRow.cs#L81-L105)) | EF materialisers call `GetFieldValue<T>` for types without a dedicated getter. Fails for `long` on `integer`, `decimal` on `decimal(p > 28)` (which returns `TrinoBigDecimal`), `DateTime` on `timestamp(p > 7)`, `byte`/`ushort`/`uint`/`ulong`, `char`, enums. |
 | G4 | `TrinoDataReader.RecordsAffected` returns `-1` whenever the result has columns. | [TrinoDataReader.cs:92-111](../src/TriQL.Data.ADO/TrinoDataReader.cs#L92-L111) | Trino DML returns a `rows` column (T2), so a reader over `UPDATE` reports `-1`. EF's concurrency checks would then fail. Also verify that `TrinoResultSet.UpdateCount` reflects the **final** page, not only the initial response. |
 | G5 | `TrinoDbParameter.Precision`/`Scale` are declared with `new`, hiding `DbParameter.Precision`/`Scale` instead of overriding them. | [TrinoDbParameter.cs:81-84](../src/TriQL.Data.ADO/TrinoDbParameter.cs#L81-L84) | EF's `RelationalTypeMapping.ConfigureParameter` sets precision and scale through the `DbParameter` base type, so the values are silently lost. |
-| G6 | The session time zone defaults to the client machine's zone, and the builder cannot tell "unset" from "set". | `TrinoSessionOptions.TimeZone` | Results of `DateTime.Now`, `DateTimeOffset` parts and timestamp casts differ between machines. |
+| G6 | The session time zone defaults to the client machine's zone. | `TrinoSessionOptions.TimeZone` | Results of `DateTime.Now`, `DateTimeOffset` parts and timestamp casts differ between machines. **No core change needed:** `TrinoConnectionStringBuilder.TimeZone` is `null` unless the connection string sets it, so the EF provider can default to UTC on its own (EF1-T5). |
 | G7 | A `null` parameter renders as an untyped `NULL`, even when `DbType`/`TrinoType` is set. | [SqlLiteralEncoder.cs:19-22](../src/TriQL.Client/Internal/SqlLiteralEncoder.cs#L19-L22) | `COALESCE(?, col)`, `CASE`, `SELECT ?` and some function arguments fail type inference with `unknown`. |
 | G8 | `DbType.DateTime` maps to bare `timestamp`, which is `timestamp(3)`. | [DbTypeMapping.cs](../src/TriQL.Client/Internal/DbTypeMapping.cs) | Only matters on the explicit-type path (CLR-type encoding wins today), but EF sends typed nulls through it once G7 is fixed, so this needs `timestamp(6)`. |
 | G9 | Query failures carry `ErrorName`/`ErrorType`, but there is no notion of a *transient* query error. `IsRetryable` covers transport failures only. | `TrinoQueryException`, `RetryPolicy` | The EF execution strategy needs a shared classification (`ICEBERG_COMMIT_ERROR`, `SERVER_STARTING_UP`, `CLUSTER_OUT_OF_MEMORY`, `TOO_MANY_REQUESTS_FAILED`, 429/503). |
@@ -313,7 +313,9 @@ to the public API, or change behaviour behind an opt-in.
   `EXECUTE IMMEDIATE '<rewritten sql, '' escaped>' USING <literals>` in the request body and
   registers nothing in the session. Values are still bound by the server, so the "no client-side
   interpolation" rule (FR-8.x, SEC-4) still holds. The 1.x default stays `PreparedStatementHeader`.
-  The EF provider forces `ExecuteImmediate`. Traces keep reporting the caller's original SQL.
+  Traces keep reporting the caller's original SQL. **Done.** Measurement (T6) showed the header
+  path has the higher ceiling at the coordinator, so the EF provider does *not* force
+  `ExecuteImmediate`; it is a documented setting for proxied deployments.
 - **EF0-T2 — HTTP connection reuse (G2).** Add a process-wide, reference-counted handler cache in
   `TriQL.Data.ADO`, keyed by the HTTP-relevant options (server, TLS settings, proxy, timeouts,
   authenticator identity). `TrinoConnection` borrows a shared `HttpMessageInvoker` instead of owning
@@ -337,9 +339,9 @@ to the public API, or change behaviour behind an opt-in.
 - **EF0-T5 — Override `Precision`/`Scale` (G5).** Change `TrinoDbParameter.Precision`/`Scale`
   from `new` to `override`. Callers keep binary compatibility, because the accessor methods stay on
   `TrinoDbParameter`. Update the PublicAPI baselines.
-- **EF0-T6 — Explicit time-zone tracking (G6).** Record whether `TimeZone` was set explicitly in
-  `TrinoConnectionStringBuilder` and `TrinoSessionOptions` (an internal flag is enough). This lets
-  the EF provider default to `UTC` without overriding a user's choice.
+- **EF0-T6 — Explicit time-zone tracking (G6).** **Not needed.** `TrinoConnectionStringBuilder.TimeZone`
+  is already `null` unless the connection string sets it; the EF provider reads it in EF1-T5. Callers
+  who pass `TrinoSessionOptions` directly keep whatever zone they set.
 - **EF0-T7 — Typed nulls and precise timestamps (G7, G8).** When `Value` is null and
   `TrinoType`/`DbType` is known, render `CAST(NULL AS <type>)`. Map `DbType.DateTime`/`DateTime2` to
   `timestamp(6)` and `DbType.DateTimeOffset` to `timestamp(6) with time zone`.
@@ -413,8 +415,8 @@ validation passes.
   - Check the list of required services against the EF 10 source of
     `EntityFrameworkRelationalServicesBuilder`.
 - **EF1-T5 — `TrinoRelationalConnection : RelationalConnection`.**
-  - `CreateDbConnection()` → `new TrinoConnection(...)`, forcing `ParameterBinding=ExecuteImmediate`
-    and, unless the user set a zone explicitly, `TimeZone=UTC`.
+  - `CreateDbConnection()` → `new TrinoConnection(...)`, setting `TimeZone=UTC` unless the
+    connection string sets a zone. `ParameterBinding` is left to the connection string (EF0-T1).
   - `BeginTransaction*`/`UseTransaction*`/`EnlistTransaction` throw (Decision 2), and
     `SupportsAmbientTransactions => false`.
   - Set the default `AutoTransactionBehavior` to `Never`. Verify which hook EF 10 honours, as
@@ -816,7 +818,7 @@ produces a compiling `DbContext` and entities for existing tables and views.
 
 | # | Risk | Likelihood | Mitigation |
 |---|---|---|---|
-| R1 | Large parameterized statements exceed header limits | High (without EF0-T1) | `EXECUTE IMMEDIATE` path; a test with 2,000 parameters |
+| R1 | Large parameterized statements exceed header limits of proxies/gateways in front of the coordinator | Medium | Opt-in `ParameterBinding=ExecuteImmediate` (done); documented in `efcore.md` troubleshooting |
 | R2 | Per-query HTTP handshakes make EF slow | High (without EF0-T2) | Shared handler cache; benchmark in EF7-T6 |
 | R3 | Non-atomic `SaveChanges` surprises users | High | Decision 2: no fake transactions; a warning event; prominent docs; combined inserts are atomic |
 | R4 | Iceberg metadata-only `DELETE` reports no `updateCount` → false concurrency failures | Medium | Verify in EF6-T2; key-predicate deletes are row-level; fall back to the `rows` column |
@@ -845,5 +847,6 @@ Defaults are chosen for all of these, so none blocks the work.
    after measuring the cost of the emulation in EF4.*
 5. **Scaffolding several catalogs:** accept `catalog.schema` in `--schema`. *Default: yes, if EF's
    option parsing allows it; otherwise use the connection's catalog only.*
-6. **Default value for `ParameterBinding` in the core:** keep `PreparedStatementHeader` for 1.x and
-   switch to `ExecuteImmediate` in 2.0. *Default: yes; only the EF provider forces the new path.*
+6. **Default value for `ParameterBinding`:** `PreparedStatementHeader` in both the core and the EF
+   provider, because it has the higher limit at the coordinator (T6). `ExecuteImmediate` is opt-in.
+   *Revisit if users report proxy failures.*
