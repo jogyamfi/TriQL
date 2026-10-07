@@ -26,6 +26,8 @@ namespace TriQL.IntegrationTests;
 /// support modifying table rows" in every case), so there is no writable connector in the default
 /// image against which a successful UPDATE or DELETE affected-count can be demonstrated. This is a
 /// genuine environment constraint, not a product bug — see the task report for detail.
+/// Successful UPDATE/DELETE/MERGE counts are asserted against the fixture's Iceberg catalog in
+/// <see cref="AdoIcebergDmlTests"/>.
 /// </para>
 /// </remarks>
 [Collection(TrinoContainerCollection.Name)]

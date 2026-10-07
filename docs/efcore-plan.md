@@ -139,7 +139,7 @@ relies on it. Facts marked **(verify)** are believed correct but have not yet be
 | T10 | No `APPLY`; `CROSS JOIN LATERAL (…)` and `LEFT JOIN LATERAL (…) ON TRUE` exist. Correlated-subquery support is partial (e.g. correlated `LIMIT`) **(verify)**. | `VisitCrossApply`/`VisitOuterApply` → `LATERAL`; translation errors for shapes that fail |
 | T11 | `UPDATE … SET … WHERE` and `DELETE … WHERE` accept subqueries in `WHERE` on Iceberg. There is no `UPDATE … FROM`. `MERGE INTO` is supported on Iceberg. | `ExecuteUpdate` with joins → `WHERE EXISTS (…)`; values from another table → generated `MERGE` (Phase 7) |
 | T12 | Bare `timestamp` means `timestamp(3)`. Iceberg only stores `timestamp(6)` and `timestamp(6) with time zone`. | `DateTime` → `timestamp(6)`, `DateTimeOffset` → `timestamp(6) with time zone` |
-| T13 | Iceberg has no `tinyint`, `smallint` or `char(n)`, and does not enforce `varchar(n)`. | Default DDL types are Iceberg-safe: small integers widen to `integer`, strings are `varchar` (Phase 2) |
+| T13 | **Measured on 466:** Iceberg accepts `tinyint`/`smallint`/`char(n)`/`varchar(n)`/`timestamp(3)` in DDL but silently stores `integer`/`integer`/`varchar`/`varchar`/`timestamp(6)`. | DDL does not fail; columns read back wider, and the EF0-T3 conversions narrow them. Default DDL types still use the stored types, so `GenerateCreateScript` shows the truth (Phase 2) |
 | T14 | Iceberg `timestamp with time zone` is stored as a UTC instant, so the offset is not preserved. | Documented; `DateTimeOffset` values read back in UTC |
 | T15 | `round()` rounds half away from zero; .NET's `Math.Round` defaults to half-to-even. | `Math.Round(x)` needs an emulation or translates only with `MidpointRounding.AwayFromZero` (Phase 4) |
 | T16 | String comparison is binary and case-sensitive. `LIKE` has no default escape character; `ESCAPE` must be stated. | Matches C# `==`; `StartsWith` etc. emit `LIKE … ESCAPE '\'` |
@@ -290,7 +290,7 @@ Phase 9 and Phases 6–8.
 |---|---|---|---|
 | Unit / SQL baseline | `TriQL.EntityFrameworkCore.Tests` | Nothing (fake connection) | `ci.yml`, every PR |
 | Functional — read | `TriQL.EntityFrameworkCore.FunctionalTests`, `Category=EfRead` | `trinodb/trino` (memory + tpch catalogs) | `ci.yml` |
-| Functional — write | `TriQL.EntityFrameworkCore.FunctionalTests`, `Category=EfIceberg` | Trino + Iceberg catalog on MinIO | `ci.yml` (Linux job) and `nightly.yml` matrix `{466, latest}` |
+| Functional — write | `TriQL.EntityFrameworkCore.FunctionalTests`, `Category=EfIceberg` | Trino + the fixture's local-disk Iceberg catalog | `ci.yml` and `nightly.yml` matrix `{466, latest}` |
 
 Unlike BricksNet, which can only run live tests locally, every test lane here runs in CI. The
 existing Testcontainers and MinIO fixtures do most of the work.
@@ -353,11 +353,13 @@ to the public API, or change behaviour behind an opt-in.
 - **EF0-T8 — Transient classification (G9).** Add `bool TrinoQueryException.IsTransient`, computed
   from a documented `ErrorName` set and the HTTP status. The EF detector reuses it, and so can other
   callers' retry policies.
-- **EF0-T9 — Iceberg test fixture.** Add `IcebergTrinoFixture` to the integration tests. It reuses
-  `MinioFixture` and mounts `etc/catalog/iceberg.properties`
-  (`connector.name=iceberg`, `iceberg.catalog.type=jdbc` or the file metastore, S3 pointed at MinIO).
-  Add integration tests that prove UPDATE/DELETE/MERGE row counts through `TrinoCommand`. This
-  closes the gap `AdoDdlDmlTests` documents today.
+- **EF0-T9 — Iceberg test fixture.** **Done, without MinIO.** `TrinoContainerFixture` starts the
+  container with `CATALOG_MANAGEMENT=dynamic` and runs `CREATE CATALOG iceberg USING iceberg`, using
+  `iceberg.catalog.type=testing_file_metastore` and `fs.hadoop.enabled=true` with `file://` paths on
+  the container's disk. Verified on 466 and 483. Every integration test class can use
+  `TrinoContainerFixture.IcebergCatalog`, so the Iceberg lane is part of the normal integration job
+  rather than a separate MinIO job. `AdoIcebergDmlTests` asserts UPDATE (including a stale
+  concurrency token → 0), DELETE (filtered by subquery, and unconditional) and MERGE counts.
 
 ### Tests
 - Extend `TrinoCommandAndReaderTests` (the conversion matrix, `RecordsAffected` on DML, typed
@@ -826,14 +828,14 @@ produces a compiling `DbContext` and entities for existing tables and views.
 | R1 | Large parameterized statements exceed header limits of proxies/gateways in front of the coordinator | Medium | Opt-in `ParameterBinding=ExecuteImmediate` (done); documented in `efcore.md` troubleshooting |
 | R2 | Per-query HTTP handshakes make EF slow | Low (EF0-T2 done) | Handler reused per connection and per data source; benchmark in EF7-T6 |
 | R3 | Non-atomic `SaveChanges` surprises users | High | Decision 2: no fake transactions; a warning event; prominent docs; combined inserts are atomic |
-| R4 | Iceberg metadata-only `DELETE` reports no `updateCount` → false concurrency failures | Medium | Verify in EF6-T2; key-predicate deletes are row-level; fall back to the `rows` column |
+| R4 | Iceberg metadata-only `DELETE` reports no `updateCount` → false concurrency failures | Retired | Measured on 466 and 483: an unconditional `DELETE` reports its count (`AdoIcebergDmlTests`) |
 | R5 | Correlated-subquery limits break common EF patterns | Medium | Live verification in EF3-T8; clear translation errors; docs steer to joins and split queries |
 | R6 | EF internal APIs change between 10.x patches | Medium | Version range `[10.0.x, 11.0.0)`; keep overrides minimal; nightly builds against the latest 10.0 patch |
 | R7 | Retries re-apply committed statements | Medium | Per-statement retry tagging (EF6-T6) |
 | R8 | Single-command-per-connection breaks split queries | Medium | Verify and enforce buffering in EF3-T7 |
 | R9 | String escaping bug → injection | Low (high impact) | Bound parameters by default; one helper shared with `SqlLiteralEncoder`; fuzz tests |
 | R10 | Behaviour differs on connectors other than Iceberg | Medium | Reads tested on memory/tpch; writes documented as Iceberg-verified; connector errors surface unchanged |
-| R11 | Iceberg + MinIO fixture is slow or flaky in CI | Medium | Reuse `MinioFixture`; one container per collection; schema-per-class isolation |
+| R11 | Iceberg fixture is slow or flaky in CI | Low | Local-disk Iceberg catalog in the shared container, no MinIO (EF0-T9); schema-per-class isolation |
 | R12 | `GetFieldValue<T>` conversion change alters 1.x behaviour | Low | Only widens what previously threw `InvalidCastException`; noted in release notes |
 
 ---
@@ -842,8 +844,8 @@ produces a compiling `DbContext` and entities for existing tables and views.
 
 Defaults are chosen for all of these, so none blocks the work.
 
-1. **Iceberg metastore for the test fixture:** JDBC catalog (needs a PostgreSQL container) or file
-   metastore on MinIO (fewer containers). *Default: file/Hive metastore on MinIO.* Decide in EF0-T9.
+1. ~~**Iceberg metastore for the test fixture.**~~ Resolved in EF0-T9: the file metastore on the
+   container's local disk, with no MinIO or PostgreSQL.
 2. **Session time zone:** default UTC when not set explicitly (EF0-T6). *Default: yes*; it can be
    turned off with `UseUtcSessionTimeZone(false)`.
 3. **`TimeSpan` storage:** `bigint` ticks (sortable, Iceberg-safe) or `varchar` (readable, as in
