@@ -112,6 +112,24 @@ public sealed class ExceptionsTests
         Assert.False(ex.IsRetryable);
     }
 
+    [Theory]
+    [InlineData("SERVER_STARTING_UP", TrinoErrorType.InternalError, true)]
+    [InlineData("CLUSTER_OUT_OF_MEMORY", TrinoErrorType.InsufficientResources, true)]
+    [InlineData("REMOTE_HOST_GONE", TrinoErrorType.InternalError, true)]
+    [InlineData("ICEBERG_COMMIT_ERROR", TrinoErrorType.External, true)]
+    [InlineData("SYNTAX_ERROR", TrinoErrorType.UserError, false)]
+    [InlineData("TABLE_NOT_FOUND", TrinoErrorType.UserError, false)]
+    [InlineData("EXCEEDED_TIME_LIMIT", TrinoErrorType.InsufficientResources, false)]
+    public void TrinoQueryException_IsTransient_ClassifiesByErrorName(string errorName, TrinoErrorType errorType, bool expected)
+    {
+        var ex = new TrinoQueryException("failed", "q1", 1, errorName, errorType);
+
+        Assert.Equal(expected, ex.IsTransient);
+
+        // Query failures are never retried by TriQL itself, transient or not.
+        Assert.False(ex.IsRetryable);
+    }
+
     [Fact]
     public void TrinoQueryException_ExposesErrorDetails()
     {
