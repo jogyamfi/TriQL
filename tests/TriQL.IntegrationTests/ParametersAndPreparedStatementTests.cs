@@ -90,6 +90,24 @@ public sealed class ParametersAndPreparedStatementTests(TrinoContainerFixture fi
     }
 
     [Fact]
+    public async Task FloatingPointParameters_KeepTheirTrinoType_RoundTrippingExactly()
+    {
+        await using var client = CreateClient(fixture);
+        var parameters = new TrinoParameterCollection();
+        parameters.Add("f", 0.1f);
+        parameters.Add("d", 0.1d);
+        parameters.Add("nan", double.NaN);
+
+        var row = await ExecuteSingleRowAsync(client, "SELECT :f, :d, :nan, typeof(:f), typeof(:d)", parameters);
+
+        Assert.Equal(0.1f, row.GetFloat(0));
+        Assert.Equal(0.1d, row.GetDouble(1));
+        Assert.True(double.IsNaN(row.GetDouble(2)));
+        Assert.Equal("real", row.GetString(3));
+        Assert.Equal("double", row.GetString(4));
+    }
+
+    [Fact]
     public async Task NullParameterWithDbType_IsTyped_SoOverloadedFunctionsResolve()
     {
         // An untyped NULL makes date_add ambiguous (date vs time(3)) and fails with AMBIGUOUS_FUNCTION_CALL.

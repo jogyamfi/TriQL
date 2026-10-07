@@ -86,8 +86,8 @@ internal static class SqlLiteralEncoder
 
             // Beyond bigint's range a bare integer literal is invalid in Trino, so render those as decimal.
             ulong u => u <= long.MaxValue ? u.ToString(CultureInfo.InvariantCulture) : $"DECIMAL {EscapeString(u.ToString(CultureInfo.InvariantCulture))}",
-            float f => EncodeFloatingPoint(f, double.IsNaN(f), double.IsPositiveInfinity(f), double.IsNegativeInfinity(f), "REAL"),
-            double d => EncodeFloatingPoint(d, double.IsNaN(d), double.IsPositiveInfinity(d), double.IsNegativeInfinity(d), "DOUBLE"),
+            float f => EncodeFloatingPoint(f, f.ToString("R", CultureInfo.InvariantCulture), "REAL"),
+            double d => EncodeFloatingPoint(d, d.ToString("R", CultureInfo.InvariantCulture), "DOUBLE"),
             decimal dec => $"DECIMAL {EscapeString(dec.ToString(CultureInfo.InvariantCulture))}",
             TrinoBigDecimal bd => $"DECIMAL {EscapeString(bd.ToString(null, CultureInfo.InvariantCulture))}",
             string s => EscapeString(s),
@@ -110,24 +110,23 @@ internal static class SqlLiteralEncoder
         return encoded.Length > 0;
     }
 
-    private static string EncodeFloatingPoint(double value, bool isNaN, bool isPositiveInfinity, bool isNegativeInfinity, string typeName)
+    /// <summary>
+    /// A typed <c>REAL '…'</c>/<c>DOUBLE '…'</c> literal. A bare <c>1.5</c> would be <c>decimal(2,1)</c>
+    /// in Trino, so the parameter would not have its CLR type (e.g. <c>SELECT ?</c> returned a decimal).
+    /// <paramref name="roundTripText"/> is formatted from the original type, so a <see cref="float"/>
+    /// does not carry the extra digits of its widened <see cref="double"/>.
+    /// </summary>
+    private static string EncodeFloatingPoint(double value, string roundTripText, string typeName)
     {
-        if (isNaN)
+        var text = value switch
         {
-            return $"CAST('NaN' AS {typeName})";
-        }
+            double.NaN => "NaN",
+            double.PositiveInfinity => "Infinity",
+            double.NegativeInfinity => "-Infinity",
+            _ => roundTripText,
+        };
 
-        if (isPositiveInfinity)
-        {
-            return $"CAST('Infinity' AS {typeName})";
-        }
-
-        if (isNegativeInfinity)
-        {
-            return $"CAST('-Infinity' AS {typeName})";
-        }
-
-        return value.ToString(CultureInfo.InvariantCulture);
+        return $"{typeName} {EscapeString(text)}";
     }
 
     private static string FormatIntervalDayToSecond(TimeSpan value)

@@ -97,6 +97,26 @@ public sealed class ParameterInjectionTests
         Assert.Equal(expected, SqlLiteralEncoder.Encode(new TrinoParameter(null, null) { DbType = dbType }));
     }
 
+    [Theory]
+    [InlineData(1.5f, "REAL '1.5'")]
+    [InlineData(0.1f, "REAL '0.1'")]
+    [InlineData(float.NaN, "REAL 'NaN'")]
+    [InlineData(float.NegativeInfinity, "REAL '-Infinity'")]
+    public void Encode_Float_RendersATypedRealLiteral_WithItsOwnDigits(float value, string expected)
+    {
+        Assert.Equal(expected, SqlLiteralEncoder.Encode(new TrinoParameter(null, value)));
+    }
+
+    [Theory]
+    [InlineData(1.5d, "DOUBLE '1.5'")]
+    [InlineData(1e300d, "DOUBLE '1E+300'")]
+    [InlineData(double.Epsilon, "DOUBLE '5E-324'")]
+    [InlineData(double.PositiveInfinity, "DOUBLE 'Infinity'")]
+    public void Encode_Double_RendersATypedDoubleLiteral(double value, string expected)
+    {
+        Assert.Equal(expected, SqlLiteralEncoder.Encode(new TrinoParameter(null, value)));
+    }
+
     [Fact]
     public void Encode_Varbinary_RendersHexLiteral()
     {
