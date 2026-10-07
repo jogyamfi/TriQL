@@ -35,6 +35,24 @@ additionally permit numeric widening (e.g. `GetInt64` succeeds on an `integer` c
 | `row(...)` | `ITrinoRowValue` | Named field access plus positional access. |
 | unknown / `null` column type | `object` | Value is always `null`. |
 
+## Conversions applied by `GetFieldValue<T>`
+
+When the value is not already a `T`, `GetFieldValue<T>` (on `TrinoRow` and `TrinoDataReader`)
+converts. `Nullable<T>` targets are supported. A conversion that would lose data throws
+`OverflowException`; a target with no conversion throws `InvalidCastException`.
+
+| Target | Accepted from |
+|---|---|
+| `sbyte`, `short`, `int`, `long`, `byte`, `ushort`, `uint`, `ulong` | any integer column, or a `decimal` value with no fractional part (checked) |
+| enums | any integer column (via the underlying value) |
+| `float`, `double` | any integer or floating-point column |
+| `decimal` | any integer column, `decimal(p ≤ 38)` (via `TrinoBigDecimal` when `p > 28`), `real`, `double` |
+| `DateTime` | `timestamp(p > 7)`, `date` (midnight), `timestamp with time zone` (as UTC) |
+| `DateTimeOffset` | `timestamp(p > 7) with time zone` |
+| `TimeOnly` | `time(p > 7)` |
+| `Guid` | `varchar` holding a UUID |
+| `char` | a one-character `varchar` |
+
 ## Custom precision types
 
 `TrinoBigDecimal`, `TrinoTime`, `TrinoTimeWithTimeZone`, `TrinoTimestamp`,
