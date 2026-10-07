@@ -7,7 +7,7 @@
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
 | Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
 | Date | 2026-10-07 |
-| Status | Phases 0–2 complete (2026-10-07, branch `feature/efcore-provider`); Phase 3 next |
+| Status | Phases 0–3 complete (2026-10-07, branch `feature/efcore-provider`); Phase 4 next |
 
 ---
 
@@ -134,9 +134,9 @@ relies on it. Facts marked **(verify)** are believed correct but have not yet be
 | T5 | String literals use `'…'` with `''` as the escape. There are no backslash escapes. `U&'…'` exists for Unicode escapes. | One escaping helper, shared with `SqlLiteralEncoder` |
 | T6 | Parameters are bound with `PREPARE`/`EXECUTE … USING` (the prepared SQL travels in the `X-Trino-Prepared-Statement` **HTTP header**) or with `EXECUTE IMMEDIATE '<sql>' USING …` (Trino 418+; the SQL travels in the body). **Measured on 466 (2026-10-07):** the coordinator accepts the header path up to ~1.7 MB of statement text (HTTP 431 by 3.5 MB); `EXECUTE IMMEDIATE` fails earlier, with `QUERY_TEXT_TOO_LARGE` (`query.max-length`, 1,000,000 characters) at ~1 MB. | The coordinator is not the constraint; proxies/gateways in front of it (8–16 KB per header is common) are. `ParameterBinding=ExecuteImmediate` (EF0-T1) is the opt-in for those deployments. |
 | T7 | Integer `/` truncates, like .NET; `%` is modulo; `\|\|` and `concat()` concatenate strings. | No integer-division rewrite (unlike Databricks); `+` on strings → `\|\|` |
-| T8 | Paging syntax is `OFFSET m ROWS` **before** `LIMIT n` (or `FETCH FIRST n ROWS ONLY`). Parameters in `LIMIT`/`OFFSET` **(verify)**. | `TrinoQuerySqlGenerator.GenerateLimitOffset`; inline `Take`/`Skip` as literals if parameters are rejected |
+| T8 | Paging syntax is `OFFSET m` **before** `LIMIT n`. **Measured:** parameters are accepted in both. | `TrinoQuerySqlGenerator.GenerateLimitOffset`; no literal inlining needed |
 | T9 | Native `BOOLEAN`; `IS [NOT] DISTINCT FROM` is supported. | No `CASE` wrapping for predicates; null-safe equality optimisation |
-| T10 | No `APPLY`; `CROSS JOIN LATERAL (…)` and `LEFT JOIN LATERAL (…) ON TRUE` exist. Correlated-subquery support is partial (e.g. correlated `LIMIT`) **(verify)**. | `VisitCrossApply`/`VisitOuterApply` → `LATERAL`; translation errors for shapes that fail |
+| T10 | No `APPLY`; `CROSS JOIN LATERAL (…)` and `LEFT JOIN LATERAL (…) ON TRUE` exist. Correlated-subquery support is partial; the measured matrix is in Phase 3's status. | `VisitCrossApply`/`VisitOuterApply` → `LATERAL`; `TrinoQueryTranslationPostprocessor` rejects the unsupported shapes |
 | T11 | `UPDATE … SET … WHERE` and `DELETE … WHERE` accept subqueries in `WHERE` on Iceberg. There is no `UPDATE … FROM`. `MERGE INTO` is supported on Iceberg. | `ExecuteUpdate` with joins → `WHERE EXISTS (…)`; values from another table → generated `MERGE` (Phase 7) |
 | T12 | Bare `timestamp` means `timestamp(3)`. Iceberg only stores `timestamp(6)` and `timestamp(6) with time zone`. | `DateTime` → `timestamp(6)`, `DateTimeOffset` → `timestamp(6) with time zone` |
 | T13 | **Measured on 466:** Iceberg accepts `tinyint`/`smallint`/`char(n)`/`varchar(n)`/`timestamp(3)` in DDL but silently stores `integer`/`integer`/`varchar`/`varchar`/`timestamp(6)`. | DDL does not fail; columns read back wider, and the EF0-T3 conversions narrow them. Default DDL types still use the stored types, so `GenerateCreateScript` shows the truth (Phase 2) |
@@ -551,6 +551,38 @@ parameter configuration and reader method. Default DDL types are Iceberg-safe (T
 
 ### Goal
 Translate the core LINQ operators correctly:
+
+> **Status: done.** 46 live query tests (Blogging model in the memory catalog, compared with
+> LINQ-to-Objects, plus `tpch.tiny`), 10 SQL baselines, and 212/212 functional tests pass on 466 and 483.
+> What was built and found:
+> - **`TrinoQuerySqlGenerator`:** `OFFSET m` before `LIMIT n`, both parameterized. EF 10 parameterizes
+>   even constant `Take` values; Trino accepts them, so EF3-T4 (literal inlining) is not needed.
+>   Also `||` for string `+`, `LATERAL` for APPLY, and no `TOP`.
+> - **Decimal `Average` (new):** Trino's `avg(decimal(p,s))` returns `decimal(p,s)`, rounding the result
+>   (the plan had not foreseen this). `AVG` over a decimal is widened to `decimal(38, max(10, s))`.
+> - **Split queries (EF3-T7):** they hit TriQL's one-command-per-connection rule, as predicted (G10).
+>   `TrinoQueryCompilationContext` reports `IsBuffering` for split queries, as SQL Server's provider
+>   does without MARS. Single queries still stream. Precompiled (NativeAOT) queries throw
+>   `NotSupportedException`, because the EF API for them is experimental (EF9100) and AOT is out of scope.
+> - **Unsupported shapes (EF3-T8):** `TrinoQueryTranslationPostprocessor` rejects them at translation
+>   time with guidance, before any SQL is sent. Measured matrix for a subquery that references the
+>   outer row (✓ runs, ✗ "Given correlated subquery is not supported"):
+>
+>   | Subquery | equality correlation | non-equality correlation | outer column in its projection |
+>   |---|---|---|---|
+>   | plain, `DISTINCT`, aggregate (`Any`/`Count`/`Max`) | ✓ | ✓ | ✗ |
+>   | with `LIMIT` (`Take`/`First`) | ✓ (✗ inside `IN`) | ✗ | ✗ |
+>   | with `GROUP BY` | ✓ | ✗ | ✗ |
+>   | with `OFFSET` (`Skip`) | ✗ | ✗ | ✗ |
+>
+>   EF already rewrites equality-correlated `Skip`/`Take` in collection projections into a
+>   `ROW_NUMBER() OVER (PARTITION BY …)` join, so the common "top N per parent" shapes work.
+> - **Not done:**
+>   - EF3-T3 (`IS DISTINCT FROM`): an optimisation only; EF's default null expansion is correct.
+>   - EF3-T1 (parameter-name sanitising): not needed, because `ParameterRewriter` accepts EF's names.
+> - **Parameter lists:** EF 10's default expansion (`IN (@ids1, @ids2, …)`) is used for `Contains` on lists.
+> - **Fix found here:** the integer literal mappings unboxed EF's constants. `COALESCE(SUM(bigint), 0)`
+>   passes an `Int32`, so they now convert the value instead.
 
 - `Where`, `Select`, `OrderBy`/`ThenBy`, `Skip`/`Take`;
 - `First*`/`Single*`, `Any`/`All`/`Contains`;

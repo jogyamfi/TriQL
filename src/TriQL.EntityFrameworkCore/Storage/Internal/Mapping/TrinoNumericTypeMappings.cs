@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore.Storage;
 namespace TriQL.EntityFrameworkCore.Storage.Internal.Mapping;
 
 // Trino's numeric types. Literals are typed (TINYINT '5', REAL '1.5', DECIMAL '1.50'): a bare 1.5 is
-// decimal(2,1) in Trino, not double, and a bare 5 is integer.
+// decimal(2,1) in Trino, not double, and a bare 5 is integer. Values are converted rather than
+// unboxed, because EF passes constants of a different CLR type, e.g. the Int32 0 in
+// COALESCE(SUM(bigintColumn), 0).
 //
 // These are internal APIs that support the EF Core infrastructure and are not subject to the same
 // compatibility standards as public APIs.
@@ -51,7 +53,7 @@ public class TrinoSByteTypeMapping : SByteTypeMapping
 
     /// <inheritdoc />
     protected override string GenerateNonNullSqlLiteral(object value) =>
-        TrinoLiterals.Typed("TINYINT", ((sbyte)value).ToString(CultureInfo.InvariantCulture));
+        TrinoLiterals.Typed("TINYINT", Convert.ToSByte(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture));
 }
 
 /// <summary>Maps <see cref="byte"/> to <c>smallint</c>: Trino has no unsigned types, and <c>tinyint</c> is signed.</summary>
@@ -74,7 +76,7 @@ public class TrinoByteTypeMapping : ByteTypeMapping
 
     /// <inheritdoc />
     protected override string GenerateNonNullSqlLiteral(object value) =>
-        TrinoLiterals.Typed("SMALLINT", ((byte)value).ToString(CultureInfo.InvariantCulture));
+        TrinoLiterals.Typed("SMALLINT", Convert.ToByte(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture));
 }
 
 /// <summary>Maps <see cref="short"/> to <c>smallint</c>.</summary>
@@ -97,7 +99,7 @@ public class TrinoShortTypeMapping : ShortTypeMapping
 
     /// <inheritdoc />
     protected override string GenerateNonNullSqlLiteral(object value) =>
-        TrinoLiterals.Typed("SMALLINT", ((short)value).ToString(CultureInfo.InvariantCulture));
+        TrinoLiterals.Typed("SMALLINT", Convert.ToInt16(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture));
 }
 
 /// <summary>Maps <see cref="uint"/> to <c>bigint</c>.</summary>
@@ -120,7 +122,7 @@ public class TrinoUIntTypeMapping : UIntTypeMapping
 
     /// <inheritdoc />
     protected override string GenerateNonNullSqlLiteral(object value) =>
-        TrinoLiterals.Typed("BIGINT", ((uint)value).ToString(CultureInfo.InvariantCulture));
+        TrinoLiterals.Typed("BIGINT", Convert.ToUInt32(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture));
 }
 
 /// <summary>Maps <see cref="long"/> to <c>bigint</c>.</summary>
@@ -143,7 +145,7 @@ public class TrinoLongTypeMapping : LongTypeMapping
 
     /// <inheritdoc />
     protected override string GenerateNonNullSqlLiteral(object value) =>
-        TrinoLiterals.Typed("BIGINT", ((long)value).ToString(CultureInfo.InvariantCulture));
+        TrinoLiterals.Typed("BIGINT", Convert.ToInt64(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture));
 }
 
 /// <summary>Maps <see cref="ulong"/> to <c>decimal(20,0)</c>, the narrowest Trino type that holds its range.</summary>
@@ -166,7 +168,7 @@ public class TrinoULongTypeMapping : ULongTypeMapping
 
     /// <inheritdoc />
     protected override string GenerateNonNullSqlLiteral(object value) =>
-        TrinoLiterals.Typed("DECIMAL", ((ulong)value).ToString(CultureInfo.InvariantCulture));
+        TrinoLiterals.Typed("DECIMAL", Convert.ToUInt64(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture));
 }
 
 /// <summary>Maps <see cref="float"/> to <c>real</c>.</summary>

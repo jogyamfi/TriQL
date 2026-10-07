@@ -75,7 +75,10 @@ internal sealed class FakeTrino : IDisposable
 
     /// <summary>Asserts the SQL EF executed, exactly and in order.</summary>
     public void AssertSql(params string[] expected) =>
-        Assert.Equal(expected.Select(Normalize), _sql.Select(Normalize));
+        Assert.Equal(string.Join(StatementSeparator, expected.Select(Normalize)), string.Join(StatementSeparator, _sql.Select(Normalize)));
+
+    // Compared as one string so a mismatch shows the whole SQL text, not a truncated sequence.
+    private const string StatementSeparator = "\n----\n";
 
     public void Dispose()
     {

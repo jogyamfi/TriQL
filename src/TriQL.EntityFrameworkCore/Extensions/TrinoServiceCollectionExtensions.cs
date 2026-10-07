@@ -2,12 +2,14 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update;
 using TriQL.EntityFrameworkCore.Diagnostics.Internal;
 using TriQL.EntityFrameworkCore.Infrastructure.Internal;
 using TriQL.EntityFrameworkCore.Metadata.Conventions;
 using TriQL.EntityFrameworkCore.Migrations.Internal;
+using TriQL.EntityFrameworkCore.Query.Internal;
 using TriQL.EntityFrameworkCore.Storage.Internal;
 using TriQL.EntityFrameworkCore.Update.Internal;
 
@@ -40,6 +42,9 @@ public static class TrinoServiceCollectionExtensions
             .TryAdd<IHistoryRepository, TrinoHistoryRepository>()
             .TryAdd<IMigrationsSqlGenerator, TrinoMigrationsSqlGenerator>()
             .TryAdd<IMigrator, TrinoMigrator>()
+            .TryAdd<IQuerySqlGeneratorFactory, TrinoQuerySqlGeneratorFactory>()
+            .TryAdd<IQueryCompilationContextFactory, TrinoQueryCompilationContextFactory>()
+            .TryAdd<IQueryTranslationPostprocessorFactory, TrinoQueryTranslationPostprocessorFactory>()
             .TryAdd<IUpdateSqlGenerator, TrinoUpdateSqlGenerator>()
             .TryAdd<IModificationCommandBatchFactory, TrinoModificationCommandBatchFactory>()
             .TryAddCoreServices();

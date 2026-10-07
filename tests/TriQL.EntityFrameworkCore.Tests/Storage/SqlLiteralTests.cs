@@ -55,6 +55,15 @@ public sealed class SqlLiteralTests
         Assert.Equal(expected, Source.FindMapping(value.GetType())!.GenerateSqlLiteral(value));
     }
 
+    [Fact]
+    public void IntegerMappings_AcceptAConstantOfAnotherIntegerType()
+    {
+        // EF generates COALESCE(SUM(x), 0) with an Int32 constant typed by x's bigint mapping.
+        Assert.Equal("BIGINT '0'", Source.FindMapping(typeof(long))!.GenerateSqlLiteral(0));
+        Assert.Equal("TINYINT '1'", Source.FindMapping(typeof(sbyte))!.GenerateSqlLiteral(1));
+        Assert.Equal("DECIMAL '7'", Source.FindMapping(typeof(ulong))!.GenerateSqlLiteral(7));
+    }
+
     [Theory]
     [InlineData("", "''")]
     [InlineData("it's", "'it''s'")]
