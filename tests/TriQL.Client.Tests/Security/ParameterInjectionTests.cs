@@ -78,6 +78,26 @@ public sealed class ParameterInjectionTests
     }
 
     [Fact]
+    public void Encode_UnsignedIntegers_RenderAsIntegerLiterals_AndUlongBeyondBigintAsDecimal()
+    {
+        Assert.Equal("255", SqlLiteralEncoder.Encode(new TrinoParameter(null, byte.MaxValue)));
+        Assert.Equal("65535", SqlLiteralEncoder.Encode(new TrinoParameter(null, ushort.MaxValue)));
+        Assert.Equal("4294967295", SqlLiteralEncoder.Encode(new TrinoParameter(null, uint.MaxValue)));
+        Assert.Equal("9223372036854775807", SqlLiteralEncoder.Encode(new TrinoParameter(null, (ulong)long.MaxValue)));
+        Assert.Equal("DECIMAL '18446744073709551615'", SqlLiteralEncoder.Encode(new TrinoParameter(null, ulong.MaxValue)));
+    }
+
+    [Theory]
+    [InlineData(System.Data.DbType.Byte, "CAST(NULL AS smallint)")]
+    [InlineData(System.Data.DbType.UInt16, "CAST(NULL AS integer)")]
+    [InlineData(System.Data.DbType.UInt32, "CAST(NULL AS bigint)")]
+    [InlineData(System.Data.DbType.UInt64, "CAST(NULL AS decimal(20,0))")]
+    public void Encode_NullWithUnsignedDbType_RendersTheWideningSignedType(System.Data.DbType dbType, string expected)
+    {
+        Assert.Equal(expected, SqlLiteralEncoder.Encode(new TrinoParameter(null, null) { DbType = dbType }));
+    }
+
+    [Fact]
     public void Encode_Varbinary_RendersHexLiteral()
     {
         Assert.Equal("X'010203'", SqlLiteralEncoder.Encode(new TrinoParameter(null, new byte[] { 1, 2, 3 })));

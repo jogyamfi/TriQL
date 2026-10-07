@@ -82,7 +82,10 @@ internal static class SqlLiteralEncoder
         encoded = value switch
         {
             bool b => b ? "TRUE" : "FALSE",
-            sbyte or short or int or long => System.Convert.ToInt64(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture),
+            sbyte or short or int or long or byte or ushort or uint => System.Convert.ToInt64(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture),
+
+            // Beyond bigint's range a bare integer literal is invalid in Trino, so render those as decimal.
+            ulong u => u <= long.MaxValue ? u.ToString(CultureInfo.InvariantCulture) : $"DECIMAL {EscapeString(u.ToString(CultureInfo.InvariantCulture))}",
             float f => EncodeFloatingPoint(f, double.IsNaN(f), double.IsPositiveInfinity(f), double.IsNegativeInfinity(f), "REAL"),
             double d => EncodeFloatingPoint(d, double.IsNaN(d), double.IsPositiveInfinity(d), double.IsNegativeInfinity(d), "DOUBLE"),
             decimal dec => $"DECIMAL {EscapeString(dec.ToString(CultureInfo.InvariantCulture))}",

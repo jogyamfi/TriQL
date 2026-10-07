@@ -15,6 +15,12 @@ internal static class DbTypeMapping
         DbType.Int16 => "smallint",
         DbType.Int32 => "integer",
         DbType.Int64 => "bigint",
+
+        // Trino has no unsigned types: each maps to the narrowest signed type that holds its range.
+        DbType.Byte => "smallint",
+        DbType.UInt16 => "integer",
+        DbType.UInt32 => "bigint",
+        DbType.UInt64 => "decimal(20,0)",
         DbType.Single => "real",
         DbType.Double => "double",
         DbType.Decimal or DbType.Currency or DbType.VarNumeric => "decimal",
