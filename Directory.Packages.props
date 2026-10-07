@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <!-- Core -->
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0" />
 
     <!-- Auth package -->
@@ -24,26 +24,26 @@
     <PackageVersion Include="ZstdSharp.Port" Version="0.8.8" />
 
     <!-- Analyzers -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.0.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0" />
 
     <!-- Tests -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
-    <PackageVersion Include="Testcontainers" Version="4.14.0" />
+    <PackageVersion Include="Testcontainers" Version="4.15.0" />
     <!-- Phase 7: MinIO Testcontainers module for spooling-validation infrastructure. -->
-    <PackageVersion Include="Testcontainers.Minio" Version="4.14.0" />
+    <PackageVersion Include="Testcontainers.Minio" Version="4.15.0" />
     <!--
       Phase 7 test-only dependency: talks to MinIO directly (bucket setup, raw-object verification
       bypassing TriQL) so Lane B tests can assert on object-storage state independent of the
       client under test. Confined to TriQL.IntegrationTests; never referenced by shipping src/.
     -->
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.103.3" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.1" />
 
     <!-- Benchmarks -->
-    <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
   </ItemGroup>
 
 </Project>
