@@ -7,7 +7,7 @@
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
 | Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
 | Date | 2026-10-07 |
-| Status | Phases 0–1 complete (2026-10-07, branch `feature/efcore-provider`); Phase 2 next |
+| Status | Phases 0–2 complete (2026-10-07, branch `feature/efcore-provider`); Phase 3 next |
 
 ---
 
@@ -471,6 +471,30 @@ Builds warning-free, the baseline harness works, and both new test projects run 
 ### Goal
 Map every supported CLR type to a Trino store type in both directions: DDL type, literal,
 parameter configuration and reader method. Default DDL types are Iceberg-safe (T12, T13).
+
+> **Status: done.** 116 unit tests. 160 live round-trip tests (literal, parameter, memory table and
+> Iceberg table, for every type at its edge values) pass on 466 and 483. Deviations from the plan
+> below:
+> - **Natural Trino types instead of an Iceberg-safe profile (EF2-T4 dropped).** `sbyte`→`tinyint`,
+>   `short`/`byte`→`smallint`, `HasMaxLength`→`varchar(n)`, `IsFixedLength`→`char(n)`. Iceberg accepts
+>   these in DDL and widens them silently (T13), and values read back through the same mappings.
+>   `TargetConnector` is therefore unnecessary.
+> - **Bare temporal store types** (`HasColumnType("timestamp")`) get Trino's implicit precision 3, not
+>   the mapping default of 6, so literals carry the digit count the column actually has.
+> - **`DateTimeOffset` literals keep their offset,** like parameters, instead of converting to UTC:
+>   a value reads back the same whether it was inlined or bound. Iceberg returns UTC; the memory
+>   connector keeps the offset.
+> - **Not mapped:** `json`, `ipaddress`, `interval …`, `time with time zone` (no mapping is reported).
+>   Map `json` columns as `string` via a property, or read them with raw SQL.
+> - **`TimeSpan` is `bigint` ticks** (open question 3, default taken).
+> - **Core fixes found here (separate commits):**
+>   - `float`/`double` parameters were sent as bare literals, which Trino types as `decimal`, so a
+>     projected parameter could not be read back. They are now typed `REAL '…'`/`DOUBLE '…'`.
+>   - `byte`/`ushort`/`uint`/`ulong` parameters threw. They are now encoded, and their `DbType`s
+>     produce typed nulls.
+>   - `TrinoDataReader.GetDateTime`/`GetGuid` now apply the `GetFieldValue<T>` conversions.
+> - **Note:** a `timestamp(p > 7)` value with sub-100 ns digits throws `OverflowException` when read as
+>   `DateTime`, rather than being truncated. This is the library's existing rule for its precision types.
 
 ### Mapping table
 
