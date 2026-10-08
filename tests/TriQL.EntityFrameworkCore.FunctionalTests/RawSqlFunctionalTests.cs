@@ -63,10 +63,13 @@ public sealed class RawSqlFunctionalTests(TrinoContainerFixture fixture)
         await using var defaulted = CreateContext();
         await using var optedOut = CreateContext(trino: t => t.UseUtcSessionTimeZone(false));
         await using var explicitZone = CreateContext("TimeZone=Asia/Tokyo");
+        // Trino canonicalizes zone ids (e.g. a Linux runner's "Etc/UTC" comes back as "UTC"), so the
+        // opted-out session is compared with one that sends the client's zone explicitly.
+        await using var clientZone = CreateContext($"TimeZone={new TrinoSessionOptions().TimeZone}");
 
         Assert.Equal("UTC", await CurrentTimeZoneAsync(defaulted));
         Assert.Equal("Asia/Tokyo", await CurrentTimeZoneAsync(explicitZone));
-        Assert.Equal(new TrinoSessionOptions().TimeZone, await CurrentTimeZoneAsync(optedOut));
+        Assert.Equal(await CurrentTimeZoneAsync(clientZone), await CurrentTimeZoneAsync(optedOut));
 
         static Task<string> CurrentTimeZoneAsync(Context context) =>
             context.Database.SqlQueryRaw<string>("SELECT current_timezone() AS \"Value\"").SingleAsync();
