@@ -106,6 +106,10 @@ internal sealed class FakeTrino : IDisposable
                 updateType,
             }));
 
+    /// <summary>Scripts the next statement's response as a finished DDL statement (no result set).</summary>
+    public void EnqueueDdl(string updateType) =>
+        Coordinator.Enqueue(HttpStatusCode.OK, JsonSerializer.Serialize(new { id = "q", updateType }));
+
     /// <summary>Scripts the next statement's response as a query failure, shaped as a real coordinator sends it.</summary>
     public void EnqueueError(string errorName, string errorType = "EXTERNAL", string message = "Query failed") =>
         Coordinator.Enqueue(

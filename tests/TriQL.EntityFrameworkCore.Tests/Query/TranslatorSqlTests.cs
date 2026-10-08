@@ -283,6 +283,26 @@ public sealed class TranslatorSqlTests
     public void DbFunctions_ThrowOnClientEvaluation() =>
         Assert.Throws<InvalidOperationException>(() => EF.Functions.ILike("a", "a"));
 
+    // ---- ordering -------------------------------------------------------------------------
+
+    [Fact]
+    public async Task AscendingOrderingOfANullableValue_PutsNullsFirst()
+    {
+        using var fake = new FakeTrino();
+        await using var db = new FunctionsContext(fake.CreateOptions<FunctionsContext>());
+        fake.EnqueueRows([("Id", "integer")]);
+
+        await db.Rows.OrderBy(r => r.Rating).ThenByDescending(r => r.Note).ThenBy(r => r.Name).Select(r => r.Id).ToListAsync();
+
+        // Only the ascending nullable ordering needs it: Trino already sorts NULL last when descending.
+        fake.AssertSql(
+            """
+            SELECT "r"."Id"
+            FROM "Rows" AS "r"
+            ORDER BY "r"."Rating" NULLS FIRST, "r"."Note" DESC, "r"."Name"
+            """);
+    }
+
     // ---- helpers --------------------------------------------------------------------------
 
     /// <summary>Asserts the SQL of <c>Rows.Select(selector)</c>: <c>SELECT {expected} FROM "Rows" AS "r"</c>.</summary>

@@ -7,7 +7,7 @@
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
 | Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
 | Date | 2026-10-07 |
-| Status | Phases 0–7 complete (2026-10-08, branch `feature/efcore-provider`); Phase 8 next |
+| Status | Phases 0–8 complete (2026-10-08, branch `feature/efcore-provider`); Phase 9 next |
 
 ---
 
@@ -912,6 +912,38 @@ correctness and affected-row counts on Iceberg.
 
 ### Goal
 Broad confidence in behaviour, run in CI against real Trino.
+
+> **Status: done, except the stretch goal.** 8 new unit tests (DDL, ordering) and 17 new live tests. What
+> was built and found:
+> - **Development DDL (EF8-T1):** `TrinoMigrationsSqlGenerator` generates `CREATE SCHEMA IF NOT EXISTS` (once per
+>   catalog the schema's tables use), `CREATE TABLE` with `NOT NULL` and column/table `COMMENT`s (keys, foreign
+>   keys and indexes left out; index operations skipped), and `DROP TABLE IF EXISTS`, all with three-part names
+>   and outside transactions; any other operation throws. Measured: `memory` and Iceberg accept and enforce
+>   `NOT NULL` and accept comments. No `WITH (format = …)`: table properties are connector-specific (the
+>   `memory` connector has none), so they are left to the connector's defaults.
+>   `TrinoDatabaseCreator`: `Exists` = reachable (`SELECT 1`); `HasTables` = any of the model's tables in
+>   `information_schema.tables` (one query per catalog, names lower-cased, `current_schema` for tables without a
+>   schema); `Create` does nothing; `EnsureDeleted` drops **only the model's tables** and returns whether any
+>   existed. Verified live on Iceberg and `memory` (via three-part names from a `tpch` connection), with
+>   `SaveChanges` round-tripping a column of every mapped type, and an unrelated table and the schema surviving
+>   `EnsureDeleted`.
+> - **Curated suites (EF8-T2):** the purpose-built suites of Phases 2–7 (operators, shapes, functions, types,
+>   SaveChanges, bulk operations, catalogs) plus `QueryHardeningTests` and `SchemaLifecycleTests`. Test classes
+>   use their own `ef_*`/`efct_*` schemas, dropped afterwards. **Stretch goal not done:** wiring EF's
+>   `Relational.Specification.Tests` (Northwind etc.) needs a `TrinoTestStore`, a seeded Northwind and triage of
+>   hundreds of inherited tests; it is a follow-up of its own.
+> - **Hardening (EF8-T3):** 13 shapes beyond Phase 3, each compared with LINQ to Objects. **Found and fixed:**
+>   Trino sorts `NULL` last for ascending orderings, where .NET (and EF on SQL Server) puts it first; the
+>   generator adds `NULLS FIRST` to ascending orderings of nullable values (descending already agrees). Already
+>   correct: string concatenation with a `NULL` operand, `Contains` on lists with `null`, empty lists and a
+>   4,000-element list, string comparison, empty aggregates, composite `GroupBy` with `HAVING`, distinct counts,
+>   `Last`, `Skip` without `Take`, `Take(0)`, conditional ordering.
+> - **CI (EF8-T4):** already in place since Phase 1: `ci.yml` and the nightly `{466, latest}` matrix run the whole
+>   functional project, Iceberg included, against the single container (its Iceberg catalog is on local disk,
+>   so no MinIO is needed).
+> - **External lane (EF8-T5):** `ExternalClusterTests` (`Category=EfExternal`) runs only with `RUN_EF_EXTERNAL=1`
+>   and `TRIQL_EF_EXTERNAL_CONNECTION_STRING` (a writable catalog and schema with credentials). It creates and
+>   drops one uniquely named table, never schemas. Verified against a separate coordinator; skipped otherwise.
 
 ### Implementation steps
 - **EF8-T1 — Development DDL (not migrations).**

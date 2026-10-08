@@ -66,7 +66,6 @@ override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.Create(
 override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.Delete() -> void
 override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.Exists() -> bool
 override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.ExistsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
-override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.GenerateCreateScript() -> string!
 override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.HasTables() -> bool
 override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.BeginTransaction() -> Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction!
 override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.BeginTransaction(System.Data.IsolationLevel isolationLevel) -> Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction!
@@ -388,3 +387,12 @@ const TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.Ma
 const TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory.DefaultMaxBatchSize = 1000 -> int
 override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.AddCommand(Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! modificationCommand) -> void
 override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.RollbackLastCommand(Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! modificationCommand) -> void
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator.Generate(Microsoft.EntityFrameworkCore.Migrations.Operations.CreateTableOperation! operation, Microsoft.EntityFrameworkCore.Metadata.IModel? model, Microsoft.EntityFrameworkCore.Migrations.MigrationCommandListBuilder! builder, bool terminate = true) -> void
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator.Generate(Microsoft.EntityFrameworkCore.Migrations.Operations.DropTableOperation! operation, Microsoft.EntityFrameworkCore.Metadata.IModel? model, Microsoft.EntityFrameworkCore.Migrations.MigrationCommandListBuilder! builder, bool terminate = true) -> void
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator.Generate(Microsoft.EntityFrameworkCore.Migrations.Operations.EnsureSchemaOperation! operation, Microsoft.EntityFrameworkCore.Metadata.IModel? model, Microsoft.EntityFrameworkCore.Migrations.MigrationCommandListBuilder! builder) -> void
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.CreateAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.DeleteAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.EnsureDeleted() -> bool
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.EnsureDeletedAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.HasTablesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitOrdering(Microsoft.EntityFrameworkCore.Query.SqlExpressions.OrderingExpression! orderingExpression) -> System.Linq.Expressions.Expression!

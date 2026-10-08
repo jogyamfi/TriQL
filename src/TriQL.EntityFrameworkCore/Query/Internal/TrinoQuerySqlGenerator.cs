@@ -352,6 +352,33 @@ public class TrinoQuerySqlGenerator : QuerySqlGenerator
         return table.Table.GetCatalog() is { } catalog ? helper.DelimitIdentifier(catalog) + "." + name : name;
     }
 
+    /// <summary>
+    /// Adds <c>NULLS FIRST</c> to an ascending ordering of a value that can be <c>NULL</c>. Trino sorts
+    /// <c>NULL</c> last in both directions by default; .NET (LINQ to Objects, and EF on SQL Server) treats
+    /// <c>NULL</c> as the lowest value, first when ascending and last when descending, which Trino already
+    /// matches for descending.
+    /// </summary>
+    protected override Expression VisitOrdering(OrderingExpression orderingExpression)
+    {
+        ArgumentNullException.ThrowIfNull(orderingExpression);
+
+        var result = base.VisitOrdering(orderingExpression);
+        if (orderingExpression.IsAscending && CanBeNull(orderingExpression.Expression))
+        {
+            Sql.Append(" NULLS FIRST");
+        }
+
+        return result;
+    }
+
+    // Columns know their nullability; for other expressions, only a nullable CLR type can produce NULL.
+    private static bool CanBeNull(SqlExpression expression) => expression switch
+    {
+        ColumnExpression column => column.IsNullable,
+        SqlConstantExpression constant => constant.Value is null,
+        _ => !expression.Type.IsValueType || Nullable.GetUnderlyingType(expression.Type) is not null,
+    };
+
     /// <summary>Generates the provider's own SQL expressions.</summary>
     protected override Expression VisitExtension(Expression extensionExpression)
     {
