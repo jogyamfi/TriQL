@@ -7,7 +7,7 @@
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
 | Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
 | Date | 2026-10-07 |
-| Status | Phases 0–3 complete (2026-10-07, branch `feature/efcore-provider`); Phase 4 next |
+| Status | Phases 0–4 complete (2026-10-08, branch `feature/efcore-provider`); Phase 5 next |
 
 ---
 
@@ -638,6 +638,38 @@ documented.
 ### Goal
 Translate common .NET members and methods to Trino built-ins.
 
+> **Status: done.** 43 SQL baselines (one per translation) and 29 live checks that run each translation
+> on Trino and compare it with LINQ-to-Objects over edge-case rows (LIKE metacharacters, white space,
+> empty and null strings, midpoints 2.5/-2.5/0.125, a Sunday, a leap day, non-UTC offsets). The full
+> functional suite is 241/241 on 466 and 483. What was built and found:
+> - **Translators** (`Query/Internal/Translators`): string, string length, math, date/time members and
+>   `Add*` methods, `Convert`, `ToString`, `Guid.NewGuid`/`Regex.IsMatch`, `EF.Functions`, and the
+>   aggregates `string.Join`/`string.Concat`/`ApproxDistinct`.
+> - **`Math.Round` (open question 4, decided):** Trino's `round` rounds half away from zero (measured).
+>   Half-to-even is emulated exactly with one `CASE` (`abs(x - r) = half AND mod(r·10^d, 2) <> 0 → step
+>   back to the even neighbour`) for `double`/`decimal` to an integer and `decimal` to constant digits.
+>   `double` to digits is **not** translated (its midpoints are inexact after scaling), and
+>   `MidpointRounding.AwayFromZero` maps to `round` directly. The emulation costs only a few scalar ops.
+> - **`Math.Max`/`Math.Min` (new):** EF 10 routes these through the SQL translator's
+>   `GenerateGreatest`/`GenerateLeast`, which return nothing by default, so the projection was silently
+>   evaluated on the client. `TrinoSqlTranslatingExpressionVisitor` generates `greatest`/`least`, except
+>   over nullable values (Trino returns `NULL` if any argument is `NULL`; LINQ's `Max` skips nulls).
+> - **String search:** a constant argument becomes `LIKE` with the pattern escaped at translation time
+>   (`ESCAPE '\'` only when needed); any other argument stays a bound parameter in `strpos(s, x) > 0` /
+>   `starts_with(s, x)`. Trino has no `ends_with` (measured): `EndsWith` is
+>   `starts_with(reverse(s), reverse(x))`.
+> - **`string.Join` over a group:** a custom `TrinoStringAggregateExpression`,
+>   `array_join(array_agg(x ORDER BY …), sep)`, with ordering, filtering (`CASE`, as `array_join` skips
+>   `NULL`) and `DISTINCT`. Needed `TrinoSqlNullabilityProcessor` and `TrinoParameterBasedSqlProcessor`.
+> - **Measured differences, documented on the translators:** `trim()` keeps non-breaking spaces (U+00A0,
+>   U+2007, U+202F) that .NET trims; `CAST(double AS integer)` rounds half away from zero (`Convert.ToInt32`
+>   rounds half to even); `CAST(true AS varchar)` is `'true'`, so `bool.ToString()` is a `CASE` giving
+>   .NET's `'True'`. `length`/`strpos` count code points, .NET UTF-16 units.
+> - **Not translated, on purpose:** `ToString()` of `double`/`float`/dates (Trino prints `1.5E0` and ISO
+>   dates; .NET's text is culture-dependent), `Trim(params char[])`, `TimeOfDay`, `MathF`.
+> - **Return types:** `year()`, `length()`, `strpos()`, … return `bigint` where .NET has `int`; no casts
+>   are added, as the reader narrows (EF0-T3). Fractional `AddDays(1.5)` etc. are applied in milliseconds.
+
 | .NET | Trino SQL | Notes |
 |---|---|---|
 | `string.Length` | `length(s)` | Counts code points; .NET counts UTF-16 units (documented) |
@@ -927,8 +959,8 @@ Defaults are chosen for all of these, so none blocks the work.
    turned off with `UseUtcSessionTimeZone(false)`.
 3. **`TimeSpan` storage:** `bigint` ticks (sortable, Iceberg-safe) or `varchar` (readable, as in
    BricksNet). *Default: ticks.*
-4. **`Math.Round`:** emulate half-to-even in SQL, or translate only `AwayFromZero`. *Default: decide
-   after measuring the cost of the emulation in EF4.*
+4. **`Math.Round`:** emulate half-to-even in SQL, or translate only `AwayFromZero`. *Decided in
+   Phase 4: emulate exactly where possible (see Phase 4's status); `double` to digits is not translated.*
 5. **Scaffolding several catalogs:** accept `catalog.schema` in `--schema`. *Default: yes, if EF's
    option parsing allows it; otherwise use the connection's catalog only.*
 6. **Default value for `ParameterBinding`:** `PreparedStatementHeader` in both the core and the EF

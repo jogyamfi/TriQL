@@ -45,6 +45,11 @@ public static class TrinoServiceCollectionExtensions
             .TryAdd<IQuerySqlGeneratorFactory, TrinoQuerySqlGeneratorFactory>()
             .TryAdd<IQueryCompilationContextFactory, TrinoQueryCompilationContextFactory>()
             .TryAdd<IQueryTranslationPostprocessorFactory, TrinoQueryTranslationPostprocessorFactory>()
+            .TryAdd<IRelationalSqlTranslatingExpressionVisitorFactory, TrinoSqlTranslatingExpressionVisitorFactory>()
+            .TryAdd<IMethodCallTranslatorProvider, TrinoMethodCallTranslatorProvider>()
+            .TryAdd<IMemberTranslatorProvider, TrinoMemberTranslatorProvider>()
+            .TryAdd<IAggregateMethodCallTranslatorProvider, TrinoAggregateMethodCallTranslatorProvider>()
+            .TryAdd<IRelationalParameterBasedSqlProcessorFactory, TrinoParameterBasedSqlProcessorFactory>()
             .TryAdd<IUpdateSqlGenerator, TrinoUpdateSqlGenerator>()
             .TryAdd<IModificationCommandBatchFactory, TrinoModificationCommandBatchFactory>()
             .TryAddCoreServices();

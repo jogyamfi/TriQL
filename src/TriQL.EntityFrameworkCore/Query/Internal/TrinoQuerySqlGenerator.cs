@@ -91,6 +91,38 @@ public class TrinoQuerySqlGenerator : QuerySqlGenerator
         return sqlFunctionExpression;
     }
 
+    /// <summary>Generates the provider's own SQL expressions.</summary>
+    protected override Expression VisitExtension(Expression extensionExpression)
+    {
+        ArgumentNullException.ThrowIfNull(extensionExpression);
+
+        if (extensionExpression is not TrinoStringAggregateExpression aggregate)
+        {
+            return base.VisitExtension(extensionExpression);
+        }
+
+        Sql.Append("array_join(array_agg(");
+        Visit(aggregate.Value);
+        if (aggregate.Orderings.Count > 0)
+        {
+            Sql.Append(" ORDER BY ");
+            for (var i = 0; i < aggregate.Orderings.Count; i++)
+            {
+                if (i > 0)
+                {
+                    Sql.Append(", ");
+                }
+
+                Visit(aggregate.Orderings[i]);
+            }
+        }
+
+        Sql.Append("), ");
+        Visit(aggregate.Separator);
+        Sql.Append(")");
+        return aggregate;
+    }
+
     /// <summary>Generates <c>CROSS APPLY</c> as <c>CROSS JOIN LATERAL</c>.</summary>
     protected override Expression VisitCrossApply(CrossApplyExpression crossApplyExpression)
     {
