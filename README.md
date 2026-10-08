@@ -29,7 +29,7 @@ for the phased delivery plan.
 changes only in a major version, additive API in minors, fixes in patches. The public API surface
 of each shipping package is locked by `PublicAPI.Shipped.txt` baselines and enforced at build time.
 
-The one deliberately conservative default in 1.0 is the spooling protocol, which ships implemented
+The one deliberately conservative default in 1.x is the spooling protocol, which ships implemented
 and tested but **opt-in** — see [Spooling protocol](#spooling-protocol-opt-in). Release notes for
 every version are published on [GitHub Releases](https://github.com/jogyamfi/TriQL/releases).
 
@@ -136,7 +136,7 @@ configuration with guidance. Writes are verified on the Iceberg connector. See t
 ## Spooling protocol (opt-in)
 
 Trino's spooling protocol (compressed, object-storage-backed result segments) is implemented but
-ships **off by default and opt-in** in 1.0: `TrinoSessionOptions.QueryDataEncodings` defaults to
+ships **off by default and opt-in** (1.0 and 1.1): `TrinoSessionOptions.QueryDataEncodings` defaults to
 an empty list, which forces the direct protocol. Enable it explicitly once your cluster is
 configured for spooling:
 
@@ -169,10 +169,10 @@ object-storage hosts segments may be fetched from; empty allows any `https` host
 
 The spooled path is verified in CI against a real spooling-configured Trino coordinator backed by
 MinIO (all three codecs, SSE-C encryption, segment acknowledgement, and cancellation cleanup). It
-stays opt-in for 1.0 because it has not yet been checked against AWS S3 or Azure Blob Storage, and
-throughput over the spooled path has not been benchmarked. Making it the default is planned for
-1.1.0; that release will call out the behaviour change, and setting `QueryDataEncodings = []` will
-keep the direct protocol.
+stays opt-in because it has not yet been checked against AWS S3 or Azure Blob Storage, and
+throughput over the spooled path has not been benchmarked. Making it the default is planned for a
+later minor release; that release will call out the behaviour change, and setting
+`QueryDataEncodings = []` will keep the direct protocol.
 
 ## Documentation
 
