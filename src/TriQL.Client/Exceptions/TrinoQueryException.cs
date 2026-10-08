@@ -75,4 +75,39 @@ public sealed class TrinoQueryException : TrinoException
 
     /// <summary>The location in the query text the error refers to, when available.</summary>
     public TrinoErrorLocation? ErrorLocation { get; }
+
+    /// <summary>
+    /// Whether the failure is transient: resubmitting the same statement may succeed (for example
+    /// the cluster was starting up or out of memory, a worker was lost, or a concurrent Iceberg
+    /// commit conflicted). Classified from <see cref="ErrorName"/>.
+    /// </summary>
+    /// <remarks>
+    /// Distinct from <see cref="TrinoException.IsRetryable"/>, which stays <see langword="false"/>
+    /// for query failures: TriQL never resubmits a statement itself, because a resubmitted DML
+    /// statement could apply twice. This property is for callers' own retry policies, such as
+    /// EF Core's execution strategy.
+    /// </remarks>
+    public bool IsTransient => TransientErrorNames.Contains(ErrorName);
+
+    /// <summary>The <see cref="ErrorName"/> values <see cref="IsTransient"/> treats as transient.</summary>
+    private static readonly HashSet<string> TransientErrorNames = new(StringComparer.Ordinal)
+    {
+        // Coordinator/cluster availability.
+        "SERVER_STARTING_UP",
+        "SERVER_SHUTTING_DOWN",
+        "NO_NODES_AVAILABLE",
+        "QUERY_QUEUE_FULL",
+        "CLUSTER_OUT_OF_MEMORY",
+
+        // Lost or unreachable workers and inter-node transport.
+        "TOO_MANY_REQUESTS_FAILED",
+        "REMOTE_TASK_ERROR",
+        "REMOTE_TASK_MISMATCH",
+        "REMOTE_HOST_GONE",
+        "PAGE_TRANSPORT_ERROR",
+        "PAGE_TRANSPORT_TIMEOUT",
+
+        // Optimistic-concurrency conflict between concurrent Iceberg writers.
+        "ICEBERG_COMMIT_ERROR",
+    };
 }

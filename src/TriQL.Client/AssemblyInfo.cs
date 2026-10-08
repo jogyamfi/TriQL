@@ -11,3 +11,8 @@ using System.Runtime.CompilerServices;
 // point so its json+lz4/json+zstd codecs can register themselves (FR-5.3.6) without TriQL.Client
 // taking a compile-time dependency on either compression package (REQ-ARCH-4).
 [assembly: InternalsVisibleTo("TriQL.Client.Compression")]
+
+// Grants TriQL.Data.ADO access to TrinoClient.CreateOwnedInvoker so a TrinoConnection (or
+// TrinoDataSource) can build the configured HTTP handler once and reuse it across Open/Close,
+// instead of paying a new TCP + TLS handshake per Open (EF0-T2), without a new public API.
+[assembly: InternalsVisibleTo("TriQL.Data.ADO")]

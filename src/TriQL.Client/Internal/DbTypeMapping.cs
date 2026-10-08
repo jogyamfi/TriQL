@@ -15,6 +15,12 @@ internal static class DbTypeMapping
         DbType.Int16 => "smallint",
         DbType.Int32 => "integer",
         DbType.Int64 => "bigint",
+
+        // Trino has no unsigned types: each maps to the narrowest signed type that holds its range.
+        DbType.Byte => "smallint",
+        DbType.UInt16 => "integer",
+        DbType.UInt32 => "bigint",
+        DbType.UInt64 => "decimal(20,0)",
         DbType.Single => "real",
         DbType.Double => "double",
         DbType.Decimal or DbType.Currency or DbType.VarNumeric => "decimal",
@@ -22,9 +28,11 @@ internal static class DbTypeMapping
         DbType.Binary => "varbinary",
         DbType.Guid => "uuid",
         DbType.Date => "date",
-        DbType.Time => "time",
-        DbType.DateTime or DbType.DateTime2 => "timestamp",
-        DbType.DateTimeOffset => "timestamp with time zone",
+        // Explicit precision: bare `time`/`timestamp` are time(3)/timestamp(3) in Trino, which would
+        // truncate the microseconds SqlLiteralEncoder renders for TimeOnly/DateTime/DateTimeOffset.
+        DbType.Time => "time(6)",
+        DbType.DateTime or DbType.DateTime2 => "timestamp(6)",
+        DbType.DateTimeOffset => "timestamp(6) with time zone",
         _ => null,
     };
 }

@@ -77,11 +77,13 @@ public sealed class TrinoDbParameter : DbParameter
     /// <inheritdoc/>
     public override object? Value { get; set; }
 
-    /// <summary>An optional numeric precision hint.</summary>
-    public new byte Precision { get; set; }
+    /// <inheritdoc/>
+    /// <remarks>An optional numeric precision hint. Overrides (rather than hides) the base property so a value set through a <see cref="DbParameter"/> reference, as EF Core does, is honoured.</remarks>
+    public override byte Precision { get; set; }
 
-    /// <summary>An optional numeric scale hint.</summary>
-    public new byte Scale { get; set; }
+    /// <inheritdoc/>
+    /// <remarks>An optional numeric scale hint. Overrides (rather than hides) the base property so a value set through a <see cref="DbParameter"/> reference, as EF Core does, is honoured.</remarks>
+    public override byte Scale { get; set; }
 
     /// <summary>An explicit Trino type name override (e.g. <c>"decimal(38,10)"</c>), rendered via <c>CAST</c>.</summary>
     public string? TrinoType { get; set; }

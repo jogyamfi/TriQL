@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>TriQL.EntityFrameworkCore</PackageId>
+    <Title>TriQL Entity Framework Core Provider</Title>
+    <Description>An Entity Framework Core provider for Trino, built on the TriQL ADO.NET provider.</Description>
+    <PackageTags>$(CommonPackageTags);entity-framework-core;efcore;orm</PackageTags>
+
+    <!--
+      The provider ships as a preview while the core packages are stable (Decision 6), so its NuGet
+      version is set here rather than from the release tag: release.yml's -p:Version stamps the
+      assemblies and the core packages, and therefore this package's TriQL.Data.ADO dependency, but
+      does not override PackageVersion. Bump the preview number for each release that ships it, or
+      pass -p:EfCorePackageVersion=… to pack.
+    -->
+    <EfCorePackageVersion Condition="'$(EfCorePackageVersion)' == ''">1.1.0-preview.1</EfCorePackageVersion>
+    <PackageVersion>$(EfCorePackageVersion)</PackageVersion>
+
+    <!--
+      Overrides the src/ defaults from Directory.Build.props: EF Core's runtime (reflection-based
+      model building, dynamic query compilation) is not trim- or NativeAOT-safe, so this package
+      cannot claim to be either.
+    -->
+    <IsTrimmable>false</IsTrimmable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+
+    <!--
+      EF1001: EF Core providers are built on EF's "internal" (pubternal) APIs by design, as the
+      SQLite, SQL Server and Npgsql providers are.
+    -->
+    <NoWarn>$(NoWarn);EF1001</NoWarn>
+
+    <!--
+      RS0026/RS0027: EF Core's provider API conventions require overloads with optional parameters —
+      UseTrino(..., Action<TrinoDbContextOptionsBuilder>? = null) mirrors UseSqlServer/UseNpgsql, and
+      overrides such as BeginTransactionAsync(..., CancellationToken = default) inherit EF's own
+      fixed signatures. Not a new API design choice (same reasoning as TrinoConnection.GetSchemaAsync).
+    -->
+    <NoWarn>$(NoWarn);RS0026;RS0027</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TriQL.Data.ADO\TriQL.Data.ADO.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

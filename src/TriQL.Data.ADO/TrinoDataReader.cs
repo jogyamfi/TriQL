@@ -89,11 +89,15 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
     public override bool IsClosed => _closed;
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// <c>-1</c> for queries. For DML, the server-reported update count — even though Trino also
+    /// returns DML counts as a one-column <c>rows</c> result set, so the reader has columns.
+    /// </remarks>
     public override int RecordsAffected
     {
         get
         {
-            if (_columns.Count > 0)
+            if (_resultSet.UpdateType is null)
             {
                 return -1;
             }
@@ -199,7 +203,8 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
         RequireRow().GetString(ordinal) is { Length: > 0 } s ? s[0] : throw new InvalidCastException("An empty string cannot be returned as a char.");
 
     /// <inheritdoc/>
-    public override DateTime GetDateTime(int ordinal) => RequireRow().GetDateTime(ordinal);
+    /// <remarks>Applies the <see cref="GetFieldValue{T}"/> conversions, so <c>timestamp(p &gt; 7)</c> and <c>date</c> columns are readable too.</remarks>
+    public override DateTime GetDateTime(int ordinal) => RequireRow().GetFieldValue<DateTime>(ordinal);
 
     /// <inheritdoc/>
     public override decimal GetDecimal(int ordinal) => RequireRow().GetDecimal(ordinal);
@@ -211,7 +216,8 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
     public override float GetFloat(int ordinal) => RequireRow().GetFloat(ordinal);
 
     /// <inheritdoc/>
-    public override Guid GetGuid(int ordinal) => RequireRow().GetGuid(ordinal);
+    /// <remarks>Applies the <see cref="GetFieldValue{T}"/> conversions, so a <c>varchar</c> column holding a UUID is readable too.</remarks>
+    public override Guid GetGuid(int ordinal) => RequireRow().GetFieldValue<Guid>(ordinal);
 
     /// <inheritdoc/>
     public override short GetInt16(int ordinal) => RequireRow().GetInt16(ordinal);

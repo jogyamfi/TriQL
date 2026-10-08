@@ -53,6 +53,13 @@ jobs:
           --collect:"XPlat Code Coverage"
           --results-directory ./coverage
 
+      - name: Unit tests with coverage (TriQL.EntityFrameworkCore.Tests)
+        run: >
+          dotnet test tests/TriQL.EntityFrameworkCore.Tests/TriQL.EntityFrameworkCore.Tests.csproj
+          -c Release --no-build
+          --collect:"XPlat Code Coverage"
+          --results-directory ./coverage
+
       # TEST-3: coverage is reported (not enforced). Results below the 85% line / 75% branch
       # targets surface as warnings but never fail the build. Reports for projects with no
       # coverable lines yet are skipped.
@@ -111,6 +118,12 @@ jobs:
         # the rest of this suite, so folding it into this 3-OS matrix would slow every PR on every
         # OS for a suite that (per the docker-check gate above) only Linux runners can even execute.
         run: dotnet test tests/TriQL.IntegrationTests -c Release --no-build --filter "Category!=Spooling"
+
+      - name: EF Core functional tests
+        if: steps.docker-check.outputs.available == 'true'
+        # The EF Core provider against the same single Trino container (memory/tpch catalogs plus the
+        # fixture's local-disk Iceberg catalog), so it needs no extra containers.
+        run: dotnet test tests/TriQL.EntityFrameworkCore.FunctionalTests -c Release --no-build
 
   aot-smoke:
     # TEST-12 / P6-T9: publish with PublishAot=true and prove it queries a live coordinator with

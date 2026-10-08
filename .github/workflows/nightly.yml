@@ -43,3 +43,8 @@ jobs:
         # SpoolingTrinoFixture.RequestedVersion honours the same TRIQL_TEST_TRINO_VERSION env var as
         # TrinoContainerFixture. No separate job is needed for that reason.
         run: dotnet test tests/TriQL.IntegrationTests -c Release --no-build
+
+      - name: EF Core functional tests against trinodb/trino:${{ matrix.trino-version }}
+        env:
+          TRIQL_TEST_TRINO_VERSION: ${{ matrix.trino-version }}
+        run: dotnet test tests/TriQL.EntityFrameworkCore.FunctionalTests -c Release --no-build

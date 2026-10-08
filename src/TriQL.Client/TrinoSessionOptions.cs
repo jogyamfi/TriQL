@@ -126,6 +126,14 @@ public sealed class TrinoSessionOptions
     public bool TestConnectionOnOpen { get; set; }
 
     /// <summary>
+    /// How parameterized statements reach the coordinator. Default
+    /// <see cref="TrinoParameterBinding.PreparedStatementHeader"/>; use
+    /// <see cref="TrinoParameterBinding.ExecuteImmediate"/> behind a proxy or gateway whose header
+    /// limits reject large statements.
+    /// </summary>
+    public TrinoParameterBinding ParameterBinding { get; set; }
+
+    /// <summary>
     /// When <see langword="true"/>, the <c>db.statement</c> tag on the <c>trino.query</c> trace span
     /// (FR-11.2.2) is redacted instead of carrying the submitted SQL text. Default <see langword="false"/>.
     /// </summary>
