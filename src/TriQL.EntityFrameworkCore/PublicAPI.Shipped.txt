@@ -1,1 +1,413 @@
 ﻿#nullable enable
+const TriQL.EntityFrameworkCore.Metadata.Internal.TrinoAnnotationNames.Catalog = "Trino:Catalog" -> string!
+const TriQL.EntityFrameworkCore.Metadata.Internal.TrinoAnnotationNames.DefaultCatalog = "Trino:DefaultCatalog" -> string!
+const TriQL.EntityFrameworkCore.Metadata.Internal.TrinoAnnotationNames.Prefix = "Trino:" -> string!
+const TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeOffsetTypeMapping.BaseStoreTypeName = "timestamp with time zone" -> string!
+const TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeOffsetTypeMapping.DefaultPrecision = 6 -> int
+const TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeTypeMapping.DefaultPrecision = 6 -> int
+const TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDecimalTypeMapping.DefaultPrecision = 18 -> int
+const TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDecimalTypeMapping.DefaultScale = 2 -> int
+const TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDecimalTypeMapping.MaxPrecision = 38 -> int
+const TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoTimeOnlyTypeMapping.DefaultPrecision = 6 -> int
+const TriQL.EntityFrameworkCore.Storage.Internal.TrinoTypeMappingSource.ImplicitTemporalPrecision = 3 -> int
+const TriQL.EntityFrameworkCore.Storage.Internal.TrinoTypeMappingSource.MaxTemporalPrecision = 12 -> int
+const TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.MaxParameters = 2000 -> int
+const TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory.DefaultMaxBatchSize = 1000 -> int
+Microsoft.EntityFrameworkCore.Diagnostics.TrinoEventId
+Microsoft.EntityFrameworkCore.TrinoDatabaseFacadeExtensions
+Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions
+Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions
+Microsoft.EntityFrameworkCore.TrinoEntityTypeExtensions
+Microsoft.EntityFrameworkCore.TrinoModelBuilderExtensions
+Microsoft.EntityFrameworkCore.TrinoModelExtensions
+Microsoft.Extensions.DependencyInjection.TrinoServiceCollectionExtensions
+override TriQL.EntityFrameworkCore.Design.Internal.TrinoAnnotationCodeGenerator.GenerateFluentApi(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType, Microsoft.EntityFrameworkCore.Infrastructure.IAnnotation! annotation) -> Microsoft.EntityFrameworkCore.Design.MethodCallCodeFragment?
+override TriQL.EntityFrameworkCore.Design.Internal.TrinoAnnotationCodeGenerator.GenerateFluentApi(Microsoft.EntityFrameworkCore.Metadata.IModel! model, Microsoft.EntityFrameworkCore.Infrastructure.IAnnotation! annotation) -> Microsoft.EntityFrameworkCore.Design.MethodCallCodeFragment?
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.Validate(Microsoft.EntityFrameworkCore.Metadata.IModel! model, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Model.Validation!>! logger) -> void
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.ApplyServices(Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> void
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.Clone() -> Microsoft.EntityFrameworkCore.Infrastructure.RelationalOptionsExtension!
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.Info.get -> Microsoft.EntityFrameworkCore.Infrastructure.DbContextOptionsExtensionInfo!
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithConnection(System.Data.Common.DbConnection? connection, bool owned) -> Microsoft.EntityFrameworkCore.Infrastructure.RelationalOptionsExtension!
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithConnectionString(string? connectionString) -> Microsoft.EntityFrameworkCore.Infrastructure.RelationalOptionsExtension!
+override TriQL.EntityFrameworkCore.Infrastructure.TrinoRetryingExecutionStrategy.ShouldRetryOn(System.Exception! exception) -> bool
+override TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoConventionSetBuilder.CreateConventionSet() -> Microsoft.EntityFrameworkCore.Metadata.Conventions.ConventionSet!
+override TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoValueGenerationConvention.GetValueGenerated(Microsoft.EntityFrameworkCore.Metadata.IConventionProperty! property) -> Microsoft.EntityFrameworkCore.Metadata.ValueGenerated?
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.AcquireDatabaseLock() -> Microsoft.EntityFrameworkCore.Migrations.IMigrationsDatabaseLock!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.AcquireDatabaseLockAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.Migrations.IMigrationsDatabaseLock!>!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.Exists() -> bool
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.ExistsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.ExistsSql.get -> string!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.GetBeginIfExistsScript(string! migrationId) -> string!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.GetBeginIfNotExistsScript(string! migrationId) -> string!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.GetCreateIfNotExistsScript() -> string!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.GetEndIfScript() -> string!
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.InterpretExistsResult(object? value) -> bool
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.LockReleaseBehavior.get -> Microsoft.EntityFrameworkCore.Migrations.LockReleaseBehavior
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator.Generate(Microsoft.EntityFrameworkCore.Migrations.Operations.CreateTableOperation! operation, Microsoft.EntityFrameworkCore.Metadata.IModel? model, Microsoft.EntityFrameworkCore.Migrations.MigrationCommandListBuilder! builder, bool terminate = true) -> void
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator.Generate(Microsoft.EntityFrameworkCore.Migrations.Operations.DropTableOperation! operation, Microsoft.EntityFrameworkCore.Metadata.IModel? model, Microsoft.EntityFrameworkCore.Migrations.MigrationCommandListBuilder! builder, bool terminate = true) -> void
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator.Generate(Microsoft.EntityFrameworkCore.Migrations.Operations.EnsureSchemaOperation! operation, Microsoft.EntityFrameworkCore.Metadata.IModel? model, Microsoft.EntityFrameworkCore.Migrations.MigrationCommandListBuilder! builder) -> void
+override TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator.Generate(System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Migrations.Operations.MigrationOperation!>! operations, Microsoft.EntityFrameworkCore.Metadata.IModel? model = null, Microsoft.EntityFrameworkCore.Migrations.MigrationsSqlGenerationOptions options = Microsoft.EntityFrameworkCore.Migrations.MigrationsSqlGenerationOptions.Default) -> System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Migrations.MigrationCommand!>!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoParameterBasedSqlProcessor.ProcessSqlNullability(System.Linq.Expressions.Expression! queryExpression, Microsoft.EntityFrameworkCore.Query.ParametersCacheDecorator! Decorator) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryCompilationContext.IsBuffering.get -> bool
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.GenerateLimitOffset(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SelectExpression! selectExpression) -> void
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.GenerateTop(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SelectExpression! selectExpression) -> void
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.GetOperator(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlBinaryExpression! binaryExpression) -> string!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitColumn(Microsoft.EntityFrameworkCore.Query.SqlExpressions.ColumnExpression! columnExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitCrossApply(Microsoft.EntityFrameworkCore.Query.SqlExpressions.CrossApplyExpression! crossApplyExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitDelete(Microsoft.EntityFrameworkCore.Query.SqlExpressions.DeleteExpression! deleteExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitExtension(System.Linq.Expressions.Expression! extensionExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitOrdering(Microsoft.EntityFrameworkCore.Query.SqlExpressions.OrderingExpression! orderingExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitOuterApply(Microsoft.EntityFrameworkCore.Query.SqlExpressions.OuterApplyExpression! outerApplyExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitSqlFunction(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlFunctionExpression! sqlFunctionExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitTable(Microsoft.EntityFrameworkCore.Query.SqlExpressions.TableExpression! tableExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitUpdate(Microsoft.EntityFrameworkCore.Query.SqlExpressions.UpdateExpression! updateExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryTranslationPostprocessor.Process(System.Linq.Expressions.Expression! query) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlNullabilityProcessor.VisitCustomSqlExpression(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression! sqlExpression, bool allowOptimizedExpansion, out bool nullable) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlTranslatingExpressionVisitor.GenerateGreatest(System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! expressions, System.Type! resultType) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlTranslatingExpressionVisitor.GenerateLeast(System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! expressions, System.Type! resultType) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlTranslatingExpressionVisitor.VisitUnary(System.Linq.Expressions.UnaryExpression! unaryExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.Equals(object? obj) -> bool
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.GetHashCode() -> int
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.Print(Microsoft.EntityFrameworkCore.Query.ExpressionPrinter! expressionPrinter) -> void
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.Quote() -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.VisitChildren(System.Linq.Expressions.ExpressionVisitor! visitor) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoCodeGenerator.GenerateUseProvider(string! connectionString, Microsoft.EntityFrameworkCore.Design.MethodCallCodeFragment? providerOptions) -> Microsoft.EntityFrameworkCore.Design.MethodCallCodeFragment!
+override TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoDatabaseModelFactory.Create(string! connectionString, Microsoft.EntityFrameworkCore.Scaffolding.DatabaseModelFactoryOptions! options) -> Microsoft.EntityFrameworkCore.Scaffolding.Metadata.DatabaseModel!
+override TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoDatabaseModelFactory.Create(System.Data.Common.DbConnection! connection, Microsoft.EntityFrameworkCore.Scaffolding.DatabaseModelFactoryOptions! options) -> Microsoft.EntityFrameworkCore.Scaffolding.Metadata.DatabaseModel!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoBoolTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoBoolTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoByteArrayTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoByteArrayTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoByteTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoByteTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateOnlyTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateOnlyTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeOffsetTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeOffsetTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeOffsetTypeMapping.ProcessStoreType(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters, string! storeType, string! storeTypeNameBase) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDecimalTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDecimalTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDoubleTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDoubleTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoFloatTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoFloatTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoGuidTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoGuidTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoLongTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoLongTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoSByteTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoSByteTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoShortTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoShortTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoStringTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoStringTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoTimeOnlyTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoTimeOnlyTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoUIntTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoUIntTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoULongTypeMapping.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping!
+override TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoULongTypeMapping.GenerateNonNullSqlLiteral(object! value) -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.Create() -> void
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.CreateAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.Delete() -> void
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.DeleteAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.EnsureDeleted() -> bool
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.EnsureDeletedAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.Exists() -> bool
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.ExistsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.HasTables() -> bool
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.HasTablesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.BeginTransaction() -> Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.BeginTransaction(System.Data.IsolationLevel isolationLevel) -> Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.BeginTransactionAsync(System.Data.IsolationLevel isolationLevel, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction!>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.BeginTransactionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction!>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.CreateDbConnection() -> System.Data.Common.DbConnection!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.EnlistTransaction(System.Transactions.Transaction? transaction) -> void
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.UseTransaction(System.Data.Common.DbTransaction? transaction) -> Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction?
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.UseTransaction(System.Data.Common.DbTransaction? transaction, System.Guid transactionId) -> Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction?
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.UseTransactionAsync(System.Data.Common.DbTransaction? transaction, System.Guid transactionId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction?>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.UseTransactionAsync(System.Data.Common.DbTransaction? transaction, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction?>!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper.BatchTerminator.get -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper.StatementTerminator.get -> string!
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoTypeMappingSource.FindMapping(in Microsoft.EntityFrameworkCore.Storage.RelationalTypeMappingInfo mappingInfo) -> Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping?
+override TriQL.EntityFrameworkCore.Storage.Internal.TrinoTypeMappingSource.ParseStoreTypeName(string? storeTypeName, ref bool? unicode, ref int? size, ref int? precision, ref int? scale) -> string?
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.AddCommand(Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! modificationCommand) -> void
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.ConsumeResultSetWithRowsAffectedOnly(int commandIndex, Microsoft.EntityFrameworkCore.Storage.RelationalDataReader! reader) -> int
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.ConsumeResultSetWithRowsAffectedOnlyAsync(int commandIndex, Microsoft.EntityFrameworkCore.Storage.RelationalDataReader! reader, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<int>!
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.RollbackLastCommand(Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! modificationCommand) -> void
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.TryAddCommand(Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! modificationCommand) -> bool
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator.AppendDeleteOperation(System.Text.StringBuilder! commandStringBuilder, Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! command, int commandPosition, out bool requiresTransaction) -> Microsoft.EntityFrameworkCore.Update.ResultSetMapping
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator.AppendInsertOperation(System.Text.StringBuilder! commandStringBuilder, Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! command, int commandPosition, out bool requiresTransaction) -> Microsoft.EntityFrameworkCore.Update.ResultSetMapping
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator.AppendUpdateOperation(System.Text.StringBuilder! commandStringBuilder, Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! command, int commandPosition, out bool requiresTransaction) -> Microsoft.EntityFrameworkCore.Update.ResultSetMapping
+override TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator.GeneratesTemporaryValues.get -> bool
+override TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator.Next(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry! entry) -> System.Guid
+override TriQL.EntityFrameworkCore.ValueGeneration.Internal.TrinoValueGeneratorSelector.FindForType(Microsoft.EntityFrameworkCore.Metadata.IProperty! property, Microsoft.EntityFrameworkCore.Metadata.ITypeBase! typeBase, System.Type! clrType) -> Microsoft.EntityFrameworkCore.ValueGeneration.ValueGenerator?
+static Microsoft.EntityFrameworkCore.TrinoDatabaseFacadeExtensions.IsTrino(this Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade! database) -> bool
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, string? connectionString, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, System.Data.Common.DbConnection! connection, bool contextOwnsConnection, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, System.Data.Common.DbConnection! connection, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, TriQL.Client.TrinoSessionOptions! sessionOptions, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder, TriQL.Data.ADO.TrinoDataSource! dataSource, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, string? connectionString, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, System.Data.Common.DbConnection! connection, bool contextOwnsConnection, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, System.Data.Common.DbConnection! connection, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, TriQL.Client.TrinoSessionOptions! sessionOptions, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.EntityFrameworkCore.TrinoDbContextOptionsBuilderExtensions.UseTrino<TContext>(this Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>! optionsBuilder, TriQL.Data.ADO.TrinoDataSource! dataSource, System.Action<TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!>? trinoOptionsAction = null) -> Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<TContext!>!
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.ApproxDistinct<T>(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.Collections.Generic.IEnumerable<T>! values) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffDay(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateOnly startDate, System.DateOnly endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffDay(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateOnly? startDate, System.DateOnly? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffDay(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime startDate, System.DateTime endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffDay(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime? startDate, System.DateTime? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffDay(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset startDate, System.DateTimeOffset endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffDay(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset? startDate, System.DateTimeOffset? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffHour(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime startDate, System.DateTime endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffHour(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime? startDate, System.DateTime? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffHour(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset startDate, System.DateTimeOffset endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffHour(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset? startDate, System.DateTimeOffset? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffMinute(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime startDate, System.DateTime endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffMinute(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime? startDate, System.DateTime? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffMinute(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset startDate, System.DateTimeOffset endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffMinute(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset? startDate, System.DateTimeOffset? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffMonth(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateOnly startDate, System.DateOnly endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffMonth(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateOnly? startDate, System.DateOnly? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffMonth(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime startDate, System.DateTime endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffMonth(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime? startDate, System.DateTime? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffMonth(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset startDate, System.DateTimeOffset endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffMonth(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset? startDate, System.DateTimeOffset? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffSecond(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime startDate, System.DateTime endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffSecond(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime? startDate, System.DateTime? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffSecond(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset startDate, System.DateTimeOffset endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffSecond(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset? startDate, System.DateTimeOffset? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffYear(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateOnly startDate, System.DateOnly endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffYear(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateOnly? startDate, System.DateOnly? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffYear(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime startDate, System.DateTime endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffYear(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTime? startDate, System.DateTime? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffYear(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset startDate, System.DateTimeOffset endDate) -> long
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.DateDiffYear(this Microsoft.EntityFrameworkCore.DbFunctions! _, System.DateTimeOffset? startDate, System.DateTimeOffset? endDate) -> long?
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.ILike(this Microsoft.EntityFrameworkCore.DbFunctions! _, string? matchExpression, string? pattern) -> bool
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.ILike(this Microsoft.EntityFrameworkCore.DbFunctions! _, string? matchExpression, string? pattern, string? escapeCharacter) -> bool
+static Microsoft.EntityFrameworkCore.TrinoDbFunctionsExtensions.JsonExtractScalar(this Microsoft.EntityFrameworkCore.DbFunctions! _, string? json, string! path) -> string?
+static Microsoft.EntityFrameworkCore.TrinoEntityTypeExtensions.GetCatalog(this Microsoft.EntityFrameworkCore.Metadata.IReadOnlyEntityType! entityType) -> string?
+static Microsoft.EntityFrameworkCore.TrinoEntityTypeExtensions.SetCatalog(this Microsoft.EntityFrameworkCore.Metadata.IMutableEntityType! entityType, string? catalog) -> void
+static Microsoft.EntityFrameworkCore.TrinoModelBuilderExtensions.HasCatalog(this Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder! entityTypeBuilder, string? catalog) -> Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder!
+static Microsoft.EntityFrameworkCore.TrinoModelBuilderExtensions.HasCatalog<TEntity>(this Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<TEntity!>! entityTypeBuilder, string? catalog) -> Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<TEntity!>!
+static Microsoft.EntityFrameworkCore.TrinoModelBuilderExtensions.HasDefaultCatalog(this Microsoft.EntityFrameworkCore.ModelBuilder! modelBuilder, string? catalog) -> Microsoft.EntityFrameworkCore.ModelBuilder!
+static Microsoft.EntityFrameworkCore.TrinoModelExtensions.GetDefaultCatalog(this Microsoft.EntityFrameworkCore.Metadata.IReadOnlyModel! model) -> string?
+static Microsoft.EntityFrameworkCore.TrinoModelExtensions.SetDefaultCatalog(this Microsoft.EntityFrameworkCore.Metadata.IMutableModel! model, string? catalog) -> void
+static Microsoft.Extensions.DependencyInjection.TrinoServiceCollectionExtensions.AddEntityFrameworkTrino(this Microsoft.Extensions.DependencyInjection.IServiceCollection! serviceCollection) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static readonly Microsoft.EntityFrameworkCore.Diagnostics.TrinoEventId.ColumnSkipped -> Microsoft.Extensions.Logging.EventId
+static readonly Microsoft.EntityFrameworkCore.Diagnostics.TrinoEventId.NonAtomicSaveChanges -> Microsoft.Extensions.Logging.EventId
+static readonly Microsoft.EntityFrameworkCore.Diagnostics.TrinoEventId.UniqueIndexNotEnforced -> Microsoft.Extensions.Logging.EventId
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper.GenerateStringLiteral(string! value) -> string!
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper.GenerateStringLiteral(System.Text.StringBuilder! builder, string! value) -> void
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoTransientExceptionDetector.GetDelay(int attempt, System.TimeSpan maxDelay) -> System.TimeSpan
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoTransientExceptionDetector.MarkNotRetryable(System.Exception! exception) -> void
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoTransientExceptionDetector.ShouldRetryOn(System.Exception? exception) -> bool
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoTransientExceptionDetector.ShouldRetryStatementOn(System.Exception? exception) -> bool
+static TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator.Instance.get -> TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator!
+TriQL.EntityFrameworkCore.Design.Internal.TrinoAnnotationCodeGenerator
+TriQL.EntityFrameworkCore.Design.Internal.TrinoAnnotationCodeGenerator.TrinoAnnotationCodeGenerator(Microsoft.EntityFrameworkCore.Design.AnnotationCodeGeneratorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Design.Internal.TrinoDesignTimeServices
+TriQL.EntityFrameworkCore.Design.Internal.TrinoDesignTimeServices.TrinoDesignTimeServices() -> void
+TriQL.EntityFrameworkCore.Diagnostics.Internal.TrinoLoggingDefinitions
+TriQL.EntityFrameworkCore.Diagnostics.Internal.TrinoLoggingDefinitions.TrinoLoggingDefinitions() -> void
+TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator
+TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.TrinoModelValidator(Microsoft.EntityFrameworkCore.Infrastructure.ModelValidatorDependencies! dependencies, Microsoft.EntityFrameworkCore.Infrastructure.RelationalModelValidatorDependencies! relationalDependencies) -> void
+TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension
+TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.TrinoOptionsExtension() -> void
+TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.TrinoOptionsExtension(TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension! copyFrom) -> void
+TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder
+TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder.TrinoDbContextOptionsBuilder(Microsoft.EntityFrameworkCore.DbContextOptionsBuilder! optionsBuilder) -> void
+TriQL.EntityFrameworkCore.Infrastructure.TrinoRetryingExecutionStrategy
+TriQL.EntityFrameworkCore.Infrastructure.TrinoRetryingExecutionStrategy.TrinoRetryingExecutionStrategy(Microsoft.EntityFrameworkCore.Storage.ExecutionStrategyDependencies! dependencies, int maxRetryCount, System.TimeSpan maxRetryDelay) -> void
+TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoConventionSetBuilder
+TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoConventionSetBuilder.TrinoConventionSetBuilder(Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure.ProviderConventionSetBuilderDependencies! dependencies, Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure.RelationalConventionSetBuilderDependencies! relationalDependencies) -> void
+TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoValueGenerationConvention
+TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoValueGenerationConvention.TrinoValueGenerationConvention(Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure.ProviderConventionSetBuilderDependencies! dependencies, Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure.RelationalConventionSetBuilderDependencies! relationalDependencies) -> void
+TriQL.EntityFrameworkCore.Metadata.Internal.TrinoAnnotationNames
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoHistoryRepository.TrinoHistoryRepository(Microsoft.EntityFrameworkCore.Migrations.HistoryRepositoryDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrationsSqlGenerator.TrinoMigrationsSqlGenerator(Microsoft.EntityFrameworkCore.Migrations.MigrationsSqlGeneratorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator
+TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator.TrinoMigrator() -> void
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoAggregateMethodTranslator
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoAggregateMethodTranslator.TrinoAggregateMethodTranslator(Microsoft.EntityFrameworkCore.Query.ISqlExpressionFactory! sqlExpressionFactory, Microsoft.EntityFrameworkCore.Storage.IRelationalTypeMappingSource! typeMappingSource) -> void
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoConvertTranslator
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoConvertTranslator.TrinoConvertTranslator(Microsoft.EntityFrameworkCore.Query.ISqlExpressionFactory! sqlExpressionFactory) -> void
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoDateTimeMemberTranslator
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoDateTimeMemberTranslator.TrinoDateTimeMemberTranslator(Microsoft.EntityFrameworkCore.Query.ISqlExpressionFactory! sqlExpressionFactory, Microsoft.EntityFrameworkCore.Storage.IRelationalTypeMappingSource! typeMappingSource) -> void
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoDateTimeMethodTranslator
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoDateTimeMethodTranslator.TrinoDateTimeMethodTranslator(Microsoft.EntityFrameworkCore.Query.ISqlExpressionFactory! sqlExpressionFactory, Microsoft.EntityFrameworkCore.Storage.IRelationalTypeMappingSource! typeMappingSource) -> void
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoDbFunctionsTranslator
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoDbFunctionsTranslator.TrinoDbFunctionsTranslator(Microsoft.EntityFrameworkCore.Query.ISqlExpressionFactory! sqlExpressionFactory, Microsoft.EntityFrameworkCore.Storage.IRelationalTypeMappingSource! typeMappingSource) -> void
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoMathTranslator
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoMathTranslator.TrinoMathTranslator(Microsoft.EntityFrameworkCore.Query.ISqlExpressionFactory! sqlExpressionFactory) -> void
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoMiscMethodTranslator
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoMiscMethodTranslator.TrinoMiscMethodTranslator(Microsoft.EntityFrameworkCore.Query.ISqlExpressionFactory! sqlExpressionFactory) -> void
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoObjectToStringTranslator
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoObjectToStringTranslator.TrinoObjectToStringTranslator(Microsoft.EntityFrameworkCore.Query.ISqlExpressionFactory! sqlExpressionFactory) -> void
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoStringMemberTranslator
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoStringMemberTranslator.TrinoStringMemberTranslator(Microsoft.EntityFrameworkCore.Query.ISqlExpressionFactory! sqlExpressionFactory) -> void
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoStringMethodTranslator
+TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoStringMethodTranslator.TrinoStringMethodTranslator(Microsoft.EntityFrameworkCore.Query.ISqlExpressionFactory! sqlExpressionFactory) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoAggregateMethodCallTranslatorProvider
+TriQL.EntityFrameworkCore.Query.Internal.TrinoAggregateMethodCallTranslatorProvider.TrinoAggregateMethodCallTranslatorProvider(Microsoft.EntityFrameworkCore.Query.RelationalAggregateMethodCallTranslatorProviderDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoMemberTranslatorProvider
+TriQL.EntityFrameworkCore.Query.Internal.TrinoMemberTranslatorProvider.TrinoMemberTranslatorProvider(Microsoft.EntityFrameworkCore.Query.RelationalMemberTranslatorProviderDependencies! dependencies, Microsoft.EntityFrameworkCore.Storage.IRelationalTypeMappingSource! typeMappingSource) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoMethodCallTranslatorProvider
+TriQL.EntityFrameworkCore.Query.Internal.TrinoMethodCallTranslatorProvider.TrinoMethodCallTranslatorProvider(Microsoft.EntityFrameworkCore.Query.RelationalMethodCallTranslatorProviderDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoParameterBasedSqlProcessor
+TriQL.EntityFrameworkCore.Query.Internal.TrinoParameterBasedSqlProcessor.TrinoParameterBasedSqlProcessor(Microsoft.EntityFrameworkCore.Query.RelationalParameterBasedSqlProcessorDependencies! dependencies, Microsoft.EntityFrameworkCore.Query.RelationalParameterBasedSqlProcessorParameters! parameters) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoParameterBasedSqlProcessorFactory
+TriQL.EntityFrameworkCore.Query.Internal.TrinoParameterBasedSqlProcessorFactory.TrinoParameterBasedSqlProcessorFactory(Microsoft.EntityFrameworkCore.Query.RelationalParameterBasedSqlProcessorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryCompilationContext
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryCompilationContext.TrinoQueryCompilationContext(Microsoft.EntityFrameworkCore.Query.QueryCompilationContextDependencies! dependencies, Microsoft.EntityFrameworkCore.Query.RelationalQueryCompilationContextDependencies! relationalDependencies, bool async) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryCompilationContextFactory
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryCompilationContextFactory.TrinoQueryCompilationContextFactory(Microsoft.EntityFrameworkCore.Query.QueryCompilationContextDependencies! dependencies, Microsoft.EntityFrameworkCore.Query.RelationalQueryCompilationContextDependencies! relationalDependencies) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.TrinoQuerySqlGenerator(Microsoft.EntityFrameworkCore.Query.QuerySqlGeneratorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGeneratorFactory
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGeneratorFactory.TrinoQuerySqlGeneratorFactory(Microsoft.EntityFrameworkCore.Query.QuerySqlGeneratorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryTranslationPostprocessor
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryTranslationPostprocessor.TrinoQueryTranslationPostprocessor(Microsoft.EntityFrameworkCore.Query.QueryTranslationPostprocessorDependencies! dependencies, Microsoft.EntityFrameworkCore.Query.RelationalQueryTranslationPostprocessorDependencies! relationalDependencies, Microsoft.EntityFrameworkCore.Query.RelationalQueryCompilationContext! queryCompilationContext) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryTranslationPostprocessorFactory
+TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryTranslationPostprocessorFactory.TrinoQueryTranslationPostprocessorFactory(Microsoft.EntityFrameworkCore.Query.QueryTranslationPostprocessorDependencies! dependencies, Microsoft.EntityFrameworkCore.Query.RelationalQueryTranslationPostprocessorDependencies! relationalDependencies) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlNullabilityProcessor
+TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlNullabilityProcessor.TrinoSqlNullabilityProcessor(Microsoft.EntityFrameworkCore.Query.RelationalParameterBasedSqlProcessorDependencies! dependencies, Microsoft.EntityFrameworkCore.Query.RelationalParameterBasedSqlProcessorParameters! parameters) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlTranslatingExpressionVisitor
+TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlTranslatingExpressionVisitor.TrinoSqlTranslatingExpressionVisitor(Microsoft.EntityFrameworkCore.Query.RelationalSqlTranslatingExpressionVisitorDependencies! dependencies, Microsoft.EntityFrameworkCore.Query.QueryCompilationContext! queryCompilationContext, Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor! queryableMethodTranslatingExpressionVisitor) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlTranslatingExpressionVisitorFactory
+TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlTranslatingExpressionVisitorFactory.TrinoSqlTranslatingExpressionVisitorFactory(Microsoft.EntityFrameworkCore.Query.RelationalSqlTranslatingExpressionVisitorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression
+TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.TrinoStringAggregateExpression(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression! value, Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression! separator, System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.OrderingExpression!>! orderings, Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping? typeMapping) -> void
+TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoCodeGenerator
+TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoCodeGenerator.TrinoCodeGenerator(Microsoft.EntityFrameworkCore.Scaffolding.ProviderCodeGeneratorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoDatabaseModelFactory
+TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoDatabaseModelFactory.TrinoDatabaseModelFactory(Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Scaffolding!>! logger, Microsoft.EntityFrameworkCore.Storage.IRelationalTypeMappingSource! typeMappingSource) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoBoolTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoBoolTypeMapping.TrinoBoolTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoBoolTypeMapping.TrinoBoolTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoByteArrayTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoByteArrayTypeMapping.TrinoByteArrayTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoByteArrayTypeMapping.TrinoByteArrayTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoByteTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoByteTypeMapping.TrinoByteTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoByteTypeMapping.TrinoByteTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateOnlyTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateOnlyTypeMapping.TrinoDateOnlyTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateOnlyTypeMapping.TrinoDateOnlyTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeOffsetTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeOffsetTypeMapping.TrinoDateTimeOffsetTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeOffsetTypeMapping.TrinoDateTimeOffsetTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeTypeMapping.TrinoDateTimeTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDateTimeTypeMapping.TrinoDateTimeTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDecimalTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDecimalTypeMapping.TrinoDecimalTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDecimalTypeMapping.TrinoDecimalTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDoubleTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDoubleTypeMapping.TrinoDoubleTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoDoubleTypeMapping.TrinoDoubleTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoFloatTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoFloatTypeMapping.TrinoFloatTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoFloatTypeMapping.TrinoFloatTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoGuidTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoGuidTypeMapping.TrinoGuidTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoGuidTypeMapping.TrinoGuidTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoLongTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoLongTypeMapping.TrinoLongTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoLongTypeMapping.TrinoLongTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoSByteTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoSByteTypeMapping.TrinoSByteTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoSByteTypeMapping.TrinoSByteTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoShortTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoShortTypeMapping.TrinoShortTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoShortTypeMapping.TrinoShortTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoStringTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoStringTypeMapping.TrinoStringTypeMapping(bool fixedLength = false) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoStringTypeMapping.TrinoStringTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoTimeOnlyTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoTimeOnlyTypeMapping.TrinoTimeOnlyTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoTimeOnlyTypeMapping.TrinoTimeOnlyTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoUIntTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoUIntTypeMapping.TrinoUIntTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoUIntTypeMapping.TrinoUIntTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoULongTypeMapping
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoULongTypeMapping.TrinoULongTypeMapping() -> void
+TriQL.EntityFrameworkCore.Storage.Internal.Mapping.TrinoULongTypeMapping.TrinoULongTypeMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters parameters) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.TrinoDatabaseCreator(Microsoft.EntityFrameworkCore.Storage.RelationalDatabaseCreatorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoRelationalConnection.TrinoRelationalConnection(Microsoft.EntityFrameworkCore.Storage.RelationalConnectionDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper.TrinoSqlGenerationHelper(Microsoft.EntityFrameworkCore.Storage.RelationalSqlGenerationHelperDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoTransientExceptionDetector
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoTypeMappingSource
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoTypeMappingSource.TrinoTypeMappingSource(Microsoft.EntityFrameworkCore.Storage.TypeMappingSourceDependencies! dependencies, Microsoft.EntityFrameworkCore.Storage.RelationalTypeMappingSourceDependencies! relationalDependencies) -> void
+TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor
+TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor.TrinoBatchExecutor(Microsoft.EntityFrameworkCore.Infrastructure.IDbContextOptions! options, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Update!>! updateLogger) -> void
+TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch
+TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.TrinoModificationCommandBatch(Microsoft.EntityFrameworkCore.Update.ModificationCommandBatchFactoryDependencies! dependencies, int maxBatchSize) -> void
+TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory
+TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory.TrinoModificationCommandBatchFactory(Microsoft.EntityFrameworkCore.Update.ModificationCommandBatchFactoryDependencies! dependencies, Microsoft.EntityFrameworkCore.Infrastructure.IDbContextOptions! options) -> void
+TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator
+TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator.TrinoUpdateSqlGenerator(Microsoft.EntityFrameworkCore.Update.UpdateSqlGeneratorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator
+TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator.GuidV7ValueGenerator() -> void
+TriQL.EntityFrameworkCore.ValueGeneration.Internal.TrinoValueGeneratorSelector
+TriQL.EntityFrameworkCore.ValueGeneration.Internal.TrinoValueGeneratorSelector.TrinoValueGeneratorSelector(Microsoft.EntityFrameworkCore.ValueGeneration.ValueGeneratorSelectorDependencies! dependencies) -> void
+virtual TriQL.EntityFrameworkCore.Design.Internal.TrinoDesignTimeServices.ConfigureDesignTimeServices(Microsoft.Extensions.DependencyInjection.IServiceCollection! serviceCollection) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateCatalog(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateColumnNameCase(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateNoSequences(Microsoft.EntityFrameworkCore.Metadata.IModel! model) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateTableNameCase(Microsoft.EntityFrameworkCore.Metadata.IModel! model) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateValueGeneration(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.WarnAboutUniqueness(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Model.Validation!>! logger) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.DataSource.get -> TriQL.Data.ADO.TrinoDataSource?
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.MaxRetryCount.get -> int
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.MaxRetryDelay.get -> System.TimeSpan
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.SessionOptions.get -> TriQL.Client.TrinoSessionOptions?
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.UseUtcSessionTimeZone.get -> bool
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithDataSource(TriQL.Data.ADO.TrinoDataSource! dataSource) -> TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension!
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithRetryOnFailure(int maxRetryCount, System.TimeSpan maxRetryDelay) -> TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension!
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithSessionOptions(TriQL.Client.TrinoSessionOptions! sessionOptions) -> TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension!
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithUseUtcSessionTimeZone(bool useUtcSessionTimeZone) -> TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension!
+virtual TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder.EnableRetryOnFailure(int maxRetryCount = 6, System.TimeSpan? maxRetryDelay = null) -> TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!
+virtual TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder.UseUtcSessionTimeZone(bool useUtcSessionTimeZone = true) -> TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!
+virtual TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator.GenerateScript(string? fromMigration = null, string? toMigration = null, Microsoft.EntityFrameworkCore.Migrations.MigrationsSqlGenerationOptions options = Microsoft.EntityFrameworkCore.Migrations.MigrationsSqlGenerationOptions.Default) -> string!
+virtual TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator.HasPendingModelChanges() -> bool
+virtual TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator.Migrate(string? targetMigration) -> void
+virtual TriQL.EntityFrameworkCore.Migrations.Internal.TrinoMigrator.MigrateAsync(string? targetMigration, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+virtual TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoAggregateMethodTranslator.Translate(System.Reflection.MethodInfo! method, Microsoft.EntityFrameworkCore.Query.EnumerableExpression! source, System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! arguments, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Query!>! logger) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+virtual TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoConvertTranslator.Translate(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression? instance, System.Reflection.MethodInfo! method, System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! arguments, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Query!>! logger) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+virtual TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoDateTimeMemberTranslator.Translate(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression? instance, System.Reflection.MemberInfo! member, System.Type! returnType, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Query!>! logger) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+virtual TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoDateTimeMethodTranslator.Translate(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression? instance, System.Reflection.MethodInfo! method, System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! arguments, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Query!>! logger) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+virtual TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoDbFunctionsTranslator.Translate(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression? instance, System.Reflection.MethodInfo! method, System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! arguments, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Query!>! logger) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+virtual TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoMathTranslator.Translate(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression? instance, System.Reflection.MethodInfo! method, System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! arguments, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Query!>! logger) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+virtual TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoMiscMethodTranslator.Translate(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression? instance, System.Reflection.MethodInfo! method, System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! arguments, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Query!>! logger) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+virtual TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoObjectToStringTranslator.Translate(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression? instance, System.Reflection.MethodInfo! method, System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! arguments, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Query!>! logger) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+virtual TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoStringMemberTranslator.Translate(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression? instance, System.Reflection.MemberInfo! member, System.Type! returnType, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Query!>! logger) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+virtual TriQL.EntityFrameworkCore.Query.Internal.Translators.TrinoStringMethodTranslator.Translate(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression? instance, System.Reflection.MethodInfo! method, System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! arguments, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Query!>! logger) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoParameterBasedSqlProcessorFactory.Create(Microsoft.EntityFrameworkCore.Query.RelationalParameterBasedSqlProcessorParameters! parameters) -> Microsoft.EntityFrameworkCore.Query.RelationalParameterBasedSqlProcessor!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryCompilationContextFactory.Create(bool async) -> Microsoft.EntityFrameworkCore.Query.QueryCompilationContext!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryCompilationContextFactory.CreatePrecompiled(bool async) -> Microsoft.EntityFrameworkCore.Query.QueryCompilationContext!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryCompilationContextFactory.Dependencies.get -> Microsoft.EntityFrameworkCore.Query.QueryCompilationContextDependencies!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryCompilationContextFactory.RelationalDependencies.get -> Microsoft.EntityFrameworkCore.Query.RelationalQueryCompilationContextDependencies!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGeneratorFactory.Create() -> Microsoft.EntityFrameworkCore.Query.QuerySqlGenerator!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryTranslationPostprocessorFactory.Create(Microsoft.EntityFrameworkCore.Query.QueryCompilationContext! queryCompilationContext) -> Microsoft.EntityFrameworkCore.Query.QueryTranslationPostprocessor!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryTranslationPostprocessorFactory.Dependencies.get -> Microsoft.EntityFrameworkCore.Query.QueryTranslationPostprocessorDependencies!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoQueryTranslationPostprocessorFactory.RelationalDependencies.get -> Microsoft.EntityFrameworkCore.Query.RelationalQueryTranslationPostprocessorDependencies!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlTranslatingExpressionVisitorFactory.Create(Microsoft.EntityFrameworkCore.Query.QueryCompilationContext! queryCompilationContext, Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor! queryableMethodTranslatingExpressionVisitor) -> Microsoft.EntityFrameworkCore.Query.RelationalSqlTranslatingExpressionVisitor!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.Orderings.get -> System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.OrderingExpression!>!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.Separator.get -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.Update(Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression! value, Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression! separator, System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.OrderingExpression!>! orderings) -> TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression!
+virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.Value.get -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!
+virtual TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor.Execute(System.Collections.Generic.IEnumerable<Microsoft.EntityFrameworkCore.Update.ModificationCommandBatch!>! commandBatches, Microsoft.EntityFrameworkCore.Storage.IRelationalConnection! connection) -> int
+virtual TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor.ExecuteAsync(System.Collections.Generic.IEnumerable<Microsoft.EntityFrameworkCore.Update.ModificationCommandBatch!>! commandBatches, Microsoft.EntityFrameworkCore.Storage.IRelationalConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
+virtual TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory.Create() -> Microsoft.EntityFrameworkCore.Update.ModificationCommandBatch!
+virtual TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory.Dependencies.get -> Microsoft.EntityFrameworkCore.Update.ModificationCommandBatchFactoryDependencies!

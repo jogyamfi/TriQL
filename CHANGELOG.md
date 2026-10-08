@@ -5,7 +5,7 @@ the core packages (`TriQL.Client`, `TriQL.Client.Auth`, `TriQL.Client.Compressio
 share one version, and `TriQL.EntityFrameworkCore` ships as a preview with its own version. GitHub
 Releases carry the same notes.
 
-## 1.1.0 — core packages; `TriQL.EntityFrameworkCore` 1.1.0-preview.1 (unreleased)
+## 1.1.0 — core packages; `TriQL.EntityFrameworkCore` 1.1.0-preview.1 (2026-10-08)
 
 ### New: `TriQL.EntityFrameworkCore` (preview)
 

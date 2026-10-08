@@ -1061,9 +1061,11 @@ produces a compiling `DbContext` and entities for existing tables and views.
 >   `docs/docfx.json` and `api-reference.md` include the assembly.
 > - **Release notes (EF10-T6):** a new `CHANGELOG.md` with the 1.1.0 core changes (Phase 0 and the parameter
 >   fixes of Phases 1–2) and the preview package.
-> - **Before tagging v1.1.0:** move the `PublicAPI.Unshipped.txt` entries to `PublicAPI.Shipped.txt`, date the
->   changelog entry, and update the README's "Stable — 1.0.0" status. (The README's spooling section no longer
->   promises the spooling default for 1.1.0; it now says "a later minor release".)
+> - **Release preparation, done:** the public API entries of `TriQL.Client`, `TriQL.Data.ADO` and
+>   `TriQL.EntityFrameworkCore` moved from `PublicAPI.Unshipped.txt` to `PublicAPI.Shipped.txt` (applying the four
+>   `*REMOVED*` markers of the `Precision`/`Scale` change); the changelog entry is dated 2026-10-08; the README
+>   status reads "Stable — 1.1.0" with the provider as a preview, and its spooling section no longer promises the
+>   spooling default for 1.1.0. What remains is merging and tagging `v1.1.0`.
 
 ### Implementation steps
 - **EF10-T1 — `docs/efcore.md` user guide.** Cover:

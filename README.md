@@ -25,9 +25,10 @@ for the phased delivery plan.
 
 ## Status
 
-**Stable — 1.0.0.** TriQL follows [Semantic Versioning](https://semver.org): breaking public-API
+**Stable — 1.1.0.** TriQL follows [Semantic Versioning](https://semver.org): breaking public-API
 changes only in a major version, additive API in minors, fixes in patches. The public API surface
 of each shipping package is locked by `PublicAPI.Shipped.txt` baselines and enforced at build time.
+The Entity Framework Core provider, `TriQL.EntityFrameworkCore`, is a **preview** (`1.1.0-preview.1`).
 
 The one deliberately conservative default in 1.x is the spooling protocol, which ships implemented
 and tested but **opt-in** — see [Spooling protocol](#spooling-protocol-opt-in). Release notes for

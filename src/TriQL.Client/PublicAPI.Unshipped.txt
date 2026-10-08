@@ -1,7 +1,1 @@
 ﻿#nullable enable
-TriQL.Client.Exceptions.TrinoQueryException.IsTransient.get -> bool
-TriQL.Client.TrinoParameterBinding
-TriQL.Client.TrinoParameterBinding.ExecuteImmediate = 1 -> TriQL.Client.TrinoParameterBinding
-TriQL.Client.TrinoParameterBinding.PreparedStatementHeader = 0 -> TriQL.Client.TrinoParameterBinding
-TriQL.Client.TrinoSessionOptions.ParameterBinding.get -> TriQL.Client.TrinoParameterBinding
-TriQL.Client.TrinoSessionOptions.ParameterBinding.set -> void
