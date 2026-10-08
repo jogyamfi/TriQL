@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 using TriQL.EntityFrameworkCore.Diagnostics.Internal;
 using TriQL.EntityFrameworkCore.Infrastructure.Internal;
 using TriQL.EntityFrameworkCore.Metadata.Conventions;
@@ -12,6 +13,7 @@ using TriQL.EntityFrameworkCore.Migrations.Internal;
 using TriQL.EntityFrameworkCore.Query.Internal;
 using TriQL.EntityFrameworkCore.Storage.Internal;
 using TriQL.EntityFrameworkCore.Update.Internal;
+using TriQL.EntityFrameworkCore.ValueGeneration.Internal;
 
 // Lives in the DI namespace, next to the other AddEntityFramework* provider registrations.
 namespace Microsoft.Extensions.DependencyInjection;
@@ -37,6 +39,8 @@ public static class TrinoServiceCollectionExtensions
             .TryAdd<IRelationalTypeMappingSource, TrinoTypeMappingSource>()
             .TryAdd<ISqlGenerationHelper, TrinoSqlGenerationHelper>()
             .TryAdd<IProviderConventionSetBuilder, TrinoConventionSetBuilder>()
+            .TryAdd<IModelValidator, TrinoModelValidator>()
+            .TryAdd<IValueGeneratorSelector, TrinoValueGeneratorSelector>()
             .TryAdd<IRelationalConnection, TrinoRelationalConnection>()
             .TryAdd<IRelationalDatabaseCreator, TrinoDatabaseCreator>()
             .TryAdd<IHistoryRepository, TrinoHistoryRepository>()

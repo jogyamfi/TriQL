@@ -318,3 +318,41 @@ virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.
 virtual TriQL.EntityFrameworkCore.Query.Internal.TrinoStringAggregateExpression.Value.get -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!
 override TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlTranslatingExpressionVisitor.GenerateGreatest(System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! expressions, System.Type! resultType) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
 override TriQL.EntityFrameworkCore.Query.Internal.TrinoSqlTranslatingExpressionVisitor.GenerateLeast(System.Collections.Generic.IReadOnlyList<Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression!>! expressions, System.Type! resultType) -> Microsoft.EntityFrameworkCore.Query.SqlExpressions.SqlExpression?
+Microsoft.EntityFrameworkCore.Diagnostics.TrinoEventId
+Microsoft.EntityFrameworkCore.TrinoEntityTypeExtensions
+Microsoft.EntityFrameworkCore.TrinoModelBuilderExtensions
+Microsoft.EntityFrameworkCore.TrinoModelExtensions
+TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator
+TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.TrinoModelValidator(Microsoft.EntityFrameworkCore.Infrastructure.ModelValidatorDependencies! dependencies, Microsoft.EntityFrameworkCore.Infrastructure.RelationalModelValidatorDependencies! relationalDependencies) -> void
+TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoValueGenerationConvention
+TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoValueGenerationConvention.TrinoValueGenerationConvention(Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure.ProviderConventionSetBuilderDependencies! dependencies, Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure.RelationalConventionSetBuilderDependencies! relationalDependencies) -> void
+TriQL.EntityFrameworkCore.Metadata.Internal.TrinoAnnotationNames
+TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator
+TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator.GuidV7ValueGenerator() -> void
+TriQL.EntityFrameworkCore.ValueGeneration.Internal.TrinoValueGeneratorSelector
+TriQL.EntityFrameworkCore.ValueGeneration.Internal.TrinoValueGeneratorSelector.TrinoValueGeneratorSelector(Microsoft.EntityFrameworkCore.ValueGeneration.ValueGeneratorSelectorDependencies! dependencies) -> void
+const TriQL.EntityFrameworkCore.Metadata.Internal.TrinoAnnotationNames.Catalog = "Trino:Catalog" -> string!
+const TriQL.EntityFrameworkCore.Metadata.Internal.TrinoAnnotationNames.DefaultCatalog = "Trino:DefaultCatalog" -> string!
+const TriQL.EntityFrameworkCore.Metadata.Internal.TrinoAnnotationNames.Prefix = "Trino:" -> string!
+override TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.Validate(Microsoft.EntityFrameworkCore.Metadata.IModel! model, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Model.Validation!>! logger) -> void
+override TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoConventionSetBuilder.CreateConventionSet() -> Microsoft.EntityFrameworkCore.Metadata.Conventions.ConventionSet!
+override TriQL.EntityFrameworkCore.Metadata.Conventions.TrinoValueGenerationConvention.GetValueGenerated(Microsoft.EntityFrameworkCore.Metadata.IConventionProperty! property) -> Microsoft.EntityFrameworkCore.Metadata.ValueGenerated?
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitTable(Microsoft.EntityFrameworkCore.Query.SqlExpressions.TableExpression! tableExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator.GeneratesTemporaryValues.get -> bool
+override TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator.Next(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry! entry) -> System.Guid
+override TriQL.EntityFrameworkCore.ValueGeneration.Internal.TrinoValueGeneratorSelector.FindForType(Microsoft.EntityFrameworkCore.Metadata.IProperty! property, Microsoft.EntityFrameworkCore.Metadata.ITypeBase! typeBase, System.Type! clrType) -> Microsoft.EntityFrameworkCore.ValueGeneration.ValueGenerator?
+static Microsoft.EntityFrameworkCore.TrinoEntityTypeExtensions.GetCatalog(this Microsoft.EntityFrameworkCore.Metadata.IReadOnlyEntityType! entityType) -> string?
+static Microsoft.EntityFrameworkCore.TrinoEntityTypeExtensions.SetCatalog(this Microsoft.EntityFrameworkCore.Metadata.IMutableEntityType! entityType, string? catalog) -> void
+static Microsoft.EntityFrameworkCore.TrinoModelBuilderExtensions.HasCatalog(this Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder! entityTypeBuilder, string? catalog) -> Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder!
+static Microsoft.EntityFrameworkCore.TrinoModelBuilderExtensions.HasCatalog<TEntity>(this Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<TEntity!>! entityTypeBuilder, string? catalog) -> Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<TEntity!>!
+static Microsoft.EntityFrameworkCore.TrinoModelBuilderExtensions.HasDefaultCatalog(this Microsoft.EntityFrameworkCore.ModelBuilder! modelBuilder, string? catalog) -> Microsoft.EntityFrameworkCore.ModelBuilder!
+static Microsoft.EntityFrameworkCore.TrinoModelExtensions.GetDefaultCatalog(this Microsoft.EntityFrameworkCore.Metadata.IReadOnlyModel! model) -> string?
+static Microsoft.EntityFrameworkCore.TrinoModelExtensions.SetDefaultCatalog(this Microsoft.EntityFrameworkCore.Metadata.IMutableModel! model, string? catalog) -> void
+static TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator.Instance.get -> TriQL.EntityFrameworkCore.ValueGeneration.Internal.GuidV7ValueGenerator!
+static readonly Microsoft.EntityFrameworkCore.Diagnostics.TrinoEventId.UniqueIndexNotEnforced -> Microsoft.Extensions.Logging.EventId
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateCatalog(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateColumnNameCase(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateNoSequences(Microsoft.EntityFrameworkCore.Metadata.IModel! model) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateTableNameCase(Microsoft.EntityFrameworkCore.Metadata.IModel! model) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateValueGeneration(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType) -> void
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.WarnAboutUniqueness(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Model.Validation!>! logger) -> void

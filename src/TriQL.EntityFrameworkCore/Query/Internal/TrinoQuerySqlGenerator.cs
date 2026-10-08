@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
@@ -89,6 +90,28 @@ public class TrinoQuerySqlGenerator : QuerySqlGenerator
         Visit(operand);
         Sql.Append(string.Create(System.Globalization.CultureInfo.InvariantCulture, $" AS decimal(38, {scale})))"));
         return sqlFunctionExpression;
+    }
+
+    /// <summary>
+    /// Generates a table or view reference, as <c>"catalog"."schema"."name"</c> when its entity types
+    /// have a catalog (<c>HasCatalog</c>/<c>HasDefaultCatalog</c>); otherwise as EF does.
+    /// </summary>
+    protected override Expression VisitTable(TableExpression tableExpression)
+    {
+        ArgumentNullException.ThrowIfNull(tableExpression);
+
+        if (tableExpression.Table.GetCatalog() is not { } catalog)
+        {
+            return base.VisitTable(tableExpression);
+        }
+
+        var helper = Dependencies.SqlGenerationHelper;
+        Sql.Append(helper.DelimitIdentifier(catalog))
+            .Append(".")
+            .Append(helper.DelimitIdentifier(tableExpression.Name, tableExpression.Schema))
+            .Append(AliasSeparator)
+            .Append(helper.DelimitIdentifier(tableExpression.Alias));
+        return tableExpression;
     }
 
     /// <summary>Generates the provider's own SQL expressions.</summary>

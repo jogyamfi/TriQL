@@ -7,7 +7,7 @@
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
 | Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
 | Date | 2026-10-07 |
-| Status | Phases 0–4 complete (2026-10-08, branch `feature/efcore-provider`); Phase 5 next |
+| Status | Phases 0–5 complete (2026-10-08, branch `feature/efcore-provider`); Phase 6 next |
 
 ---
 
@@ -723,6 +723,34 @@ Translate common .NET members and methods to Trino built-ins.
 ### Goal
 Steer users towards what Trino and Iceberg support, and reject what they don't when the model is
 built rather than at run time.
+
+> **Status: done.** 18 unit tests (conventions, one per validation rule, the warning) and 5 catalog SQL
+> baselines; 2 live catalog tests. The functional suite is 243/243 on 466 and 483. What was built and found:
+> - **Conventions (EF5-T1):** `TrinoValueGenerationConvention` drops EF's `OnAdd` for non-`Guid` keys;
+>   `TrinoValueGeneratorSelector` gives `Guid` properties generated on add a `GuidV7ValueGenerator`
+>   (not temporary values). Default values and computed columns keep their EF value generation, so
+>   the validator reports them instead of silently dropping them.
+> - **Validation (EF5-T2):** `TrinoModelValidator` rejects, each with guidance: row versions, computed
+>   columns, `HasDefaultValue`/`HasDefaultValueSql`, any value generated on update, values generated on
+>   add without a client generator (`Guid`/`string`/`byte[]` and `HasValueGenerator` are accepted),
+>   sequences, an `OwnsMany` whose key still contains EF's shadow ordinal (a `Guid` key set with
+>   `HasKey("Id")` is accepted), and table or column names that differ only by case. Client-managed
+>   concurrency tokens are accepted.
+> - **Warning, deviation:** `TrinoEventId.UniqueIndexNotEnforced` (30000, a warning that `ConfigureWarnings`
+>   can make an error) is logged for unique indexes and **alternate** keys only. A warning for every
+>   primary key would fire on every model and be noise.
+> - **Catalogs (EF5-T3):** `HasDefaultCatalog`/`HasCatalog`, with `GetCatalog` resolving entity → base type
+>   → owner → model default. `TrinoQuerySqlGenerator.VisitTable` emits `"catalog"."schema"."table"`, which
+>   covers queries, `ExecuteUpdate` and `ExecuteDelete`. Verified live: from a `memory` connection,
+>   `tpch.tiny.nation` is read and correlated with a `memory` table in one query. The update generator
+>   (Phase 6) and the DDL generator (Phase 8) are still stubs; they read the same
+>   `GetCatalog(ITableBase)` when they are built. **New rule:** a catalog needs a schema, and entity
+>   types mapped to one schema-qualified table may not be in different catalogs (EF identifies a table
+>   by schema and name only).
+> - **Default schema (EF5-T4):** no code needed. Without `HasDefaultSchema`/`ToTable(name, schema)`, names
+>   are unqualified, so Trino resolves them against the connection's catalog and schema.
+> - **Naming (EF5-T5):** confirmed live that quoted PascalCase names match Trino's lower-case columns
+>   (`"RegionKey"` → `regionkey`). The `EFCore.NamingConventions` recommendation goes in `efcore.md` (Phase 10).
 
 ### Implementation steps
 - **EF5-T1 — `TrinoConventionSetBuilder` + `TrinoValueGenerationConvention`.** Integer keys are not
