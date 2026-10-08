@@ -134,9 +134,15 @@ public sealed class FunctionTranslationTests(TrinoContainerFixture fixture, ITes
         await AssertSameAsync(
             r => new
             {
-                Years = r.Created.AddYears(1), Months = r.Created.AddMonths(12), Days = r.Created.AddDays(2), ColumnDays = r.Created.AddDays(r.Count),
-                Hours = r.Created.AddHours(-r.Count), FractionalDays = r.Created.AddDays(fraction), Minutes = r.Created.AddMinutes(minutes),
-                Seconds = r.Created.AddSeconds(30), Milliseconds = r.Created.AddMilliseconds(r.Count),
+                Years = r.Created.AddYears(1),
+                Months = r.Created.AddMonths(12),
+                Days = r.Created.AddDays(2),
+                ColumnDays = r.Created.AddDays(r.Count),
+                Hours = r.Created.AddHours(-r.Count),
+                FractionalDays = r.Created.AddDays(fraction),
+                Minutes = r.Created.AddMinutes(minutes),
+                Seconds = r.Created.AddSeconds(30),
+                Milliseconds = r.Created.AddMilliseconds(r.Count),
             },
             "date_add(");
     }
@@ -146,8 +152,19 @@ public sealed class FunctionTranslationTests(TrinoContainerFixture fixture, ITes
         AssertSameAsync(
             r => new
             {
-                r.Day.Year, r.Day.Month, r.Day.Day, r.Day.DayOfYear, r.Day.DayOfWeek, Plus = r.Day.AddDays(r.Count), NextMonth = r.Day.AddMonths(1), LastYear = r.Day.AddYears(-1),
-                FromDateTime = DateOnly.FromDateTime(r.Created), r.Time.Hour, r.Time.Minute, r.Time.Second, r.Time.Millisecond,
+                r.Day.Year,
+                r.Day.Month,
+                r.Day.Day,
+                r.Day.DayOfYear,
+                r.Day.DayOfWeek,
+                Plus = r.Day.AddDays(r.Count),
+                NextMonth = r.Day.AddMonths(1),
+                LastYear = r.Day.AddYears(-1),
+                FromDateTime = DateOnly.FromDateTime(r.Created),
+                r.Time.Hour,
+                r.Time.Minute,
+                r.Time.Second,
+                r.Time.Millisecond,
             },
             "year(", "date_add(", "AS date)");
 
@@ -180,8 +197,15 @@ public sealed class FunctionTranslationTests(TrinoContainerFixture fixture, ITes
         AssertSameAsync(
             r => new
             {
-                Count = r.Count.ToString(), Rating = r.Rating.ToString(), Key = r.Key.ToString(), Flag = r.Flag.ToString(), MaybeFlag = r.MaybeFlag.ToString(),
-                AsLong = Convert.ToInt64(r.Count), AsDouble = Convert.ToDouble(r.Amount), AsDecimal = Convert.ToDecimal(r.Count), Text = Convert.ToString(r.Count),
+                Count = r.Count.ToString(),
+                Rating = r.Rating.ToString(),
+                Key = r.Key.ToString(),
+                Flag = r.Flag.ToString(),
+                MaybeFlag = r.MaybeFlag.ToString(),
+                AsLong = Convert.ToInt64(r.Count),
+                AsDouble = Convert.ToDouble(r.Amount),
+                AsDecimal = Convert.ToDecimal(r.Count),
+                Text = Convert.ToString(r.Count),
             },
             "AS varchar)");
 
@@ -228,13 +252,19 @@ public sealed class FunctionTranslationTests(TrinoContainerFixture fixture, ITes
         await AssertSameAsync(
             r => new
             {
-                Days = EF.Functions.DateDiffDay(r.Created, reference), Hours = EF.Functions.DateDiffHour(r.Created, reference), Seconds = EF.Functions.DateDiffSecond(reference, r.Created),
-                Months = EF.Functions.DateDiffMonth(r.Day, referenceDay), Years = EF.Functions.DateDiffYear(r.Day, referenceDay),
+                Days = EF.Functions.DateDiffDay(r.Created, reference),
+                Hours = EF.Functions.DateDiffHour(r.Created, reference),
+                Seconds = EF.Functions.DateDiffSecond(reference, r.Created),
+                Months = EF.Functions.DateDiffMonth(r.Day, referenceDay),
+                Years = EF.Functions.DateDiffYear(r.Day, referenceDay),
             },
             expected: r => new
             {
-                Days = (long)(reference - r.Created).TotalDays, Hours = (long)(reference - r.Created).TotalHours, Seconds = (long)(r.Created - reference).TotalSeconds,
-                Months = WholeMonths(r.Day, referenceDay), Years = WholeMonths(r.Day, referenceDay) / 12,
+                Days = (long)(reference - r.Created).TotalDays,
+                Hours = (long)(reference - r.Created).TotalHours,
+                Seconds = (long)(r.Created - reference).TotalSeconds,
+                Months = WholeMonths(r.Day, referenceDay),
+                Years = WholeMonths(r.Day, referenceDay) / 12,
             },
             "date_diff(");
     }

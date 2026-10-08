@@ -49,35 +49,35 @@ public class TrinoDbFunctionsTranslator : IMethodCallTranslator
         switch (method.Name)
         {
             case nameof(TrinoDbFunctionsExtensions.ILike):
-            {
-                var typeMapping = ExpressionExtensions.InferTypeMapping(arguments[1], arguments[2]);
-                SqlExpression Lower(SqlExpression value) =>
-                    _sqlExpressionFactory.Function("lower", [_sqlExpressionFactory.ApplyTypeMapping(value, typeMapping)], typeof(string), typeMapping);
+                {
+                    var typeMapping = ExpressionExtensions.InferTypeMapping(arguments[1], arguments[2]);
+                    SqlExpression Lower(SqlExpression value) =>
+                        _sqlExpressionFactory.Function("lower", [_sqlExpressionFactory.ApplyTypeMapping(value, typeMapping)], typeof(string), typeMapping);
 
-                return _sqlExpressionFactory.Like(
-                    Lower(arguments[1]),
-                    Lower(arguments[2]),
-                    arguments.Count == 4 ? arguments[3] : null);
-            }
+                    return _sqlExpressionFactory.Like(
+                        Lower(arguments[1]),
+                        Lower(arguments[2]),
+                        arguments.Count == 4 ? arguments[3] : null);
+                }
 
             case nameof(TrinoDbFunctionsExtensions.JsonExtractScalar):
                 return _sqlExpressionFactory.Function("json_extract_scalar", [arguments[1], arguments[2]], typeof(string));
 
             case var name when name.StartsWith(DateDiffPrefix, StringComparison.Ordinal):
-            {
-                var unit = name[DateDiffPrefix.Length..].ToLowerInvariant();
-                var typeMapping = ExpressionExtensions.InferTypeMapping(arguments[1], arguments[2]);
-                return _sqlExpressionFactory.Function(
-                    "date_diff",
-                    [
-                        _sqlExpressionFactory.Constant(unit, _typeMappingSource.FindMapping(typeof(string))),
+                {
+                    var unit = name[DateDiffPrefix.Length..].ToLowerInvariant();
+                    var typeMapping = ExpressionExtensions.InferTypeMapping(arguments[1], arguments[2]);
+                    return _sqlExpressionFactory.Function(
+                        "date_diff",
+                        [
+                            _sqlExpressionFactory.Constant(unit, _typeMappingSource.FindMapping(typeof(string))),
                         _sqlExpressionFactory.ApplyTypeMapping(arguments[1], typeMapping),
                         _sqlExpressionFactory.ApplyTypeMapping(arguments[2], typeMapping),
-                    ],
-                    nullable: true,
-                    argumentsPropagateNullability: [false, true, true],
-                    typeof(long));
-            }
+                        ],
+                        nullable: true,
+                        argumentsPropagateNullability: [false, true, true],
+                        typeof(long));
+                }
 
             default:
                 return null;
