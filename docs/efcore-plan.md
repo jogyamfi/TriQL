@@ -7,7 +7,7 @@
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
 | Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
 | Date | 2026-10-07 |
-| Status | Phases 0–9 complete (2026-10-08, branch `feature/efcore-provider`); Phase 10 next |
+| Status | Phases 0–10 complete (2026-10-08, branch `feature/efcore-provider`); ready for review and the 1.1.0 release |
 
 ---
 
@@ -1040,6 +1040,30 @@ produces a compiling `DbContext` and entities for existing tables and views.
 ---
 
 ## Phase 10 — Docs, samples, packaging and release
+
+> **Status: done, release not yet cut.** What was built:
+> - **User guide (EF10-T1):** [`docs/efcore.md`](efcore.md), structured like BricksNet's, built only from
+>   behaviour measured or tested in Phases 0–9.
+> - **README (EF10-T2):** the package in the list and install block, an EF Core quick start, and a link to the
+>   guide. (The README is also every package's NuGet README.)
+> - **Sample (EF10-T3):** `samples/TriQL.Samples.EntityFrameworkCore`: LINQ over `tpch.tiny` through a
+>   scaffold-shaped keyless context, and on `TRINO_WRITE_CATALOG` (default `iceberg`): `EnsureCreated`, a
+>   combined insert, a concurrency conflict between two contexts, `ExecuteUpdate`, `ExecuteDelete`,
+>   `EnsureDeleted`. Run against Trino 466 with Iceberg; in `TriQL.slnx` and documented in `Run-Sample.ps1`.
+> - **Packaging (EF10-T4):** the package's NuGet version is `PackageVersion` = `EfCorePackageVersion`
+>   (`1.1.0-preview.1`) in its csproj, which the release's `-p:Version` does not override; `-p:Version` still
+>   stamps the assembly and the `TriQL.Data.ADO` dependency. Verified by packing with `-p:Version=1.1.0`:
+>   `TriQL.EntityFrameworkCore 1.1.0-preview.1` depends on `TriQL.Data.ADO 1.1.0` and
+>   `Microsoft.EntityFrameworkCore.Relational [10.0.12, 11.0.0)` (not on the Design package), with the shared
+>   README and icon. The core fallback `VersionPrefix` is now 1.1.0.
+> - **CI and release (EF10-T5):** `release.yml` and `publish-manual.yml` pack the new project; `security.yml`
+>   already scans every project in the solution with `--include-transitive` (no vulnerable packages today);
+>   `docs/docfx.json` and `api-reference.md` include the assembly.
+> - **Release notes (EF10-T6):** a new `CHANGELOG.md` with the 1.1.0 core changes (Phase 0 and the parameter
+>   fixes of Phases 1–2) and the preview package.
+> - **Before tagging v1.1.0:** move the `PublicAPI.Unshipped.txt` entries to `PublicAPI.Shipped.txt`, date the
+>   changelog entry, and update the README's "Stable — 1.0.0" status. Note that the README also says making
+>   spooling the default "is planned for 1.1.0", which this release does not do.
 
 ### Implementation steps
 - **EF10-T1 — `docs/efcore.md` user guide.** Cover:

@@ -50,8 +50,10 @@ jobs:
         run: dotnet build TriQL.slnx -c Release --no-restore -p:Version=${{ steps.version.outputs.version }}
 
       - name: "Pack shipping packages (REL-4: deterministic, Source Link, .snupkg)"
+        # TriQL.EntityFrameworkCore keeps its own preview NuGet version (PackageVersion in its csproj,
+        # e.g. 1.1.0-preview.1): -p:Version stamps its assembly and its TriQL.Data.ADO dependency only.
         run: |
-          for proj in TriQL.Client TriQL.Client.Auth TriQL.Client.Compression TriQL.Data.ADO; do
+          for proj in TriQL.Client TriQL.Client.Auth TriQL.Client.Compression TriQL.Data.ADO TriQL.EntityFrameworkCore; do
             dotnet pack "src/$proj/$proj.csproj" -c Release --no-build \
               -p:Version=${{ steps.version.outputs.version }} \
               -o ./artifacts
