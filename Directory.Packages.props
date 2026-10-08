@@ -28,6 +28,12 @@
       EF's internal ("pubternal") APIs, which may change in a major release but not within 10.x.
     -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="[10.0.12, 11.0.0)" />
+    <!--
+      Design-time services for reverse engineering (dotnet ef dbcontext scaffold). Referenced with
+      PrivateAssets=all, as the SQLite and Npgsql providers do: the tooling loads it from the
+      startup project, so the provider package does not flow it to applications.
+    -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="[10.0.12, 11.0.0)" />
 
     <!-- Analyzers -->
     <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />

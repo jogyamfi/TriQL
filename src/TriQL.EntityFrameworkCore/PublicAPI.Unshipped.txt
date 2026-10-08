@@ -396,3 +396,18 @@ override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.EnsureD
 override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.EnsureDeletedAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
 override TriQL.EntityFrameworkCore.Storage.Internal.TrinoDatabaseCreator.HasTablesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
 override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitOrdering(Microsoft.EntityFrameworkCore.Query.SqlExpressions.OrderingExpression! orderingExpression) -> System.Linq.Expressions.Expression!
+TriQL.EntityFrameworkCore.Design.Internal.TrinoAnnotationCodeGenerator
+TriQL.EntityFrameworkCore.Design.Internal.TrinoAnnotationCodeGenerator.TrinoAnnotationCodeGenerator(Microsoft.EntityFrameworkCore.Design.AnnotationCodeGeneratorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Design.Internal.TrinoDesignTimeServices
+TriQL.EntityFrameworkCore.Design.Internal.TrinoDesignTimeServices.TrinoDesignTimeServices() -> void
+TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoCodeGenerator
+TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoCodeGenerator.TrinoCodeGenerator(Microsoft.EntityFrameworkCore.Scaffolding.ProviderCodeGeneratorDependencies! dependencies) -> void
+TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoDatabaseModelFactory
+TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoDatabaseModelFactory.TrinoDatabaseModelFactory(Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Scaffolding!>! logger, Microsoft.EntityFrameworkCore.Storage.IRelationalTypeMappingSource! typeMappingSource) -> void
+override TriQL.EntityFrameworkCore.Design.Internal.TrinoAnnotationCodeGenerator.GenerateFluentApi(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType, Microsoft.EntityFrameworkCore.Infrastructure.IAnnotation! annotation) -> Microsoft.EntityFrameworkCore.Design.MethodCallCodeFragment?
+override TriQL.EntityFrameworkCore.Design.Internal.TrinoAnnotationCodeGenerator.GenerateFluentApi(Microsoft.EntityFrameworkCore.Metadata.IModel! model, Microsoft.EntityFrameworkCore.Infrastructure.IAnnotation! annotation) -> Microsoft.EntityFrameworkCore.Design.MethodCallCodeFragment?
+override TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoCodeGenerator.GenerateUseProvider(string! connectionString, Microsoft.EntityFrameworkCore.Design.MethodCallCodeFragment? providerOptions) -> Microsoft.EntityFrameworkCore.Design.MethodCallCodeFragment!
+override TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoDatabaseModelFactory.Create(System.Data.Common.DbConnection! connection, Microsoft.EntityFrameworkCore.Scaffolding.DatabaseModelFactoryOptions! options) -> Microsoft.EntityFrameworkCore.Scaffolding.Metadata.DatabaseModel!
+override TriQL.EntityFrameworkCore.Scaffolding.Internal.TrinoDatabaseModelFactory.Create(string! connectionString, Microsoft.EntityFrameworkCore.Scaffolding.DatabaseModelFactoryOptions! options) -> Microsoft.EntityFrameworkCore.Scaffolding.Metadata.DatabaseModel!
+static readonly Microsoft.EntityFrameworkCore.Diagnostics.TrinoEventId.ColumnSkipped -> Microsoft.Extensions.Logging.EventId
+virtual TriQL.EntityFrameworkCore.Design.Internal.TrinoDesignTimeServices.ConfigureDesignTimeServices(Microsoft.Extensions.DependencyInjection.IServiceCollection! serviceCollection) -> void

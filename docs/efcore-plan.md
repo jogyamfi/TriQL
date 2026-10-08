@@ -7,7 +7,7 @@
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
 | Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
 | Date | 2026-10-07 |
-| Status | Phases 0–8 complete (2026-10-08, branch `feature/efcore-provider`); Phase 9 next |
+| Status | Phases 0–9 complete (2026-10-08, branch `feature/efcore-provider`); Phase 10 next |
 
 ---
 
@@ -985,6 +985,32 @@ and documented.
 `dotnet ef dbcontext scaffold "Server=…;Catalog=lake;Schema=sales" TriQL.EntityFrameworkCore`
 produces a compiling `DbContext` and entities for existing tables and views.
 
+> **Status: done.** 5 unit tests and 1 live test; also verified with the real `dotnet ef` 10.0.12 CLI. What
+> was built and found:
+> - **Metadata source (EF9-T1), deviation, measured on 466:** `information_schema.columns` has **no comment
+>   column**. Columns (type, nullability, comment) come from `system.jdbc.columns`, tables and views from
+>   `system.jdbc.tables`, table comments from `system.metadata.table_comments`; catalog and schemas are bound
+>   parameters. Store types map through `TrinoTypeMappingSource`.
+> - **Catalogs (open question 5, decided):** one catalog per run: the connection's, or the one in
+>   `--schema catalog.schema` (several catalogs throw). Another catalog than the connection's scaffolds
+>   `HasDefaultCatalog`; the connection's schema becomes the default schema. `--table` accepts `table`,
+>   `schema.table` or `catalog.schema.table`. Without `--schema`, every schema but the connector metadata
+>   schemas `information_schema` and `system` (**found on 483:** the Iceberg connector adds a `system` schema
+>   with `system.iceberg_tables`, which was being scaffolded); either can still be named with `--schema`.
+> - **Keys (EF9-T2):** every table and view scaffolds keyless; EF's own warning names each one. The optional
+>   `id`-column heuristic was not built.
+> - **Naming (EF9-T3):** EF's defaults already give PascalCase singular classes and properties with
+>   `HasColumnName` for snake_case names; comments flow to `HasComment` and XML docs. `decimal(10,2)` scaffolds
+>   as `HasPrecision(10)` (the scale equals the provider's default) and resolves back to `decimal(10,2)`.
+> - **Design-time services (EF9-T4):** `TrinoDesignTimeServices` (via `[assembly: DesignTimeProviderServices]`),
+>   `TrinoCodeGenerator` (`UseTrino(...)`) and `TrinoAnnotationCodeGenerator` (`HasDefaultCatalog`/`HasCatalog`).
+>   `Microsoft.EntityFrameworkCore.Design` is referenced with `PrivateAssets=all`.
+> - **Unmappable columns (EF9-T5):** skipped with `TrinoEventId.ColumnSkipped` (30200, warning), which the CLI
+>   prints per column (`array`, `map`, `row`, … measured; Iceberg rejects `ipaddress` columns).
+> - **Verified:** the live test scaffolds snake_case Iceberg tables, a view and an `array` column, compiles the
+>   output with Roslyn in memory and queries through it. The real `dotnet ef dbcontext scaffold` (local tool)
+>   discovered the provider, scaffolded an Iceberg schema and `--schema tpch.tiny`, and both outputs compiled.
+
 ### Implementation steps
 - **EF9-T1 — `TrinoDatabaseModelFactory : DatabaseModelFactory`.**
   - Read `<catalog>.information_schema.tables` and `.columns`, filtered by the `--schema`/`--table`
@@ -1074,8 +1100,9 @@ Defaults are chosen for all of these, so none blocks the work.
    BricksNet). *Default: ticks.*
 4. **`Math.Round`:** emulate half-to-even in SQL, or translate only `AwayFromZero`. *Decided in
    Phase 4: emulate exactly where possible (see Phase 4's status); `double` to digits is not translated.*
-5. **Scaffolding several catalogs:** accept `catalog.schema` in `--schema`. *Default: yes, if EF's
-   option parsing allows it; otherwise use the connection's catalog only.*
+5. **Scaffolding several catalogs:** accept `catalog.schema` in `--schema`. *Decided in Phase 9: yes,
+   one catalog per run (EF passes the option through unchanged); a catalog other than the connection's
+   scaffolds `HasDefaultCatalog`.*
 6. **Default value for `ParameterBinding`:** `PreparedStatementHeader` in both the core and the EF
    provider, because it has the higher limit at the coordinator (T6). `ExecuteImmediate` is opt-in.
    *Revisit if users report proxy failures.*

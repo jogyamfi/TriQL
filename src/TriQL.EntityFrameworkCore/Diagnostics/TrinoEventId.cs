@@ -11,6 +11,7 @@ public static class TrinoEventId
 {
     private const string ValidationPrefix = "Microsoft.EntityFrameworkCore.Model.Validation.";
     private const string UpdatePrefix = "Microsoft.EntityFrameworkCore.Update.";
+    private const string ScaffoldingPrefix = "Microsoft.EntityFrameworkCore.Scaffolding.";
 
     // Provider event IDs start at CoreEventId.ProviderBaseId (30000), as the other providers' do.
     private enum Id
@@ -18,6 +19,8 @@ public static class TrinoEventId
         UniqueIndexNotEnforced = CoreEventId.ProviderBaseId,
 
         NonAtomicSaveChanges = CoreEventId.ProviderBaseId + 100,
+
+        ColumnSkipped = CoreEventId.ProviderBaseId + 200,
     }
 
     /// <summary>
@@ -34,4 +37,11 @@ public static class TrinoEventId
     /// per <c>SaveChanges</c>, as a warning.
     /// </summary>
     public static readonly EventId NonAtomicSaveChanges = new((int)Id.NonAtomicSaveChanges, UpdatePrefix + Id.NonAtomicSaveChanges);
+
+    /// <summary>
+    /// Scaffolding skipped a column whose Trino type has no .NET mapping (<c>array</c>, <c>map</c>, <c>row</c>,
+    /// <c>json</c>, <c>ipaddress</c>, intervals, …). Category <c>Microsoft.EntityFrameworkCore.Scaffolding</c>;
+    /// logged as a warning.
+    /// </summary>
+    public static readonly EventId ColumnSkipped = new((int)Id.ColumnSkipped, ScaffoldingPrefix + Id.ColumnSkipped);
 }

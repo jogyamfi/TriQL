@@ -12,6 +12,7 @@ public class TrinoLoggingDefinitions : RelationalLoggingDefinitions
 {
     private EventDefinition<string, string>? _uniqueIndexNotEnforced;
     private EventDefinition? _nonAtomicSaveChanges;
+    private EventDefinition<string, string, string>? _columnSkipped;
 
     /// <summary>The definition of <see cref="TrinoEventId.UniqueIndexNotEnforced"/>, created on first use.</summary>
     internal EventDefinition<string, string> UniqueIndexNotEnforced(ILoggingOptions options) =>
@@ -43,4 +44,19 @@ public class TrinoLoggingDefinitions : RelationalLoggingDefinitions
                     TrinoEventId.NonAtomicSaveChanges,
                     "SaveChanges is executing more than one statement. Trino commits each statement on its own, so if "
                     + "a later statement fails, earlier ones stay committed; their entities are marked as saved.")));
+
+    /// <summary>The definition of <see cref="TrinoEventId.ColumnSkipped"/>, created on first use.</summary>
+    internal EventDefinition<string, string, string> ColumnSkipped(ILoggingOptions options) =>
+        LazyInitializer.EnsureInitialized(
+            ref _columnSkipped,
+            () => new EventDefinition<string, string, string>(
+                options,
+                TrinoEventId.ColumnSkipped,
+                LogLevel.Warning,
+                "TrinoEventId.ColumnSkipped",
+                level => LoggerMessage.Define<string, string, string>(
+                    level,
+                    TrinoEventId.ColumnSkipped,
+                    "The column '{Column}' of '{Table}' was skipped: its Trino type '{StoreType}' has no .NET mapping. "
+                    + "Read it with a query that converts it (for example CAST(... AS json) and json_format) if you need it.")));
 }
