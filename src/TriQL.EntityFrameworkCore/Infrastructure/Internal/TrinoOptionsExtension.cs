@@ -24,6 +24,8 @@ public class TrinoOptionsExtension : RelationalOptionsExtension
     private TrinoSessionOptions? _sessionOptions;
     private TrinoDataSource? _dataSource;
     private bool _useUtcSessionTimeZone = true;
+    private int _maxRetryCount;
+    private TimeSpan _maxRetryDelay;
 
     /// <summary>Initializes an empty extension.</summary>
     public TrinoOptionsExtension()
@@ -38,6 +40,8 @@ public class TrinoOptionsExtension : RelationalOptionsExtension
         _sessionOptions = copyFrom._sessionOptions;
         _dataSource = copyFrom._dataSource;
         _useUtcSessionTimeZone = copyFrom._useUtcSessionTimeZone;
+        _maxRetryCount = copyFrom._maxRetryCount;
+        _maxRetryDelay = copyFrom._maxRetryDelay;
     }
 
     /// <inheritdoc />
@@ -54,6 +58,27 @@ public class TrinoOptionsExtension : RelationalOptionsExtension
     /// the connection string does not set <c>TimeZone</c>. Default <see langword="true"/>.
     /// </summary>
     public virtual bool UseUtcSessionTimeZone => _useUtcSessionTimeZone;
+
+    /// <summary>
+    /// How many times a <c>SaveChanges</c> statement that failed transiently is retried on its own; 0 (the
+    /// default) disables retries. Set by <c>EnableRetryOnFailure</c>.
+    /// </summary>
+    public virtual int MaxRetryCount => _maxRetryCount;
+
+    /// <summary>The longest delay between <c>SaveChanges</c> statement retries.</summary>
+    public virtual TimeSpan MaxRetryDelay => _maxRetryDelay;
+
+    /// <summary>Returns a copy with <see cref="MaxRetryCount"/> and <see cref="MaxRetryDelay"/> changed.</summary>
+    public virtual TrinoOptionsExtension WithRetryOnFailure(int maxRetryCount, TimeSpan maxRetryDelay)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(maxRetryCount);
+        ArgumentOutOfRangeException.ThrowIfLessThan(maxRetryDelay, TimeSpan.Zero);
+
+        var clone = (TrinoOptionsExtension)Clone();
+        clone._maxRetryCount = maxRetryCount;
+        clone._maxRetryDelay = maxRetryDelay;
+        return clone;
+    }
 
     /// <summary>Returns a copy that connects with <paramref name="sessionOptions"/>, replacing any connection configured earlier.</summary>
     public virtual TrinoOptionsExtension WithSessionOptions(TrinoSessionOptions sessionOptions)
@@ -142,6 +167,11 @@ public class TrinoOptionsExtension : RelationalOptionsExtension
                         builder.Append("UseUtcSessionTimeZone=False ");
                     }
 
+                    if (Extension._maxRetryCount > 0)
+                    {
+                        builder.Append(CultureInfo.InvariantCulture, $"MaxRetryCount={Extension._maxRetryCount} ");
+                    }
+
                     if (Extension._sessionOptions is not null)
                     {
                         builder.Append("SessionOptions ");
@@ -170,6 +200,7 @@ public class TrinoOptionsExtension : RelationalOptionsExtension
             ArgumentNullException.ThrowIfNull(debugInfo);
             debugInfo["Trino:" + nameof(UseUtcSessionTimeZone)] =
                 Extension._useUtcSessionTimeZone.GetHashCode().ToString(CultureInfo.InvariantCulture);
+            debugInfo["Trino:" + nameof(MaxRetryCount)] = Extension._maxRetryCount.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

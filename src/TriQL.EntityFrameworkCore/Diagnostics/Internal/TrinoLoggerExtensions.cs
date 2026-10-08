@@ -28,4 +28,22 @@ internal static class TrinoLoggerExtensions
             diagnostics.DispatchEventData(definition, eventData, diagnosticSourceEnabled, simpleLogEnabled);
         }
     }
+
+    /// <summary>Logs <see cref="TrinoEventId.NonAtomicSaveChanges"/>.</summary>
+    /// <param name="diagnostics">The logger.</param>
+    public static void NonAtomicSaveChanges(this IDiagnosticsLogger<DbLoggerCategory.Update> diagnostics)
+    {
+        var definition = ((TrinoLoggingDefinitions)diagnostics.Definitions).NonAtomicSaveChanges(diagnostics.Options);
+
+        if (diagnostics.ShouldLog(definition))
+        {
+            definition.Log(diagnostics);
+        }
+
+        if (diagnostics.NeedsEventData(definition, out var diagnosticSourceEnabled, out var simpleLogEnabled))
+        {
+            var eventData = new EventData(definition, (d, _) => ((EventDefinition)d).GenerateMessage());
+            diagnostics.DispatchEventData(definition, eventData, diagnosticSourceEnabled, simpleLogEnabled);
+        }
+    }
 }

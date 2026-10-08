@@ -56,6 +56,7 @@ public static class TrinoServiceCollectionExtensions
             .TryAdd<IRelationalParameterBasedSqlProcessorFactory, TrinoParameterBasedSqlProcessorFactory>()
             .TryAdd<IUpdateSqlGenerator, TrinoUpdateSqlGenerator>()
             .TryAdd<IModificationCommandBatchFactory, TrinoModificationCommandBatchFactory>()
+            .TryAdd<IBatchExecutor, TrinoBatchExecutor>()
             .TryAddCoreServices();
 
         return serviceCollection;

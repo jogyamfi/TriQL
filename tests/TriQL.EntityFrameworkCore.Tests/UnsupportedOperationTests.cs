@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using TriQL.EntityFrameworkCore.Migrations.Internal;
 using TriQL.EntityFrameworkCore.Storage.Internal;
 using TriQL.EntityFrameworkCore.Tests.TestUtilities;
-using TriQL.EntityFrameworkCore.Update.Internal;
 
 namespace TriQL.EntityFrameworkCore.Tests;
 
@@ -35,19 +34,4 @@ public sealed class UnsupportedOperationTests
         fake.EnqueueRows([("_col0", "integer")], [1]);
         await Assert.ThrowsAsync<NotSupportedException>(() => context.Database.EnsureDeletedAsync());
     }
-
-    [Fact]
-    public async Task SaveChanges_ThrowsUntilImplemented_WithoutSendingSql()
-    {
-        using var fake = new FakeTrino();
-        await using var context = new WidgetContext(fake.CreateOptions<WidgetContext>());
-        context.Widgets.Add(new Widget { Id = 1, Name = "a" });
-
-        var ex = await Assert.ThrowsAnyAsync<Exception>(() => context.SaveChangesAsync());
-
-        Assert.Contains(TrinoModificationCommandBatchFactory.NotYetSupportedMessage, Flatten(ex), StringComparison.Ordinal);
-        Assert.Empty(fake.SubmittedBodies);
-    }
-
-    private static string Flatten(Exception ex) => ex.InnerException is null ? ex.Message : ex.Message + " | " + Flatten(ex.InnerException);
 }

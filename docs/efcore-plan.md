@@ -7,7 +7,7 @@
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
 | Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
 | Date | 2026-10-07 |
-| Status | Phases 0–5 complete (2026-10-08, branch `feature/efcore-provider`); Phase 6 next |
+| Status | Phases 0–6 complete (2026-10-08, branch `feature/efcore-provider`); Phase 7 next |
 
 ---
 
@@ -785,6 +785,32 @@ catalog SQL baselines.
 ### Goal
 Correct INSERT/UPDATE/DELETE through `SaveChanges` on Iceberg, with optimistic concurrency checks
 and retries of transient conflicts.
+
+> **Status: done.** 14 fake-coordinator tests (DML baselines, rows affected, partial failure, retries) and
+> 6 live `EfIceberg` tests. What was built and found:
+> - **SQL (EF6-T1):** `TrinoUpdateSqlGenerator` (ported from BricksNet) generates one statement per
+>   command, with `"catalog"."schema"."table"` when the model assigns a catalog (deferred from Phase 5).
+> - **Rows affected (EF6-T2), measured on 466:** every DML statement answers with a `rows` column and an
+>   `updateCount`, **except** an Iceberg metadata-only `DELETE` (its predicate selects whole partitions)
+>   that matches nothing: `rows` is `NULL` and `updateCount` is absent (risk R4 confirmed). The batch reads
+>   the `rows` column and treats `NULL` as 0, so deleting a row another writer already removed from a
+>   table partitioned by its key is still a `DbUpdateConcurrencyException` (verified live).
+> - **Batches (EF6-T3):** `TrinoModificationCommandBatch` holds one command; Phase 7 adds multi-row inserts.
+> - **Executor (EF6-T4):** `TrinoBatchExecutor` (ported from BricksNet) runs statements in order without a
+>   transaction, accepts the entries of statements that committed before a failure, and logs
+>   `TrinoEventId.NonAtomicSaveChanges` (30100, warning) once per multi-statement save.
+> - **Concurrency (EF6-T5):** 0 rows on an `UPDATE`/`DELETE` throws `DbUpdateConcurrencyException`;
+>   verified live between two contexts, with the reload-and-retry resolution. Never retried.
+> - **Retries (EF6-T6):** `EnableRetryOnFailure()` sets `TrinoRetryingExecutionStrategy` (queries,
+>   `ExecuteUpdate`/`ExecuteDelete` as a whole: transient query errors and transport failures) and
+>   per-statement retries in `SaveChanges`. **Decision:** a `SaveChanges` statement is retried only when Trino
+>   reported the statement itself as failed for a transient reason (`TrinoQueryException.IsTransient`); a
+>   transport failure is not retried there, because the statement may have committed before the connection
+>   was lost. The failure is marked so the strategy does not then retry the whole save.
+> - **Measured:** 10 concurrent `SaveChanges` updating different rows of one Iceberg table conflict with
+>   `ICEBERG_COMMIT_ERROR` (11 of 12 failed in a probe); with retries all succeed (≈50 statements for 10
+>   updates), each applied exactly once.
+> - **Raw DML (EF6-T7):** `ExecuteSql*` already returned `updateCount`; verified live.
 
 ### Implementation steps
 - **EF6-T1 — `TrinoUpdateSqlGenerator`.** Generates `INSERT INTO t (cols) VALUES (…)`,

@@ -29,4 +29,20 @@ public class TrinoDbContextOptionsBuilder
     /// <returns>The same builder instance so that calls can be chained.</returns>
     public virtual TrinoDbContextOptionsBuilder UseUtcSessionTimeZone(bool useUtcSessionTimeZone = true) =>
         WithOption(extension => extension.WithUseUtcSessionTimeZone(useUtcSessionTimeZone));
+
+    /// <summary>
+    /// Retries operations that fail for a transient reason: the cluster starting up, out of memory or losing
+    /// a worker, a conflicting concurrent Iceberg commit (<c>ICEBERG_COMMIT_ERROR</c>), or a lost connection.
+    /// Queries, <c>ExecuteUpdate</c> and <c>ExecuteDelete</c> are retried as a whole; <c>SaveChanges</c> retries
+    /// only the statement that failed, because earlier statements have already committed.
+    /// </summary>
+    /// <param name="maxRetryCount">The maximum number of retries. Defaults to 6.</param>
+    /// <param name="maxRetryDelay">The longest delay between retries. Defaults to 30 seconds.</param>
+    /// <returns>The same builder instance so that calls can be chained.</returns>
+    public virtual TrinoDbContextOptionsBuilder EnableRetryOnFailure(int maxRetryCount = 6, TimeSpan? maxRetryDelay = null)
+    {
+        var delay = maxRetryDelay ?? TimeSpan.FromSeconds(30);
+        WithOption(extension => extension.WithRetryOnFailure(maxRetryCount, delay));
+        return ExecutionStrategy(dependencies => new TrinoRetryingExecutionStrategy(dependencies, maxRetryCount, delay));
+    }
 }

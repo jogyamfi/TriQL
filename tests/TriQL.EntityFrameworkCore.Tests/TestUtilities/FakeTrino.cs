@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 using TriQL.Client;
 using TriQL.Client.Tests.Fakes;
 using TriQL.Data.ADO;
@@ -17,6 +18,7 @@ namespace TriQL.EntityFrameworkCore.Tests.TestUtilities;
 internal sealed class FakeTrino : IDisposable
 {
     private readonly List<string> _sql = [];
+    private readonly List<(EventId Id, string Message)> _providerEvents = [];
 
     public FakeTrino() =>
         Connection = new TrinoConnection(
@@ -31,6 +33,12 @@ internal sealed class FakeTrino : IDisposable
     /// <summary>The SQL text of every command EF executed, in order.</summary>
     public IReadOnlyList<string> Sql => _sql;
 
+    /// <summary>
+    /// Every Trino provider event logged (IDs from <see cref="CoreEventId.ProviderBaseId"/>). Tests read
+    /// events here rather than adding their own <c>LogTo</c>, which would replace this one.
+    /// </summary>
+    public IReadOnlyList<(EventId Id, string Message)> ProviderEvents => _providerEvents;
+
     /// <summary>The body of every statement submitted to the coordinator (what Trino actually receives).</summary>
     public IReadOnlyList<string?> SubmittedBodies =>
         [.. Coordinator.ReceivedRequests.Where(r => r.Method == HttpMethod.Post).Select(r => r.Body)];
@@ -42,8 +50,18 @@ internal sealed class FakeTrino : IDisposable
         var builder = new DbContextOptionsBuilder<TContext>()
             .UseTrino(Connection)
             .LogTo(
-                (eventId, _) => eventId == RelationalEventId.CommandExecuting,
-                eventData => _sql.Add(((CommandEventData)eventData).Command.CommandText));
+                (eventId, _) => eventId == RelationalEventId.CommandExecuting || eventId.Id >= CoreEventId.ProviderBaseId,
+                eventData =>
+                {
+                    if (eventData is CommandEventData command)
+                    {
+                        _sql.Add(command.Command.CommandText);
+                    }
+                    else
+                    {
+                        _providerEvents.Add((eventData.EventId, eventData.ToString()));
+                    }
+                });
         configure?.Invoke(builder);
         return builder.Options;
     }
@@ -71,6 +89,31 @@ internal sealed class FakeTrino : IDisposable
                 data = new[] { new[] { updateCount } },
                 updateType,
                 updateCount,
+            }));
+
+    /// <summary>
+    /// Scripts the next statement's response as an Iceberg metadata-only <c>DELETE</c> that matched nothing:
+    /// <c>rows</c> is <c>NULL</c> and there is no <c>updateCount</c> (measured on Trino 466).
+    /// </summary>
+    public void EnqueueUpdateWithoutCount(string updateType) =>
+        Coordinator.Enqueue(
+            HttpStatusCode.OK,
+            JsonSerializer.Serialize(new
+            {
+                id = "q",
+                columns = new[] { new { name = "rows", type = "bigint" } },
+                data = new[] { new long?[] { null } },
+                updateType,
+            }));
+
+    /// <summary>Scripts the next statement's response as a query failure, shaped as a real coordinator sends it.</summary>
+    public void EnqueueError(string errorName, string errorType = "EXTERNAL", string message = "Query failed") =>
+        Coordinator.Enqueue(
+            HttpStatusCode.OK,
+            JsonSerializer.Serialize(new
+            {
+                id = "q",
+                error = new { message, errorCode = 65536, errorName, errorType },
             }));
 
     /// <summary>Asserts the SQL EF executed, exactly and in order.</summary>

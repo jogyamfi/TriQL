@@ -356,3 +356,28 @@ virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.Va
 virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateTableNameCase(Microsoft.EntityFrameworkCore.Metadata.IModel! model) -> void
 virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.ValidateValueGeneration(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType) -> void
 virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoModelValidator.WarnAboutUniqueness(Microsoft.EntityFrameworkCore.Metadata.IEntityType! entityType, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Model.Validation!>! logger) -> void
+TriQL.EntityFrameworkCore.Infrastructure.TrinoRetryingExecutionStrategy
+TriQL.EntityFrameworkCore.Infrastructure.TrinoRetryingExecutionStrategy.TrinoRetryingExecutionStrategy(Microsoft.EntityFrameworkCore.Storage.ExecutionStrategyDependencies! dependencies, int maxRetryCount, System.TimeSpan maxRetryDelay) -> void
+TriQL.EntityFrameworkCore.Storage.Internal.TrinoTransientExceptionDetector
+TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor
+TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor.TrinoBatchExecutor(Microsoft.EntityFrameworkCore.Infrastructure.IDbContextOptions! options, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Update!>! updateLogger) -> void
+TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch
+TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.TrinoModificationCommandBatch(Microsoft.EntityFrameworkCore.Update.ModificationCommandBatchFactoryDependencies! dependencies) -> void
+override TriQL.EntityFrameworkCore.Infrastructure.TrinoRetryingExecutionStrategy.ShouldRetryOn(System.Exception! exception) -> bool
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.ConsumeResultSetWithRowsAffectedOnly(int commandIndex, Microsoft.EntityFrameworkCore.Storage.RelationalDataReader! reader) -> int
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.ConsumeResultSetWithRowsAffectedOnlyAsync(int commandIndex, Microsoft.EntityFrameworkCore.Storage.RelationalDataReader! reader, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<int>!
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.TryAddCommand(Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! modificationCommand) -> bool
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator.AppendDeleteOperation(System.Text.StringBuilder! commandStringBuilder, Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! command, int commandPosition, out bool requiresTransaction) -> Microsoft.EntityFrameworkCore.Update.ResultSetMapping
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator.AppendInsertOperation(System.Text.StringBuilder! commandStringBuilder, Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! command, int commandPosition, out bool requiresTransaction) -> Microsoft.EntityFrameworkCore.Update.ResultSetMapping
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator.AppendUpdateOperation(System.Text.StringBuilder! commandStringBuilder, Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! command, int commandPosition, out bool requiresTransaction) -> Microsoft.EntityFrameworkCore.Update.ResultSetMapping
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoTransientExceptionDetector.GetDelay(int attempt, System.TimeSpan maxDelay) -> System.TimeSpan
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoTransientExceptionDetector.MarkNotRetryable(System.Exception! exception) -> void
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoTransientExceptionDetector.ShouldRetryOn(System.Exception? exception) -> bool
+static TriQL.EntityFrameworkCore.Storage.Internal.TrinoTransientExceptionDetector.ShouldRetryStatementOn(System.Exception? exception) -> bool
+static readonly Microsoft.EntityFrameworkCore.Diagnostics.TrinoEventId.NonAtomicSaveChanges -> Microsoft.Extensions.Logging.EventId
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.MaxRetryCount.get -> int
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.MaxRetryDelay.get -> System.TimeSpan
+virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.WithRetryOnFailure(int maxRetryCount, System.TimeSpan maxRetryDelay) -> TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension!
+virtual TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder.EnableRetryOnFailure(int maxRetryCount = 6, System.TimeSpan? maxRetryDelay = null) -> TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!
+virtual TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor.Execute(System.Collections.Generic.IEnumerable<Microsoft.EntityFrameworkCore.Update.ModificationCommandBatch!>! commandBatches, Microsoft.EntityFrameworkCore.Storage.IRelationalConnection! connection) -> int
+virtual TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor.ExecuteAsync(System.Collections.Generic.IEnumerable<Microsoft.EntityFrameworkCore.Update.ModificationCommandBatch!>! commandBatches, Microsoft.EntityFrameworkCore.Storage.IRelationalConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
