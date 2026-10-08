@@ -7,7 +7,7 @@
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
 | Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
 | Date | 2026-10-07 |
-| Status | Phases 0–6 complete (2026-10-08, branch `feature/efcore-provider`); Phase 7 next |
+| Status | Phases 0–7 complete (2026-10-08, branch `feature/efcore-provider`); Phase 8 next |
 
 ---
 
@@ -852,6 +852,33 @@ and retries of transient conflicts.
 
 ### Goal
 Make writes and repeated queries practical despite per-statement latency (T19).
+
+> **Status: done.** 12 SQL baselines and 7 live tests (5 `EfIceberg`, 2 `EfRead`); benchmarks in
+> [benchmarks.md §9](benchmarks.md#9-ef-core-provider--ef7-t6). What was built and found:
+> - **New, measured on 466: Trino's `UPDATE` and `DELETE` take no table alias** (`mismatched input 'AS'`),
+>   but EF always generates `DELETE FROM t AS a` / `UPDATE t AS a`. Every `ExecuteDelete`/`ExecuteUpdate`
+>   would have failed on the server; the earlier phases had them only in SQL baselines. The generator now
+>   names the target without an alias and qualifies its columns with the table's (catalog-, schema-) name,
+>   which Trino resolves. A subquery alias equal to the unqualified target name would take over that
+>   qualifier and silently act on the wrong rows (measured), so that case is rejected at translation.
+> - **`ExecuteDelete` (EF7-T1):** EF already rewrites joins, `Take` etc. into `EXISTS`/`IN` on the target;
+>   only the alias fix was needed.
+> - **`ExecuteUpdate` (EF7-T2), deviation:** every update that involves another table (a filter on a
+>   related table, a value from one, `Take`) becomes `MERGE INTO t AS a USING (SELECT key, values FROM … WHERE
+>   …) AS s ON a.key = s.key WHEN MATCHED THEN UPDATE SET …`, rather than `WHERE EXISTS` for filter-only
+>   joins. One shape is simpler and was verified live for all three cases. A keyless target is rejected.
+> - **Multi-row inserts (EF7-T3):** ported from BricksNet, `MaxBatchSize` rows (default 1000) per statement.
+>   **Measured:** Trino accepted 30,000 parameters in one `INSERT` on both binding paths (~1 s), so the cap
+>   (`MaxParameters` = 2,000, as planned) protects proxy header limits on the default prepared-statement
+>   path, not Trino. A combined insert is one Iceberg commit.
+> - **Connection reuse (EF7-T4):** verified live by counting client TCP connections: 20 queries through pooled
+>   contexts opened 1, through new contexts 20. Over local plain HTTP the difference is not measurable in time
+>   (~300 ms per statement dominates); it matters for TLS to a remote coordinator.
+> - **Compiled queries (EF7-T5):** `EF.CompileAsyncQuery` verified live with changing parameters. Precompiled
+>   (NativeAOT) queries stay unsupported (Phase 3).
+> - **Benchmarks (EF7-T6):** `EfSaveChangesBenchmarks`, `EfConnectionBenchmarks`, `EfMaterializationBenchmarks`
+>   in `tests/TriQL.Benchmarks` (server from `TRIQL_BENCH_SERVER`). 1,000-row `SaveChanges`: 0.69 s combined vs
+>   283 s one statement per row. EF no-tracking materialisation matches the raw reader's time (+33% allocation).
 
 ### Implementation steps
 - **EF7-T1 — `ExecuteDelete`.** `DELETE FROM t WHERE …`. When EF needs joins, rewrite to

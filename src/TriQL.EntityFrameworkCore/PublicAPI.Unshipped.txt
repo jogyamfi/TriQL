@@ -173,7 +173,6 @@ TriQL.EntityFrameworkCore.Storage.Internal.TrinoSqlGenerationHelper.TrinoSqlGene
 TriQL.EntityFrameworkCore.Storage.Internal.TrinoTypeMappingSource
 TriQL.EntityFrameworkCore.Storage.Internal.TrinoTypeMappingSource.TrinoTypeMappingSource(Microsoft.EntityFrameworkCore.Storage.TypeMappingSourceDependencies! dependencies, Microsoft.EntityFrameworkCore.Storage.RelationalTypeMappingSourceDependencies! relationalDependencies) -> void
 TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory
-TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory.TrinoModificationCommandBatchFactory(Microsoft.EntityFrameworkCore.Update.ModificationCommandBatchFactoryDependencies! dependencies) -> void
 TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator
 TriQL.EntityFrameworkCore.Update.Internal.TrinoUpdateSqlGenerator.TrinoUpdateSqlGenerator(Microsoft.EntityFrameworkCore.Update.UpdateSqlGeneratorDependencies! dependencies) -> void
 virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.DataSource.get -> TriQL.Data.ADO.TrinoDataSource?
@@ -362,7 +361,6 @@ TriQL.EntityFrameworkCore.Storage.Internal.TrinoTransientExceptionDetector
 TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor
 TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor.TrinoBatchExecutor(Microsoft.EntityFrameworkCore.Infrastructure.IDbContextOptions! options, Microsoft.EntityFrameworkCore.Diagnostics.IDiagnosticsLogger<Microsoft.EntityFrameworkCore.DbLoggerCategory.Update!>! updateLogger) -> void
 TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch
-TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.TrinoModificationCommandBatch(Microsoft.EntityFrameworkCore.Update.ModificationCommandBatchFactoryDependencies! dependencies) -> void
 override TriQL.EntityFrameworkCore.Infrastructure.TrinoRetryingExecutionStrategy.ShouldRetryOn(System.Exception! exception) -> bool
 override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.ConsumeResultSetWithRowsAffectedOnly(int commandIndex, Microsoft.EntityFrameworkCore.Storage.RelationalDataReader! reader) -> int
 override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.ConsumeResultSetWithRowsAffectedOnlyAsync(int commandIndex, Microsoft.EntityFrameworkCore.Storage.RelationalDataReader! reader, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<int>!
@@ -381,3 +379,12 @@ virtual TriQL.EntityFrameworkCore.Infrastructure.Internal.TrinoOptionsExtension.
 virtual TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder.EnableRetryOnFailure(int maxRetryCount = 6, System.TimeSpan? maxRetryDelay = null) -> TriQL.EntityFrameworkCore.Infrastructure.TrinoDbContextOptionsBuilder!
 virtual TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor.Execute(System.Collections.Generic.IEnumerable<Microsoft.EntityFrameworkCore.Update.ModificationCommandBatch!>! commandBatches, Microsoft.EntityFrameworkCore.Storage.IRelationalConnection! connection) -> int
 virtual TriQL.EntityFrameworkCore.Update.Internal.TrinoBatchExecutor.ExecuteAsync(System.Collections.Generic.IEnumerable<Microsoft.EntityFrameworkCore.Update.ModificationCommandBatch!>! commandBatches, Microsoft.EntityFrameworkCore.Storage.IRelationalConnection! connection, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitColumn(Microsoft.EntityFrameworkCore.Query.SqlExpressions.ColumnExpression! columnExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitDelete(Microsoft.EntityFrameworkCore.Query.SqlExpressions.DeleteExpression! deleteExpression) -> System.Linq.Expressions.Expression!
+override TriQL.EntityFrameworkCore.Query.Internal.TrinoQuerySqlGenerator.VisitUpdate(Microsoft.EntityFrameworkCore.Query.SqlExpressions.UpdateExpression! updateExpression) -> System.Linq.Expressions.Expression!
+TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.TrinoModificationCommandBatch(Microsoft.EntityFrameworkCore.Update.ModificationCommandBatchFactoryDependencies! dependencies, int maxBatchSize) -> void
+TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory.TrinoModificationCommandBatchFactory(Microsoft.EntityFrameworkCore.Update.ModificationCommandBatchFactoryDependencies! dependencies, Microsoft.EntityFrameworkCore.Infrastructure.IDbContextOptions! options) -> void
+const TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.MaxParameters = 2000 -> int
+const TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatchFactory.DefaultMaxBatchSize = 1000 -> int
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.AddCommand(Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! modificationCommand) -> void
+override TriQL.EntityFrameworkCore.Update.Internal.TrinoModificationCommandBatch.RollbackLastCommand(Microsoft.EntityFrameworkCore.Update.IReadOnlyModificationCommand! modificationCommand) -> void

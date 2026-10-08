@@ -1,7 +1,10 @@
+using System.Globalization;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace TriQL.EntityFrameworkCore.Query.Internal;
 
@@ -16,6 +19,12 @@ namespace TriQL.EntityFrameworkCore.Query.Internal;
 /// </remarks>
 public class TrinoQuerySqlGenerator : QuerySqlGenerator
 {
+    // The alias of the source subquery of a generated MERGE; not one EF would choose.
+    private const string MergeSourceAlias = "triql_source";
+
+    // The target of the DELETE/UPDATE being generated, whose columns VisitColumn qualifies with its name.
+    private (string Alias, string QualifiedName)? _target;
+
     /// <summary>Initializes a new instance.</summary>
     public TrinoQuerySqlGenerator(QuerySqlGeneratorDependencies dependencies)
         : base(dependencies)
@@ -88,7 +97,7 @@ public class TrinoQuerySqlGenerator : QuerySqlGenerator
 
         Sql.Append("CAST(");
         Visit(operand);
-        Sql.Append(string.Create(System.Globalization.CultureInfo.InvariantCulture, $" AS decimal(38, {scale})))"));
+        Sql.Append(string.Create(CultureInfo.InvariantCulture, $" AS decimal(38, {scale})))"));
         return sqlFunctionExpression;
     }
 
@@ -100,18 +109,247 @@ public class TrinoQuerySqlGenerator : QuerySqlGenerator
     {
         ArgumentNullException.ThrowIfNull(tableExpression);
 
-        if (tableExpression.Table.GetCatalog() is not { } catalog)
+        Sql.Append(QualifiedName(tableExpression))
+            .Append(AliasSeparator)
+            .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(tableExpression.Alias));
+        return tableExpression;
+    }
+
+    /// <summary>
+    /// Generates <c>DELETE FROM table WHERE …</c>. Trino's <c>DELETE</c> takes no table alias, so the target
+    /// is named without one and its columns are qualified with the table's name. EF has already rewritten
+    /// joins, <c>Take</c> and other shapes into an <c>EXISTS</c>/<c>IN</c> predicate on the target.
+    /// </summary>
+    protected override Expression VisitDelete(DeleteExpression deleteExpression)
+    {
+        ArgumentNullException.ThrowIfNull(deleteExpression);
+
+        var select = deleteExpression.SelectExpression;
+        if (!IsSingleTableStatement(select, deleteExpression.Table))
         {
-            return base.VisitTable(tableExpression);
+            return base.VisitDelete(deleteExpression);
+        }
+
+        GenerateTagsHeaderComment(deleteExpression.Tags);
+        Sql.Append("DELETE FROM ").Append(QualifiedName(deleteExpression.Table));
+        GenerateTargetPredicate(deleteExpression.Table, select);
+        return deleteExpression;
+    }
+
+    /// <summary>
+    /// Generates <c>UPDATE table SET … WHERE …</c> when only the target table is involved (with no alias,
+    /// which Trino's <c>UPDATE</c> does not take). When the update joins other tables (a filter on a
+    /// related table, a value from one, or <c>Take</c>), Trino has no <c>UPDATE … FROM</c>, so a
+    /// <c>MERGE</c> is generated instead: <c>MERGE INTO table AS t USING (SELECT key, values FROM … WHERE …)
+    /// AS s ON t.key = s.key WHEN MATCHED THEN UPDATE SET column = s.value</c>.
+    /// </summary>
+    /// <remarks>
+    /// As with SQL Server's <c>UPDATE … FROM</c>, a target row must match at most one source row; Trino
+    /// fails the <c>MERGE</c> if one matches several.
+    /// </remarks>
+    protected override Expression VisitUpdate(UpdateExpression updateExpression)
+    {
+        ArgumentNullException.ThrowIfNull(updateExpression);
+
+        var select = updateExpression.SelectExpression;
+        GenerateTagsHeaderComment(updateExpression.Tags);
+
+        if (!IsSingleTableStatement(select, updateExpression.Table))
+        {
+            GenerateMerge(updateExpression);
+            return updateExpression;
         }
 
         var helper = Dependencies.SqlGenerationHelper;
-        Sql.Append(helper.DelimitIdentifier(catalog))
-            .Append(".")
-            .Append(helper.DelimitIdentifier(tableExpression.Name, tableExpression.Schema))
-            .Append(AliasSeparator)
-            .Append(helper.DelimitIdentifier(tableExpression.Alias));
-        return tableExpression;
+        foreach (var setter in updateExpression.ColumnValueSetters)
+        {
+            EnsureNoAliasShadowsTarget(updateExpression.Table, setter.Value);
+        }
+
+        Sql.Append("UPDATE ").Append(QualifiedName(updateExpression.Table)).AppendLine().Append("SET ");
+        _target = (updateExpression.Table.Alias, QualifiedName(updateExpression.Table));
+        try
+        {
+            for (var i = 0; i < updateExpression.ColumnValueSetters.Count; i++)
+            {
+                var setter = updateExpression.ColumnValueSetters[i];
+                Sql.Append(i == 0 ? string.Empty : ", ").Append(helper.DelimitIdentifier(setter.Column.Name)).Append(" = ");
+                Visit(setter.Value);
+            }
+        }
+        finally
+        {
+            _target = null;
+        }
+
+        GenerateTargetPredicate(updateExpression.Table, select);
+        return updateExpression;
+    }
+
+    /// <summary>
+    /// Inside a <c>DELETE</c> or single-table <c>UPDATE</c>, a column of the target table is qualified with the
+    /// table's name, because the target has no alias.
+    /// </summary>
+    protected override Expression VisitColumn(ColumnExpression columnExpression)
+    {
+        ArgumentNullException.ThrowIfNull(columnExpression);
+
+        if (_target is not { } target || columnExpression.TableAlias != target.Alias)
+        {
+            return base.VisitColumn(columnExpression);
+        }
+
+        Sql.Append(target.QualifiedName).Append(".").Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(columnExpression.Name));
+        return columnExpression;
+    }
+
+    private void GenerateMerge(UpdateExpression updateExpression)
+    {
+        var helper = Dependencies.SqlGenerationHelper;
+        var target = updateExpression.Table;
+        var select = updateExpression.SelectExpression;
+        var keyColumns = (target.Table as ITable)?.PrimaryKey?.Columns
+            ?? throw new InvalidOperationException(
+                $"ExecuteUpdate on '{target.Name}' joins other tables, which Trino runs as a MERGE matched on the "
+                + "primary key, but the table has none. Configure a key, or filter on the table's own columns only.");
+        var targetAlias = helper.DelimitIdentifier(target.Alias);
+        var source = helper.DelimitIdentifier(MergeSourceAlias);
+
+        Sql.Append("MERGE INTO ").Append(QualifiedName(target)).Append(AliasSeparator).AppendLine(targetAlias)
+            .AppendLine("USING (");
+        using (Sql.Indent())
+        {
+            Sql.Append("SELECT ");
+            for (var i = 0; i < keyColumns.Count; i++)
+            {
+                Sql.Append(i == 0 ? string.Empty : ", ")
+                    .Append(targetAlias).Append(".").Append(helper.DelimitIdentifier(keyColumns[i].Name))
+                    .Append(AliasSeparator).Append(helper.DelimitIdentifier(KeyAlias(i)));
+            }
+
+            for (var i = 0; i < updateExpression.ColumnValueSetters.Count; i++)
+            {
+                Sql.Append(", ");
+                Visit(updateExpression.ColumnValueSetters[i].Value);
+                Sql.Append(AliasSeparator).Append(helper.DelimitIdentifier(ValueAlias(i)));
+            }
+
+            Sql.AppendLine().Append("FROM ");
+            for (var i = 0; i < select.Tables.Count; i++)
+            {
+                if (i > 0)
+                {
+                    if (select.Tables[i] is JoinExpressionBase)
+                    {
+                        Sql.AppendLine();
+                    }
+                    else
+                    {
+                        Sql.Append(", ");
+                    }
+                }
+
+                Visit(select.Tables[i]);
+            }
+
+            if (select.Predicate is not null)
+            {
+                Sql.AppendLine().Append("WHERE ");
+                Visit(select.Predicate);
+            }
+        }
+
+        Sql.AppendLine().Append(")").Append(AliasSeparator).AppendLine(source).Append("ON ");
+        for (var i = 0; i < keyColumns.Count; i++)
+        {
+            Sql.Append(i == 0 ? string.Empty : " AND ")
+                .Append(targetAlias).Append(".").Append(helper.DelimitIdentifier(keyColumns[i].Name))
+                .Append(" = ").Append(source).Append(".").Append(helper.DelimitIdentifier(KeyAlias(i)));
+        }
+
+        Sql.AppendLine().Append("WHEN MATCHED THEN UPDATE SET ");
+        for (var i = 0; i < updateExpression.ColumnValueSetters.Count; i++)
+        {
+            Sql.Append(i == 0 ? string.Empty : ", ")
+                .Append(helper.DelimitIdentifier(updateExpression.ColumnValueSetters[i].Column.Name))
+                .Append(" = ").Append(source).Append(".").Append(helper.DelimitIdentifier(ValueAlias(i)));
+        }
+    }
+
+    private void GenerateTargetPredicate(TableExpression target, SelectExpression select)
+    {
+        if (select.Predicate is null)
+        {
+            return;
+        }
+
+        EnsureNoAliasShadowsTarget(target, select.Predicate);
+        Sql.AppendLine().Append("WHERE ");
+        _target = (target.Alias, QualifiedName(target));
+        try
+        {
+            Visit(select.Predicate);
+        }
+        finally
+        {
+            _target = null;
+        }
+    }
+
+    /// <summary>
+    /// The target of a <c>DELETE</c>/<c>UPDATE</c> has no alias, so its columns are qualified with its name.
+    /// Inside a subquery, a table whose alias is that same name would take over the qualifier (measured: the
+    /// statement then silently acts on the wrong rows), so that case is rejected. EF's aliases are short
+    /// (<c>p</c>, <c>p0</c>, …), so only a table named like one, without a schema, can be affected.
+    /// </summary>
+    private static void EnsureNoAliasShadowsTarget(TableExpression target, Expression predicate)
+    {
+        if (target.Schema is not null)
+        {
+            return;
+        }
+
+        var aliases = new AliasCollector();
+        aliases.Visit(predicate);
+        if (aliases.Aliases.Contains(target.Name))
+        {
+            throw new InvalidOperationException(
+                $"Trino cannot run this ExecuteUpdate/ExecuteDelete safely: Trino's UPDATE and DELETE take no table alias, "
+                + $"so the columns of '{target.Name}' are qualified with its name, and a subquery in the statement uses "
+                + $"'{target.Name}' as an alias too. Give the table a schema (ToTable(name, schema) or HasDefaultSchema) "
+                + "or a name that is not a short alias.");
+        }
+    }
+
+    private static bool IsSingleTableStatement(SelectExpression select, TableExpression target) =>
+        select is { Tables: [TableExpression only], Offset: null, Limit: null, Having: null, IsDistinct: false, GroupBy: [], Orderings: [] }
+        && only.Alias == target.Alias;
+
+    private static string KeyAlias(int index) => "k" + index.ToString(CultureInfo.InvariantCulture);
+
+    private static string ValueAlias(int index) => "v" + index.ToString(CultureInfo.InvariantCulture);
+
+    private sealed class AliasCollector : ExpressionVisitor
+    {
+        public HashSet<string> Aliases { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+        public override Expression? Visit(Expression? node)
+        {
+            if (node is TableExpressionBase { Alias: { } alias })
+            {
+                Aliases.Add(alias);
+            }
+
+            return base.Visit(node);
+        }
+    }
+
+    /// <summary><c>"catalog"."schema"."name"</c>, with the catalog only when the model assigns one.</summary>
+    private string QualifiedName(TableExpression table)
+    {
+        var helper = Dependencies.SqlGenerationHelper;
+        var name = helper.DelimitIdentifier(table.Name, table.Schema);
+        return table.Table.GetCatalog() is { } catalog ? helper.DelimitIdentifier(catalog) + "." + name : name;
     }
 
     /// <summary>Generates the provider's own SQL expressions.</summary>

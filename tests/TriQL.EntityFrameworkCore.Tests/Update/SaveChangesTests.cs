@@ -125,7 +125,8 @@ public sealed class SaveChangesTests
     public async Task FailureOfTheThirdOfFiveStatements_KeepsTheFirstTwoSaved_AndWarnsOnce()
     {
         using var fake = new FakeTrino();
-        await using var db = CreateContext(fake);
+        // One statement per row (no insert combining), so that statements commit separately.
+        await using var db = CreateContext(fake, configureOptions: o => o.UseTrino(fake.Connection, t => t.MaxBatchSize(1)));
         var items = Enumerable.Range(1, 5).Select(i => new Item { Id = i, Name = $"n{i}" }).ToList();
         db.AddRange(items);
         fake.EnqueueUpdate("INSERT", 1);
@@ -164,7 +165,7 @@ public sealed class SaveChangesTests
     public async Task TransientStatementFailure_IsRetriedOnItsOwn_WhenRetryIsEnabled()
     {
         using var fake = new FakeTrino();
-        await using var db = CreateContext(fake, configureOptions: o => o.UseTrino(fake.Connection, t => t.EnableRetryOnFailure(3, TimeSpan.Zero)));
+        await using var db = CreateContext(fake, configureOptions: o => o.UseTrino(fake.Connection, t => t.EnableRetryOnFailure(3, TimeSpan.Zero).MaxBatchSize(1)));
         db.AddRange(new Item { Id = 1, Name = "a" }, new Item { Id = 2, Name = "b" });
         fake.EnqueueUpdate("INSERT", 1);
         fake.EnqueueError("ICEBERG_COMMIT_ERROR");

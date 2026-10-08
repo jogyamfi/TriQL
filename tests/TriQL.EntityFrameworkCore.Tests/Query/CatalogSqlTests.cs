@@ -103,8 +103,8 @@ public sealed class CatalogSqlTests
         Assert.Equal(2, deleted);
         fake.AssertSql(
             """
-            DELETE FROM "lake"."sales"."orders" AS "o"
-            WHERE "o"."CustomerId" = 7
+            DELETE FROM "lake"."sales"."orders"
+            WHERE "lake"."sales"."orders"."CustomerId" = 7
             """);
     }
 
