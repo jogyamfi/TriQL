@@ -153,15 +153,15 @@
         "dependencies": {
           "Azure.Core": "[1.48.0, )",
           "Azure.Identity": "[1.16.0, )",
-          "TriQL.Client": "[1.0.0, )",
-          "TriQL.Data.ADO": "[1.0.0, )"
+          "TriQL.Client": "[1.1.0, )",
+          "TriQL.Data.ADO": "[1.1.0, )"
         }
       },
       "triql.data.ado": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.Http": "[10.0.0, )",
-          "TriQL.Client": "[1.0.0, )"
+          "TriQL.Client": "[1.1.0, )"
         }
       },
       "Azure.Core": {

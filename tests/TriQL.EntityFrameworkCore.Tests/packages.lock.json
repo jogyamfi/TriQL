@@ -409,7 +409,7 @@
         "type": "Project",
         "dependencies": {
           "K4os.Compression.LZ4": "[1.3.8, )",
-          "TriQL.Client": "[1.0.0, )",
+          "TriQL.Client": "[1.1.0, )",
           "ZstdSharp.Port": "[0.8.8, )"
         }
       },
@@ -418,8 +418,8 @@
         "dependencies": {
           "K4os.Compression.LZ4": "[1.3.8, )",
           "Microsoft.NET.Test.Sdk": "[18.10.1, )",
-          "TriQL.Client": "[1.0.0, )",
-          "TriQL.Client.Compression": "[1.0.0, )",
+          "TriQL.Client": "[1.1.0, )",
+          "TriQL.Client.Compression": "[1.1.0, )",
           "ZstdSharp.Port": "[0.8.8, )",
           "coverlet.collector": "[6.0.4, )",
           "xunit": "[2.9.3, )",
@@ -430,14 +430,14 @@
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.Http": "[10.0.0, )",
-          "TriQL.Client": "[1.0.0, )"
+          "TriQL.Client": "[1.1.0, )"
         }
       },
       "triql.entityframeworkcore": {
         "type": "Project",
         "dependencies": {
           "Microsoft.EntityFrameworkCore.Relational": "[10.0.12, 11.0.0)",
-          "TriQL.Data.ADO": "[1.0.0, )"
+          "TriQL.Data.ADO": "[1.1.0, )"
         }
       },
       "K4os.Compression.LZ4": {

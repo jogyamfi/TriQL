@@ -1,6 +1,6 @@
 name: Release
 
-# REL-7: triggers on a `v*` tag; packs, signs, and publishes all three shipping packages via NuGet
+# REL-7: triggers on a `v*` tag; packs, signs, and publishes all five shipping packages via NuGet
 # trusted publishing (OIDC — no long-lived API key stored in the repo), then creates a GitHub
 # Release with generated notes. Requires the repository to have NuGet trusted publishing configured
 # for this GitHub repo/workflow (see https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)

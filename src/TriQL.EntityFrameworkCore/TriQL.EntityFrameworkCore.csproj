@@ -38,6 +38,13 @@
       fixed signatures. Not a new API design choice (same reasoning as TrinoConnection.GetSchemaAsync).
     -->
     <NoWarn>$(NoWarn);RS0026;RS0027</NoWarn>
+
+    <!--
+      Microsoft.EntityFrameworkCore.Design's build props turn this on (for startup projects run by
+      dotnet ef), which would ship a stray runtimeconfig.json in this library's package. The
+      application referencing the provider is the startup project, not this library.
+    -->
+    <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
 
   <ItemGroup>
