@@ -1,5 +1,4 @@
-using System.Net;
-using System.Net.NetworkInformation;
+using System.Diagnostics.Tracing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using TriQL.IntegrationTests.Fixtures;
@@ -69,20 +68,42 @@ public sealed class PerformanceBehaviourTests(TrinoContainerFixture fixture, ITe
         }
     }
 
-    /// <summary>The client-side TCP connections to the coordinator that <paramref name="action"/> opened.</summary>
+    /// <summary>The HTTP connections to the coordinator that <paramref name="action"/> opened.</summary>
+    /// <remarks>
+    /// Counted from System.Net.Http's ConnectionEstablished event rather than by diffing client-side TCP ports:
+    /// Linux reuses loopback ports in TIME_WAIT (tcp_tw_reuse), so a new connection can take a port that was
+    /// already in use before the action (or earlier in it) and a port diff undercounts.
+    /// </remarks>
     private async Task<int> CountNewConnectionsAsync(Func<Task> action)
     {
-        var before = LocalPortsToServer();
+        using var listener = new HttpConnectionListener(fixture.ServerUri.Port);
         await action();
-        return LocalPortsToServer().Except(before).Count();
+        return listener.Count;
     }
 
-    // Every state (including TIME_WAIT), so connections opened and already closed are counted too.
-    private HashSet<int> LocalPortsToServer()
+    private sealed class HttpConnectionListener(int port) : EventListener
     {
-        var port = fixture.ServerUri.Port;
-        return [.. IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpConnections()
-            .Where(c => c.RemoteEndPoint.Port == port && IPAddress.IsLoopback(c.RemoteEndPoint.Address))
-            .Select(c => c.LocalEndPoint.Port)];
+        private int _count;
+
+        public int Count => Volatile.Read(ref _count);
+
+        protected override void OnEventSourceCreated(EventSource eventSource)
+        {
+            if (eventSource.Name == "System.Net.Http")
+            {
+                EnableEvents(eventSource, EventLevel.Informational);
+            }
+        }
+
+        protected override void OnEventWritten(EventWrittenEventArgs eventData)
+        {
+            if (eventData.EventName == "ConnectionEstablished"
+                && eventData.PayloadNames?.IndexOf("port") is int index and >= 0
+                && eventData.Payload?[index] is int connectedPort
+                && connectedPort == port)
+            {
+                Interlocked.Increment(ref _count);
+            }
+        }
     }
 }
