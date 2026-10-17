@@ -229,6 +229,45 @@ public sealed class TrinoCommandAndReaderTests
         Assert.NotNull(submitted);
     }
 
+    [Fact]
+    public async Task GetDateTimeAndGetGuid_ApplyFieldValueConversions()
+    {
+        // EF Core materializes DateTime/Guid properties through these typed getters, not GetFieldValue<T>.
+        using var fake = new FakeTrinoCoordinator();
+        var guid = Guid.NewGuid();
+        fake.Enqueue(HttpStatusCode.OK, $$"""{"id":"q1","nextUri":null,"columns":[{"name":"ts","type":"timestamp(9)"},{"name":"d","type":"date"},{"name":"u","type":"varchar"}],"data":[["2026-01-02 03:04:05.123456789","2026-01-02","{{guid}}"]]}""");
+
+        using var connection = await OpenConnectionAsync(fake);
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT ts, d, u FROM t";
+        using var reader = await command.ExecuteReaderAsync();
+        Assert.True(await reader.ReadAsync());
+
+        Assert.Throws<OverflowException>(() => reader.GetDateTime(0));
+        Assert.Equal(new DateTime(2026, 1, 2), reader.GetDateTime(1));
+        Assert.Equal(guid, reader.GetGuid(2));
+    }
+
+    [Theory]
+    [InlineData("@id")]
+    [InlineData(":id")]
+    [InlineData("id")]
+    public async Task Execute_ParameterNameWithOrWithoutPrefix_BindsToTheNamedPlaceholder(string parameterName)
+    {
+        using var fake = new FakeTrinoCoordinator();
+        fake.Enqueue(HttpStatusCode.OK, """{"id":"q1","nextUri":null,"columns":null,"data":null}""");
+
+        using var connection = await OpenConnectionAsync(fake);
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT * FROM t WHERE x = @id";
+        command.Parameters.Add(new TrinoDbParameter { ParameterName = parameterName, Value = 7 });
+
+        await command.ExecuteNonQueryAsync();
+
+        var submitted = fake.ReceivedRequests.Single(r => r.Method == HttpMethod.Post);
+        Assert.EndsWith(" USING 7", submitted.Body, StringComparison.Ordinal);
+    }
+
     private static async Task<TrinoConnection> OpenConnectionAsync(FakeTrinoCoordinator fake)
     {
         var options = new TrinoSessionOptions { Server = new Uri("https://trino.example.com/") };

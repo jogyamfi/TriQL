@@ -2,6 +2,7 @@
   <Folder Name="/samples/">
     <Project Path="samples/TriQL.Samples.CertificateAuth/TriQL.Samples.CertificateAuth.csproj" />
     <Project Path="samples/TriQL.Samples.Console/TriQL.Samples.Console.csproj" />
+    <Project Path="samples/TriQL.Samples.EntityFrameworkCore/TriQL.Samples.EntityFrameworkCore.csproj" />
     <Project Path="samples/TriQL.Samples.UserNamePassword/TriQL.Samples.UserNamePassword.csproj" />
   </Folder>
   <Folder Name="/src/">
@@ -9,6 +10,7 @@
     <Project Path="src/TriQL.Client.Compression/TriQL.Client.Compression.csproj" />
     <Project Path="src/TriQL.Client/TriQL.Client.csproj" />
     <Project Path="src/TriQL.Data.ADO/TriQL.Data.ADO.csproj" />
+    <Project Path="src/TriQL.EntityFrameworkCore/TriQL.EntityFrameworkCore.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/TriQL.AotSmoke/TriQL.AotSmoke.csproj" />
@@ -16,6 +18,8 @@
     <Project Path="tests/TriQL.Client.Auth.Tests/TriQL.Client.Auth.Tests.csproj" />
     <Project Path="tests/TriQL.Client.Tests/TriQL.Client.Tests.csproj" />
     <Project Path="tests/TriQL.Data.ADO.Tests/TriQL.Data.ADO.Tests.csproj" />
+    <Project Path="tests/TriQL.EntityFrameworkCore.FunctionalTests/TriQL.EntityFrameworkCore.FunctionalTests.csproj" />
+    <Project Path="tests/TriQL.EntityFrameworkCore.Tests/TriQL.EntityFrameworkCore.Tests.csproj" />
     <Project Path="tests/TriQL.IntegrationTests/TriQL.IntegrationTests.csproj" />
   </Folder>
 </Solution>

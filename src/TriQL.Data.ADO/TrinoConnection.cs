@@ -11,13 +11,24 @@ namespace TriQL.Data.ADO;
 /// A <see cref="DbConnection"/> to a Trino coordinator. See FR-9.1.
 /// </summary>
 /// <remarks>
+/// <para>
 /// A single command may execute at a time per connection (FR-9.1.15); attempting to start a
 /// second concurrent command throws <see cref="InvalidOperationException"/> rather than
 /// corrupting session state.
+/// </para>
+/// <para>
+/// The HTTP handler (and its pooled TCP/TLS connections) is built on the first <see cref="Open"/>
+/// and reused by every later <see cref="Open"/> until the connection is disposed or its
+/// <see cref="ConnectionString"/> changes, so open/close cycles — as ORMs perform around every
+/// command — do not pay a new handshake each time. Connections created by a
+/// <see cref="TrinoDataSource"/> share that data source's handler instead.
+/// </para>
 /// </remarks>
 public sealed class TrinoConnection : DbConnection
 {
     private readonly IHttpClientFactory? _httpClientFactory;
+    private readonly Lazy<HttpMessageInvoker>? _sharedInvoker;
+    private HttpMessageInvoker? _ownedInvoker;
     private TrinoSessionOptions? _options;
     private TrinoClient? _client;
     private IDisposable? _activeQuery;
@@ -34,6 +45,10 @@ public sealed class TrinoConnection : DbConnection
     /// <summary>Initializes a new instance with the given connection string.</summary>
     public TrinoConnection(string connectionString)
         : this() => ConnectionString = connectionString;
+
+    /// <summary>Initializes a new instance that sends requests through <paramref name="sharedInvoker"/>, owned by a <see cref="TrinoDataSource"/>.</summary>
+    internal TrinoConnection(string connectionString, Lazy<HttpMessageInvoker> sharedInvoker)
+        : this(connectionString) => _sharedInvoker = sharedInvoker;
 
     /// <summary>Initializes a new instance for dependency-injection scenarios (FR-9.1.16).</summary>
     public TrinoConnection(TrinoSessionOptions options)
@@ -68,6 +83,9 @@ public sealed class TrinoConnection : DbConnection
 
             _connectionString = value;
             _options = string.IsNullOrEmpty(value) ? null : new TrinoConnectionStringBuilder(value).ToSessionOptions();
+
+            // The cached handler was built for the previous settings (TLS, certificates, auth).
+            ReleaseOwnedInvoker();
         }
     }
 
@@ -114,8 +132,10 @@ public sealed class TrinoConnection : DbConnection
         SetState(ConnectionState.Connecting);
         try
         {
-            var invoker = _httpClientFactory?.CreateClient(nameof(TrinoConnection));
-            var client = invoker is null ? new TrinoClient(_options) : new TrinoClient(_options, invoker);
+            HttpMessageInvoker invoker = _httpClientFactory?.CreateClient(nameof(TrinoConnection))
+                ?? _sharedInvoker?.Value
+                ?? (_ownedInvoker ??= TrinoClient.CreateOwnedInvoker(_options, loggerFactory: null));
+            var client = new TrinoClient(_options, invoker);
 
             if (_options.TestConnectionOnOpen)
             {
@@ -271,12 +291,26 @@ public sealed class TrinoConnection : DbConnection
         OnStateChange(new StateChangeEventArgs(old, newState));
     }
 
+    /// <summary>The HTTP pipeline this connection sends requests through, once opened. For tests.</summary>
+    internal HttpMessageInvoker? CurrentInvoker => _sharedInvoker is { IsValueCreated: true } shared ? shared.Value : _ownedInvoker;
+
+    private void ReleaseOwnedInvoker()
+    {
+        _ownedInvoker?.Dispose();
+        _ownedInvoker = null;
+    }
+
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
-        if (disposing && _state != ConnectionState.Closed)
+        if (disposing)
         {
-            Close();
+            if (_state != ConnectionState.Closed)
+            {
+                Close();
+            }
+
+            ReleaseOwnedInvoker();
         }
 
         base.Dispose(disposing);

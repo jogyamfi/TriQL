@@ -268,7 +268,7 @@ public sealed class TrinoCommand : DbCommand
         foreach (TrinoDbParameter parameter in _parameters)
         {
             var value = parameter.Value is DBNull ? null : parameter.Value;
-            var clientParameter = new ClientParameter(string.IsNullOrEmpty(parameter.ParameterName) ? null : parameter.ParameterName, value)
+            var clientParameter = new ClientParameter(NormalizeParameterName(parameter.ParameterName), value)
             {
                 DbType = parameter.HasExplicitDbType ? parameter.DbType : null,
                 TrinoType = parameter.TrinoType,
@@ -282,6 +282,17 @@ public sealed class TrinoCommand : DbCommand
 
         return result;
     }
+
+    /// <summary>
+    /// Strips a leading <c>@</c> or <c>:</c> so a parameter named like its placeholder (<c>@id</c>,
+    /// as EF Core and SqlClient-style code name them) binds to <c>@id</c>/<c>:id</c>, whose name is <c>id</c>.
+    /// </summary>
+    private static string? NormalizeParameterName(string parameterName) => parameterName switch
+    {
+        "" => null,
+        ['@' or ':', .. var rest] => rest,
+        _ => parameterName,
+    };
 
     private TrinoConnection RequireConnection() =>
         _connection ?? throw new InvalidOperationException("Connection must be set before executing a command.");

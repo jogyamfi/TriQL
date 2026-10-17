@@ -89,6 +89,25 @@ public sealed class TrinoConnectionStringBuilderTests
     }
 
     [Fact]
+    public void ParameterBinding_DefaultsToPreparedStatementHeader_AndParsesCaseInsensitively()
+    {
+        Assert.Equal(TrinoParameterBinding.PreparedStatementHeader, new TrinoConnectionStringBuilder().ParameterBinding);
+
+        var builder = new TrinoConnectionStringBuilder("Server=https://trino.example.com/;ParameterBinding=executeimmediate");
+
+        Assert.Equal(TrinoParameterBinding.ExecuteImmediate, builder.ParameterBinding);
+        Assert.Equal(TrinoParameterBinding.ExecuteImmediate, InvokeToSessionOptions(builder).ParameterBinding);
+    }
+
+    [Fact]
+    public void ParameterBinding_InvalidValue_Throws()
+    {
+        var builder = new TrinoConnectionStringBuilder("ParameterBinding=Sometimes");
+
+        Assert.Throws<ArgumentException>(() => builder.ParameterBinding);
+    }
+
+    [Fact]
     public void ToSessionOptions_BuildsServerFromHostPortEnableSsl()
     {
         var builder = new TrinoConnectionStringBuilder { Host = "trino.example.com", Port = 8443, EnableSsl = true };

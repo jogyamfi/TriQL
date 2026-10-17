@@ -86,7 +86,11 @@ override TriQL.Data.ADO.TrinoDbParameter.IsNullable.get -> bool
 override TriQL.Data.ADO.TrinoDbParameter.IsNullable.set -> void
 override TriQL.Data.ADO.TrinoDbParameter.ParameterName.get -> string!
 override TriQL.Data.ADO.TrinoDbParameter.ParameterName.set -> void
+override TriQL.Data.ADO.TrinoDbParameter.Precision.get -> byte
+override TriQL.Data.ADO.TrinoDbParameter.Precision.set -> void
 override TriQL.Data.ADO.TrinoDbParameter.ResetDbType() -> void
+override TriQL.Data.ADO.TrinoDbParameter.Scale.get -> byte
+override TriQL.Data.ADO.TrinoDbParameter.Scale.set -> void
 override TriQL.Data.ADO.TrinoDbParameter.Size.get -> int
 override TriQL.Data.ADO.TrinoDbParameter.Size.set -> void
 override TriQL.Data.ADO.TrinoDbParameter.SourceColumn.get -> string!
@@ -168,6 +172,8 @@ TriQL.Data.ADO.TrinoConnectionStringBuilder.Host.get -> string?
 TriQL.Data.ADO.TrinoConnectionStringBuilder.Host.set -> void
 TriQL.Data.ADO.TrinoConnectionStringBuilder.Locale.get -> string?
 TriQL.Data.ADO.TrinoConnectionStringBuilder.Locale.set -> void
+TriQL.Data.ADO.TrinoConnectionStringBuilder.ParameterBinding.get -> TriQL.Client.TrinoParameterBinding
+TriQL.Data.ADO.TrinoConnectionStringBuilder.ParameterBinding.set -> void
 TriQL.Data.ADO.TrinoConnectionStringBuilder.Password.get -> string?
 TriQL.Data.ADO.TrinoConnectionStringBuilder.Password.set -> void
 TriQL.Data.ADO.TrinoConnectionStringBuilder.Path.get -> string?
@@ -223,10 +229,6 @@ TriQL.Data.ADO.TrinoDataReader.GetColumnSchema() -> System.Collections.ObjectMod
 TriQL.Data.ADO.TrinoDataSource
 TriQL.Data.ADO.TrinoDataSource.TrinoDataSource(string! connectionString) -> void
 TriQL.Data.ADO.TrinoDbParameter
-TriQL.Data.ADO.TrinoDbParameter.Precision.get -> byte
-TriQL.Data.ADO.TrinoDbParameter.Precision.set -> void
-TriQL.Data.ADO.TrinoDbParameter.Scale.get -> byte
-TriQL.Data.ADO.TrinoDbParameter.Scale.set -> void
 TriQL.Data.ADO.TrinoDbParameter.TrinoDbParameter() -> void
 TriQL.Data.ADO.TrinoDbParameter.TrinoType.get -> string?
 TriQL.Data.ADO.TrinoDbParameter.TrinoType.set -> void

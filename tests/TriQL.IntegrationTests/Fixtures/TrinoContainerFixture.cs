@@ -24,6 +24,13 @@ public sealed class TrinoContainerFixture : IAsyncLifetime
     public const string FloorVersion = "466";
 
     /// <summary>
+    /// The name of the writable Iceberg catalog created at start-up (EF0-T9): the only connector in
+    /// the image that supports row-level UPDATE, DELETE and MERGE. Tests should create their own
+    /// uniquely named schema in it and drop it afterwards.
+    /// </summary>
+    public const string IcebergCatalog = "iceberg";
+
+    /// <summary>
     /// The image tag this fixture was started with — either <see cref="FloorVersion"/>, or
     /// whatever <c>TRIQL_TEST_TRINO_VERSION</c> named (e.g. <c>"latest"</c>). Not necessarily
     /// equal to the numeric version the server reports via <c>/v1/info</c>.
@@ -42,6 +49,9 @@ public sealed class TrinoContainerFixture : IAsyncLifetime
         // that rejects every query with "Trino server is still initializing". Poll the body too.
         _container = new ContainerBuilder(image: $"trinodb/trino:{RequestedVersion}")
             .WithPortBinding(8080, assignRandomHostPort: true)
+            // The image's config.properties reads catalog.management from this variable; "dynamic"
+            // enables CREATE CATALOG (used for Iceberg below) and still loads the bundled catalogs.
+            .WithEnvironment("CATALOG_MANAGEMENT", "dynamic")
             .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r
                 .ForPath("/v1/info")
                 .ForPort(8080)
@@ -60,6 +70,25 @@ public sealed class TrinoContainerFixture : IAsyncLifetime
     {
         await _container.StartAsync().ConfigureAwait(false);
         await WaitUntilQueryableAsync().ConfigureAwait(false);
+        await CreateIcebergCatalogAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Creates <see cref="IcebergCatalog"/> on the container's local disk: Iceberg's file-backed
+    /// metastore and the Hadoop file system with <c>file://</c> paths, so no object store or
+    /// metastore container is needed. Verified on 466 and 483. Data lives only as long as the container.
+    /// </summary>
+    private async Task CreateIcebergCatalogAsync()
+    {
+        using var client = new HttpClient { BaseAddress = ServerUri, Timeout = TimeSpan.FromSeconds(30) };
+        await RunStatementAsync(
+            client,
+            $"""
+            CREATE CATALOG {IcebergCatalog} USING iceberg WITH (
+                "iceberg.catalog.type" = 'testing_file_metastore',
+                "hive.metastore.catalog.dir" = 'file:///tmp/triql-iceberg',
+                "fs.hadoop.enabled" = 'true')
+            """).ConfigureAwait(false);
     }
 
     public Task DisposeAsync() => _container.DisposeAsync().AsTask();
@@ -104,17 +133,21 @@ public sealed class TrinoContainerFixture : IAsyncLifetime
         throw new TimeoutException("Trino coordinator did not become reliably queryable in time.", lastFailure);
     }
 
-    private static async Task ProbeAsync(HttpClient client)
+    private static Task ProbeAsync(HttpClient client) => RunStatementAsync(client, "SELECT count(*) FROM tpch.tiny.nation");
+
+    /// <summary>Runs <paramref name="sql"/> to completion over the raw protocol, throwing if the server reports an error.</summary>
+    private static async Task RunStatementAsync(HttpClient client, string sql)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, "v1/statement")
         {
-            Content = new StringContent("SELECT count(*) FROM tpch.tiny.nation", System.Text.Encoding.UTF8, "text/plain"),
+            Content = new StringContent(sql, System.Text.Encoding.UTF8, "text/plain"),
         };
         request.Headers.Add("X-Trino-User", "triql-readiness-probe");
 
         using var response = await client.SendAsync(request).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadFromJsonAsync<JsonElement>().ConfigureAwait(false);
+        ThrowIfFailed(body, sql);
 
         var nextUri = body.TryGetProperty("nextUri", out var next) ? next.GetString() : null;
         while (nextUri is not null)
@@ -122,13 +155,18 @@ public sealed class TrinoContainerFixture : IAsyncLifetime
             using var follow = await client.GetAsync(nextUri).ConfigureAwait(false);
             follow.EnsureSuccessStatusCode();
             body = await follow.Content.ReadFromJsonAsync<JsonElement>().ConfigureAwait(false);
-
-            if (body.TryGetProperty("error", out var error))
-            {
-                throw new InvalidOperationException(error.TryGetProperty("message", out var message) ? message.GetString() : "Query failed.");
-            }
+            ThrowIfFailed(body, sql);
 
             nextUri = body.TryGetProperty("nextUri", out var next2) ? next2.GetString() : null;
+        }
+    }
+
+    private static void ThrowIfFailed(JsonElement body, string sql)
+    {
+        if (body.TryGetProperty("error", out var error))
+        {
+            var message = error.TryGetProperty("message", out var m) ? m.GetString() : "Query failed.";
+            throw new InvalidOperationException($"{message} (statement: {sql})");
         }
     }
 }

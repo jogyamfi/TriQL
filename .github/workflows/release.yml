@@ -1,6 +1,6 @@
 name: Release
 
-# REL-7: triggers on a `v*` tag; packs, signs, and publishes all three shipping packages via NuGet
+# REL-7: triggers on a `v*` tag; packs, signs, and publishes all five shipping packages via NuGet
 # trusted publishing (OIDC — no long-lived API key stored in the repo), then creates a GitHub
 # Release with generated notes. Requires the repository to have NuGet trusted publishing configured
 # for this GitHub repo/workflow (see https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
@@ -50,8 +50,10 @@ jobs:
         run: dotnet build TriQL.slnx -c Release --no-restore -p:Version=${{ steps.version.outputs.version }}
 
       - name: "Pack shipping packages (REL-4: deterministic, Source Link, .snupkg)"
+        # TriQL.EntityFrameworkCore keeps its own preview NuGet version (PackageVersion in its csproj,
+        # e.g. 1.1.0-preview.1): -p:Version stamps its assembly and its TriQL.Data.ADO dependency only.
         run: |
-          for proj in TriQL.Client TriQL.Client.Auth TriQL.Client.Compression TriQL.Data.ADO; do
+          for proj in TriQL.Client TriQL.Client.Auth TriQL.Client.Compression TriQL.Data.ADO TriQL.EntityFrameworkCore; do
             dotnet pack "src/$proj/$proj.csproj" -c Release --no-build \
               -p:Version=${{ steps.version.outputs.version }} \
               -o ./artifacts

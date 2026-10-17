@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TriQL.Client\TriQL.Client.csproj" />
+    <ProjectReference Include="..\..\src\TriQL.EntityFrameworkCore\TriQL.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>

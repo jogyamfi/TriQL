@@ -22,6 +22,7 @@ public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
         "ReadAheadBufferBytes", "TargetResultSizeBytes", "QueryDataEncoding", "CompressionDisabled",
         "TestConnection", "AllowSelfSignedCertificate", "AllowHostNameMismatch", "UseSystemTrustStore",
         "TrustedCertificatePath", "ClientCertificatePath", "ClientCertificateThumbprint", "AllowPlaintextCredentials",
+        "ParameterBinding",
     };
 
     private static readonly string[] SecretKeys = ["Password", "AccessToken", "ClientSecret"];
@@ -146,6 +147,17 @@ public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
     /// <summary>Issues a <c>/v1/info</c> request on <c>Open()</c> to confirm the server is ready. Default <see langword="false"/>.</summary>
     public bool TestConnection { get => GetBoolean("TestConnection") ?? false; set => SetValue("TestConnection", value); }
 
+    /// <summary>
+    /// How parameterized statements reach the coordinator: <c>PreparedStatementHeader</c> (the default) or
+    /// <c>ExecuteImmediate</c>. See <see cref="TrinoSessionOptions.ParameterBinding"/>.
+    /// </summary>
+    /// <exception cref="ArgumentException">The stored value is not a <see cref="TrinoParameterBinding"/> name.</exception>
+    public TrinoParameterBinding ParameterBinding
+    {
+        get => GetString("ParameterBinding") is { Length: > 0 } value ? Enum.Parse<TrinoParameterBinding>(value, ignoreCase: true) : TrinoParameterBinding.PreparedStatementHeader;
+        set => SetValue("ParameterBinding", value.ToString());
+    }
+
     /// <summary>Accept a certificate chain whose only failure is an untrusted (self-signed) root. Default <see langword="false"/>.</summary>
     public bool AllowSelfSignedCertificate { get => GetBoolean("AllowSelfSignedCertificate") ?? false; set => SetValue("AllowSelfSignedCertificate", value); }
 
@@ -240,6 +252,7 @@ public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
             TargetResultSizeBytes = TargetResultSizeBytes ?? 5_242_880,
             CompressionDisabled = CompressionDisabled,
             TestConnectionOnOpen = TestConnection,
+            ParameterBinding = ParameterBinding,
         };
 
         if (TimeZone is not null)

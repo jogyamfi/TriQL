@@ -18,7 +18,10 @@ internal static class SqlLiteralEncoder
 
         if (parameter.Value is null)
         {
-            return "NULL";
+            // A typed NULL when the type is known: an untyped NULL is `unknown` to the analyzer, which
+            // makes overloaded functions ambiguous (e.g. date_add(unit, n, NULL) fails with
+            // AMBIGUOUS_FUNCTION_CALL) and lets others resolve to a surprising type (abs(NULL) is tinyint).
+            return ResolveTypeName(parameter) is { } nullType ? $"CAST(NULL AS {nullType})" : "NULL";
         }
 
         if (parameter.TrinoType is { Length: > 0 } explicitType)
@@ -31,13 +34,35 @@ internal static class SqlLiteralEncoder
             return encoded;
         }
 
-        if (parameter.DbType is { } dbType && DbTypeMapping.ToTrinoTypeName(dbType) is { } mappedType)
+        if (parameter.DbType is not null && ResolveTypeName(parameter) is { } mappedType)
         {
             return EncodeWithExplicitType(parameter.Value, mappedType);
         }
 
         throw new TrinoParameterException(
             $"Cannot render a value of type '{parameter.Value.GetType()}' as a Trino literal. Set TrinoParameter.TrinoType or DbType explicitly.");
+    }
+
+    /// <summary>
+    /// The Trino type a parameter declares: <see cref="TrinoParameter.TrinoType"/> if set, otherwise
+    /// the mapping of <see cref="TrinoParameter.DbType"/>, with <see cref="TrinoParameter.Precision"/>
+    /// and <see cref="TrinoParameter.Scale"/> applied to <c>decimal</c>.
+    /// </summary>
+    private static string? ResolveTypeName(TrinoParameter parameter)
+    {
+        if (parameter.TrinoType is { Length: > 0 } explicitType)
+        {
+            return explicitType;
+        }
+
+        if (parameter.DbType is not { } dbType || DbTypeMapping.ToTrinoTypeName(dbType) is not { } mapped)
+        {
+            return null;
+        }
+
+        return mapped == "decimal" && parameter.Precision is { } precision
+            ? string.Create(CultureInfo.InvariantCulture, $"decimal({precision},{parameter.Scale ?? 0})")
+            : mapped;
     }
 
     private static string EncodeWithExplicitType(object value, string trinoType)
@@ -57,9 +82,12 @@ internal static class SqlLiteralEncoder
         encoded = value switch
         {
             bool b => b ? "TRUE" : "FALSE",
-            sbyte or short or int or long => System.Convert.ToInt64(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture),
-            float f => EncodeFloatingPoint(f, double.IsNaN(f), double.IsPositiveInfinity(f), double.IsNegativeInfinity(f), "REAL"),
-            double d => EncodeFloatingPoint(d, double.IsNaN(d), double.IsPositiveInfinity(d), double.IsNegativeInfinity(d), "DOUBLE"),
+            sbyte or short or int or long or byte or ushort or uint => System.Convert.ToInt64(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture),
+
+            // Beyond bigint's range a bare integer literal is invalid in Trino, so render those as decimal.
+            ulong u => u <= long.MaxValue ? u.ToString(CultureInfo.InvariantCulture) : $"DECIMAL {EscapeString(u.ToString(CultureInfo.InvariantCulture))}",
+            float f => EncodeFloatingPoint(f, f.ToString("R", CultureInfo.InvariantCulture), "REAL"),
+            double d => EncodeFloatingPoint(d, d.ToString("R", CultureInfo.InvariantCulture), "DOUBLE"),
             decimal dec => $"DECIMAL {EscapeString(dec.ToString(CultureInfo.InvariantCulture))}",
             TrinoBigDecimal bd => $"DECIMAL {EscapeString(bd.ToString(null, CultureInfo.InvariantCulture))}",
             string s => EscapeString(s),
@@ -82,24 +110,23 @@ internal static class SqlLiteralEncoder
         return encoded.Length > 0;
     }
 
-    private static string EncodeFloatingPoint(double value, bool isNaN, bool isPositiveInfinity, bool isNegativeInfinity, string typeName)
+    /// <summary>
+    /// A typed <c>REAL '…'</c>/<c>DOUBLE '…'</c> literal. A bare <c>1.5</c> would be <c>decimal(2,1)</c>
+    /// in Trino, so the parameter would not have its CLR type (e.g. <c>SELECT ?</c> returned a decimal).
+    /// <paramref name="roundTripText"/> is formatted from the original type, so a <see cref="float"/>
+    /// does not carry the extra digits of its widened <see cref="double"/>.
+    /// </summary>
+    private static string EncodeFloatingPoint(double value, string roundTripText, string typeName)
     {
-        if (isNaN)
+        var text = value switch
         {
-            return $"CAST('NaN' AS {typeName})";
-        }
+            double.NaN => "NaN",
+            double.PositiveInfinity => "Infinity",
+            double.NegativeInfinity => "-Infinity",
+            _ => roundTripText,
+        };
 
-        if (isPositiveInfinity)
-        {
-            return $"CAST('Infinity' AS {typeName})";
-        }
-
-        if (isNegativeInfinity)
-        {
-            return $"CAST('-Infinity' AS {typeName})";
-        }
-
-        return value.ToString(CultureInfo.InvariantCulture);
+        return $"{typeName} {EscapeString(text)}";
     }
 
     private static string FormatIntervalDayToSecond(TimeSpan value)
@@ -111,6 +138,9 @@ internal static class SqlLiteralEncoder
             $"{magnitude.Days} {magnitude.Hours:D2}:{magnitude.Minutes:D2}:{magnitude.Seconds:D2}.{magnitude.Milliseconds:D3}");
         return negative ? "-" + text : text;
     }
+
+    /// <summary>Renders <paramref name="value"/> as a single-quoted SQL string literal, doubling embedded quotes.</summary>
+    public static string EncodeStringLiteral(string value) => EscapeString(value);
 
     private static string EscapeString(string value) => "'" + value.Replace("'", "''", StringComparison.Ordinal) + "'";
 

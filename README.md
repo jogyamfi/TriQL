@@ -15,6 +15,8 @@ Additional packages:
 - `TriQL.Client.Auth` — cloud/enterprise authentication providers (Microsoft Entra ID, OAuth 2.0
   client credentials) kept isolated so their dependencies never leak into the core client.
 - `TriQL.Client.Compression` — support for compressed spooled protocol payloads.
+- `TriQL.EntityFrameworkCore` (**preview**) — an Entity Framework Core 10 provider: LINQ on any
+  connector, `SaveChanges` and bulk updates on Iceberg, and `dotnet ef dbcontext scaffold`.
 
 See [docs/requirements.md](https://github.com/jogyamfi/TriQL/blob/main/docs/requirements.md) for
 the full requirements specification and
@@ -23,11 +25,12 @@ for the phased delivery plan.
 
 ## Status
 
-**Stable — 1.0.0.** TriQL follows [Semantic Versioning](https://semver.org): breaking public-API
+**Stable — 1.1.0.** TriQL follows [Semantic Versioning](https://semver.org): breaking public-API
 changes only in a major version, additive API in minors, fixes in patches. The public API surface
 of each shipping package is locked by `PublicAPI.Shipped.txt` baselines and enforced at build time.
+The Entity Framework Core provider, `TriQL.EntityFrameworkCore`, is a **preview** (`1.1.0-preview.1`).
 
-The one deliberately conservative default in 1.0 is the spooling protocol, which ships implemented
+The one deliberately conservative default in 1.x is the spooling protocol, which ships implemented
 and tested but **opt-in** — see [Spooling protocol](#spooling-protocol-opt-in). Release notes for
 every version are published on [GitHub Releases](https://github.com/jogyamfi/TriQL/releases).
 
@@ -45,6 +48,7 @@ dotnet add package TriQL.Client        # streaming SDK
 dotnet add package TriQL.Data.ADO      # ADO.NET provider
 dotnet add package TriQL.Client.Auth   # optional: Entra ID / OAuth2 authentication
 dotnet add package TriQL.Client.Compression  # optional: json+lz4 / json+zstd spooling codecs
+dotnet add package TriQL.EntityFrameworkCore --prerelease  # preview: Entity Framework Core 10 provider
 ```
 
 ## Quick start: TriQL SDK (streaming)
@@ -98,10 +102,42 @@ More runnable examples — including Microsoft Entra ID authentication and `IAsy
 consumption — live in
 [samples/TriQL.Samples.Console](https://github.com/jogyamfi/TriQL/blob/main/samples/TriQL.Samples.Console/Program.cs).
 
+## Quick start: Entity Framework Core (preview)
+
+```csharp
+public class Nation
+{
+    public long NationKey { get; set; }
+    public string Name { get; set; } = "";
+    public long RegionKey { get; set; }
+}
+
+public class TpchContext(DbContextOptions<TpchContext> options) : DbContext(options)
+{
+    public DbSet<Nation> Nations => Set<Nation>();
+
+    // Trino identifiers are case-insensitive, so "NationKey" matches the nationkey column.
+    protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+        modelBuilder.Entity<Nation>().ToTable("nation").HasKey(n => n.NationKey);
+}
+
+services.AddDbContext<TpchContext>(options => options.UseTrino(
+    "Server=https://trino.example.com;Catalog=tpch;Schema=tiny;User=analyst",
+    o => o.EnableRetryOnFailure()));
+
+var europe = await db.Nations.Where(n => n.RegionKey == 3).OrderBy(n => n.Name).Select(n => n.Name).ToListAsync();
+```
+
+Trino has no multi-statement transactions, identity columns or enforced keys, so the provider sets
+keys in .NET, commits each `SaveChanges` statement on its own, and rejects unsupported model
+configuration with guidance. Writes are verified on the Iceberg connector. See the
+[EF Core guide](https://github.com/jogyamfi/TriQL/blob/main/docs/efcore.md) and
+[samples/TriQL.Samples.EntityFrameworkCore](https://github.com/jogyamfi/TriQL/blob/main/samples/TriQL.Samples.EntityFrameworkCore/Program.cs).
+
 ## Spooling protocol (opt-in)
 
 Trino's spooling protocol (compressed, object-storage-backed result segments) is implemented but
-ships **off by default and opt-in** in 1.0: `TrinoSessionOptions.QueryDataEncodings` defaults to
+ships **off by default and opt-in** (1.0 and 1.1): `TrinoSessionOptions.QueryDataEncodings` defaults to
 an empty list, which forces the direct protocol. Enable it explicitly once your cluster is
 configured for spooling:
 
@@ -134,13 +170,14 @@ object-storage hosts segments may be fetched from; empty allows any `https` host
 
 The spooled path is verified in CI against a real spooling-configured Trino coordinator backed by
 MinIO (all three codecs, SSE-C encryption, segment acknowledgement, and cancellation cleanup). It
-stays opt-in for 1.0 because it has not yet been checked against AWS S3 or Azure Blob Storage, and
-throughput over the spooled path has not been benchmarked. Making it the default is planned for
-1.1.0; that release will call out the behaviour change, and setting `QueryDataEncodings = []` will
-keep the direct protocol.
+stays opt-in because it has not yet been checked against AWS S3 or Azure Blob Storage, and
+throughput over the spooled path has not been benchmarked. Making it the default is planned for a
+later minor release; that release will call out the behaviour change, and setting
+`QueryDataEncodings = []` will keep the direct protocol.
 
 ## Documentation
 
+- [Entity Framework Core guide](https://github.com/jogyamfi/TriQL/blob/main/docs/efcore.md) (preview provider)
 - [Connection-string reference](https://github.com/jogyamfi/TriQL/blob/main/docs/connection-string-reference.md)
 - [Type-mapping reference](https://github.com/jogyamfi/TriQL/blob/main/docs/type-mapping-reference.md)
 - [Troubleshooting guide](https://github.com/jogyamfi/TriQL/blob/main/docs/troubleshooting.md)

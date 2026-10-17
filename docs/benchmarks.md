@@ -6,8 +6,8 @@
 | Product | TriQL — .NET Trino Client & ADO.NET Provider |
 | Harness | [BenchmarkDotNet](https://benchmarkdotnet.org/) v0.14.0 |
 | Project | [tests/TriQL.Benchmarks](../tests/TriQL.Benchmarks) |
-| Last run | 2026-08-27 |
-| Status | Phase 3 results recorded; Phase 5 benchmarks (NFR-PERF-1/2/4) not yet written |
+| Last run | 2026-10-08 (EF Core provider); 2026-08-27 (row decoding) |
+| Status | Phase 3 results and EF Core provider (EF7-T6) results recorded; Phase 5 benchmarks (NFR-PERF-1/2/4) not yet written |
 
 ---
 
@@ -21,6 +21,7 @@
 6. [Regression Guard](#6-regression-guard)
 7. [Caveats](#7-caveats)
 8. [Outstanding Benchmarks](#8-outstanding-benchmarks)
+9. [EF Core Provider — EF7-T6](#9-ef-core-provider--ef7-t6)
 
 ---
 
@@ -37,6 +38,7 @@ Currently covered:
 | NFR-PERF-1 — time-to-first-row | — | Not written (Phase 5, P5-T10) |
 | NFR-PERF-2 — throughput vs JDBC | — | Not written (Phase 5, P5-T10) |
 | NFR-PERF-4 — peak working set | — | Not written (Phase 5, P5-T10) |
+| EF7-T6 — EF Core `SaveChanges`, connection reuse, materialization | `EfSaveChangesBenchmarks`, `EfConnectionBenchmarks`, `EfMaterializationBenchmarks` | Recorded — see [§9](#9-ef-core-provider--ef7-t6) |
 
 The row-decoding benchmark exists to satisfy **P3-T6**, which requires the `Utf8JsonReader` decoder
 to be *measured against the naive path before committing to it* rather than adopted on faith.
@@ -215,6 +217,98 @@ Phase 5 (P5-T10) must add:
 
 P5-T12 then wires a CI perf gate failing beyond 10 % regression, per gate **G5**. Phase 7 (P7-T11)
 re-baselines NFR-PERF-2 over the spooled path.
+
+---
+
+## 9. EF Core Provider — EF7-T6
+
+These benchmarks run against a live coordinator, so every figure includes the HTTP round trips.
+That is intentional: they show what the provider saves or adds per statement and per row.
+
+### 9.1 Running
+
+```bash
+# A local coordinator; the benchmarks use only the built-in memory and tpch catalogs.
+docker run -d -p 8080:8080 trinodb/trino:466
+TRIQL_BENCH_SERVER=http://localhost:8080/ \
+    dotnet run -c Release --project tests/TriQL.Benchmarks --framework net10.0 -- --filter "*Ef*"
+```
+
+Environment for the results below: Trino 466 in Docker Desktop (WSL 2) on the same machine, plain
+HTTP, BenchmarkDotNet v0.15.8, .NET 10.0.12, Intel Core i5-1340P, Windows 11. Iteration counts are small
+(see each job line) because single operations take up to minutes.
+
+### 9.2 `SaveChanges` — multi-row inserts (EF7-T3)
+
+`Rows` new entities (3 columns) saved in one `SaveChanges` to a `memory` catalog table, with consecutive
+inserts combined into multi-row `INSERT`s (the default) or one statement per row (`MaxBatchSize(1)`).
+
+```text
+Job: RunStrategy=Monitoring, LaunchCount=1, WarmupCount=1, IterationCount=5
+| Method      | Rows | CombineInserts | Mean         | Error      | StdDev      |
+|------------ |----- |--------------- |-------------:|-----------:|------------:|
+| SaveChanges | 1    | False          |     273.1 ms |   183.5 ms |    47.65 ms |
+| SaveChanges | 1    | True           |     289.8 ms |   203.6 ms |    52.87 ms |
+| SaveChanges | 100  | False          |  28,271.2 ms | 3,742.8 ms |   971.98 ms |
+| SaveChanges | 100  | True           |     289.4 ms |   274.6 ms |    71.32 ms |
+| SaveChanges | 1000 | False          | 283,421.1 ms | 4,702.9 ms | 1,221.32 ms |
+| SaveChanges | 1000 | True           |     687.2 ms |   208.5 ms |    54.16 ms |
+```
+
+- Each statement costs ~280 ms here, almost all of it Trino's submit-and-poll cycle, not the network.
+  One statement per row therefore scales linearly: **283 s** for 1,000 rows.
+- Combined, 100 rows cost the same as 1 (one statement), and 1,000 rows (two statements of 666 and
+  334 rows under the 2,000-parameter cap, as each row binds 3 parameters) take **0.69 s**:
+  **~410× faster**.
+- On Iceberg each statement is also a commit and a snapshot, so combining saves more there.
+
+### 9.3 Connection reuse (EF7-T4)
+
+A one-row query (`count(*)` of `tpch.tiny.region`) through a new context each time, a pooled context
+(`PooledDbContextFactory`), and one long-lived context.
+
+```text
+Job: RunStrategy=Throughput, LaunchCount=1, WarmupCount=3, IterationCount=10
+| Method             | Mean     | Error    | StdDev   | Ratio | RatioSD |
+|------------------- |---------:|---------:|---------:|------:|--------:|
+| NewContextPerQuery | 303.7 ms | 35.72 ms | 23.63 ms |  1.01 |    0.11 |
+| PooledContext      | 302.8 ms | 29.90 ms | 19.78 ms |  1.00 |    0.10 |
+| LongLivedContext   | 302.8 ms | 10.06 ms |  5.99 ms |  1.00 |    0.08 |
+```
+
+- The three are equal within noise. A new context opens a new HTTP connection (verified: 20 unpooled
+  queries opened 20 TCP connections, 20 pooled ones opened 1, in `PerformanceBehaviourTests`), but over
+  plain HTTP to a local coordinator the TCP handshake is a fraction of a millisecond against ~300 ms of
+  statement latency.
+- Reuse matters with TLS and a remote coordinator, where each new connection adds a TLS handshake (one
+  or more network round trips). Pooling (`AddDbContextPool`) or a shared `TrinoDataSource` avoids it; this
+  run does not measure that case.
+
+### 9.4 Materialization
+
+`tpch.tiny.orders` (15,000 rows, 5 columns) read through `TrinoDataReader` into objects by hand, and
+through EF with and without change tracking.
+
+```text
+Job: RunStrategy=Throughput, LaunchCount=1, WarmupCount=2, IterationCount=8
+| Method        | Mean     | Error     | StdDev   | Ratio | RatioSD | Gen0      | Gen1      | Gen2      | Allocated | Alloc Ratio |
+|-------------- |---------:|----------:|---------:|------:|--------:|----------:|----------:|----------:|----------:|------------:|
+| RawDataReader | 383.2 ms |  70.45 ms | 36.85 ms |  1.01 |    0.14 | 1000.0000 |         - |         - |  11.52 MB |        1.00 |
+| EfNoTracking  | 380.8 ms | 113.52 ms | 59.37 ms |  1.00 |    0.18 | 2000.0000 | 1000.0000 |         - |  15.33 MB |        1.33 |
+| EfTracking    | 413.1 ms | 102.58 ms | 53.65 ms |  1.09 |    0.18 | 4000.0000 | 2000.0000 | 1000.0000 |  22.65 MB |        1.97 |
+```
+
+- With `AsNoTracking`, EF costs no measurable time over the raw reader (the server and the transfer
+  dominate) and allocates 33% more.
+- Tracking adds ~9% time and doubles allocation (snapshots and the identity map), as in other EF
+  providers.
+
+### 9.5 Caveats
+
+- Single machine, a coordinator in Docker on the same host, few iterations: the confidence intervals
+  are wide (see `Error`). The ratios between methods measured back to back are the useful output.
+- The ~280 ms per statement is this local single-node coordinator's figure; a production cluster's
+  latency differs, and the benefit of combining inserts grows with it.
 
 ---
 

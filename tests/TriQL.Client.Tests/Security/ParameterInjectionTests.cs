@@ -33,6 +33,36 @@ public sealed class ParameterInjectionTests
         Assert.Equal("NULL", SqlLiteralEncoder.Encode(new TrinoParameter(null, null)));
     }
 
+    [Theory]
+    [InlineData(System.Data.DbType.Int32, "CAST(NULL AS integer)")]
+    [InlineData(System.Data.DbType.String, "CAST(NULL AS varchar)")]
+    [InlineData(System.Data.DbType.DateTime, "CAST(NULL AS timestamp(6))")]
+    [InlineData(System.Data.DbType.DateTimeOffset, "CAST(NULL AS timestamp(6) with time zone)")]
+    [InlineData(System.Data.DbType.Time, "CAST(NULL AS time(6))")]
+    [InlineData(System.Data.DbType.Object, "NULL")]
+    public void Encode_NullWithDbType_RendersTypedNull(System.Data.DbType dbType, string expected)
+    {
+        Assert.Equal(expected, SqlLiteralEncoder.Encode(new TrinoParameter(null, null) { DbType = dbType }));
+    }
+
+    [Fact]
+    public void Encode_NullWithExplicitTrinoType_RendersTypedNull()
+    {
+        var parameter = new TrinoParameter(null, null) { TrinoType = "decimal(10,2)", DbType = System.Data.DbType.String };
+
+        Assert.Equal("CAST(NULL AS decimal(10,2))", SqlLiteralEncoder.Encode(parameter));
+    }
+
+    [Fact]
+    public void Encode_DecimalDbTypeWithPrecision_AppliesPrecisionAndScale()
+    {
+        var withScale = new TrinoParameter(null, null) { DbType = System.Data.DbType.Decimal, Precision = 20, Scale = 4 };
+        var withoutScale = new TrinoParameter(null, null) { DbType = System.Data.DbType.Decimal, Precision = 20 };
+
+        Assert.Equal("CAST(NULL AS decimal(20,4))", SqlLiteralEncoder.Encode(withScale));
+        Assert.Equal("CAST(NULL AS decimal(20,0))", SqlLiteralEncoder.Encode(withoutScale));
+    }
+
     [Fact]
     public void Encode_Boolean_RendersBareKeyword()
     {
@@ -45,6 +75,46 @@ public sealed class ParameterInjectionTests
     {
         Assert.Equal("42", SqlLiteralEncoder.Encode(new TrinoParameter(null, 42)));
         Assert.Equal("-7", SqlLiteralEncoder.Encode(new TrinoParameter(null, (sbyte)-7)));
+    }
+
+    [Fact]
+    public void Encode_UnsignedIntegers_RenderAsIntegerLiterals_AndUlongBeyondBigintAsDecimal()
+    {
+        Assert.Equal("255", SqlLiteralEncoder.Encode(new TrinoParameter(null, byte.MaxValue)));
+        Assert.Equal("65535", SqlLiteralEncoder.Encode(new TrinoParameter(null, ushort.MaxValue)));
+        Assert.Equal("4294967295", SqlLiteralEncoder.Encode(new TrinoParameter(null, uint.MaxValue)));
+        Assert.Equal("9223372036854775807", SqlLiteralEncoder.Encode(new TrinoParameter(null, (ulong)long.MaxValue)));
+        Assert.Equal("DECIMAL '18446744073709551615'", SqlLiteralEncoder.Encode(new TrinoParameter(null, ulong.MaxValue)));
+    }
+
+    [Theory]
+    [InlineData(System.Data.DbType.Byte, "CAST(NULL AS smallint)")]
+    [InlineData(System.Data.DbType.UInt16, "CAST(NULL AS integer)")]
+    [InlineData(System.Data.DbType.UInt32, "CAST(NULL AS bigint)")]
+    [InlineData(System.Data.DbType.UInt64, "CAST(NULL AS decimal(20,0))")]
+    public void Encode_NullWithUnsignedDbType_RendersTheWideningSignedType(System.Data.DbType dbType, string expected)
+    {
+        Assert.Equal(expected, SqlLiteralEncoder.Encode(new TrinoParameter(null, null) { DbType = dbType }));
+    }
+
+    [Theory]
+    [InlineData(1.5f, "REAL '1.5'")]
+    [InlineData(0.1f, "REAL '0.1'")]
+    [InlineData(float.NaN, "REAL 'NaN'")]
+    [InlineData(float.NegativeInfinity, "REAL '-Infinity'")]
+    public void Encode_Float_RendersATypedRealLiteral_WithItsOwnDigits(float value, string expected)
+    {
+        Assert.Equal(expected, SqlLiteralEncoder.Encode(new TrinoParameter(null, value)));
+    }
+
+    [Theory]
+    [InlineData(1.5d, "DOUBLE '1.5'")]
+    [InlineData(1e300d, "DOUBLE '1E+300'")]
+    [InlineData(double.Epsilon, "DOUBLE '5E-324'")]
+    [InlineData(double.PositiveInfinity, "DOUBLE 'Infinity'")]
+    public void Encode_Double_RendersATypedDoubleLiteral(double value, string expected)
+    {
+        Assert.Equal(expected, SqlLiteralEncoder.Encode(new TrinoParameter(null, value)));
     }
 
     [Fact]

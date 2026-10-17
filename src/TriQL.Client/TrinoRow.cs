@@ -76,8 +76,17 @@ public sealed class TrinoRow
     /// <remarks>
     /// A <c>json</c> (or <c>varchar</c>) column may be requested as <see cref="JsonDocument"/> (FR-7.2.1);
     /// the returned document is owned by the caller and must be disposed.
+    /// <para>
+    /// When the value is not already a <typeparamref name="T"/>, the documented conversions are
+    /// applied (FR-7.2.4): checked numeric widening/narrowing (including the unsigned types, enums
+    /// and whole-valued decimals), the precision types to their nearest BCL type,
+    /// <see cref="DateOnly"/>/<see cref="DateTimeOffset"/> to <see cref="DateTime"/>, and
+    /// <see cref="string"/> to <see cref="Guid"/>/<see cref="char"/>. <see cref="Nullable{T}"/> targets
+    /// are supported.
+    /// </para>
     /// </remarks>
-    /// <exception cref="InvalidCastException">The value is <see langword="null"/> and <typeparamref name="T"/> is not nullable, or the value cannot be cast to <typeparamref name="T"/>.</exception>
+    /// <exception cref="InvalidCastException">The value is <see langword="null"/> and <typeparamref name="T"/> is not nullable, or no conversion to <typeparamref name="T"/> exists.</exception>
+    /// <exception cref="OverflowException">A conversion exists but the value does not fit <typeparamref name="T"/> without loss.</exception>
     public T GetFieldValue<T>(int ordinal)
     {
         var value = GetValue(ordinal);
@@ -99,6 +108,11 @@ public sealed class TrinoRow
         if (typeof(T) == typeof(JsonDocument) && value is string json)
         {
             return (T)(object)JsonDocument.Parse(json);
+        }
+
+        if (FieldValueConverter.TryConvert(value, Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T), out var converted))
+        {
+            return (T)converted!;
         }
 
         throw new InvalidCastException($"Column '{GetName(ordinal)}' of type '{value.GetType()}' cannot be returned as '{typeof(T)}'.");

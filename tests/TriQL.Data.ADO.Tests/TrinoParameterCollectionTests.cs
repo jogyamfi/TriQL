@@ -125,6 +125,20 @@ public sealed class TrinoDbParameterTests
     }
 
     [Fact]
+    public void PrecisionAndScale_SetThroughDbParameterBase_AreVisibleOnTrinoDbParameter()
+    {
+        // EF Core's RelationalTypeMapping.ConfigureParameter sets these through the DbParameter base type.
+        var parameter = new TrinoDbParameter();
+        System.Data.Common.DbParameter asBase = parameter;
+
+        asBase.Precision = 20;
+        asBase.Scale = 4;
+
+        Assert.Equal(20, parameter.Precision);
+        Assert.Equal(4, parameter.Scale);
+    }
+
+    [Fact]
     public void ParameterName_NullAssignment_BecomesEmptyString()
     {
         var parameter = new TrinoDbParameter { ParameterName = null! };

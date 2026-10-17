@@ -8,7 +8,8 @@
             "TriQL.Client/TriQL.Client.csproj",
             "TriQL.Client.Auth/TriQL.Client.Auth.csproj",
             "TriQL.Client.Compression/TriQL.Client.Compression.csproj",
-            "TriQL.Data.ADO/TriQL.Data.ADO.csproj"
+            "TriQL.Data.ADO/TriQL.Data.ADO.csproj",
+            "TriQL.EntityFrameworkCore/TriQL.EntityFrameworkCore.csproj"
           ]
         }
       ],

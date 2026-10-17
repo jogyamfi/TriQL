@@ -33,6 +33,27 @@ public sealed class CrossCheckRegressionTests
     }
 
     [Fact]
+    public async Task ExecuteReader_OnDmlWithRowsColumn_ReportsUpdateCountAsRecordsAffected()
+    {
+        // The shape a real coordinator (466) returns for INSERT/UPDATE/DELETE/MERGE: a one-column
+        // "rows" result set AND updateType/updateCount, on the same page. EF Core's concurrency
+        // checks depend on RecordsAffected reporting the count despite the result set's columns.
+        using var fake = new FakeTrinoCoordinator();
+        fake.Enqueue(HttpStatusCode.OK, """{"id":"q1","nextUri":null,"columns":[{"name":"rows","type":"bigint","typeSignature":{"rawType":"bigint","arguments":[]}}],"data":[[3]],"updateType":"UPDATE","updateCount":3}""");
+
+        using var connection = await OpenAsync(fake);
+        using var command = connection.CreateCommand();
+        command.CommandText = "UPDATE t SET x = 1";
+
+        using var reader = await WithinBudgetAsync(command.ExecuteReaderAsync());
+
+        Assert.Equal(3, reader.RecordsAffected);
+        Assert.True(reader.Read());
+        Assert.Equal(3L, reader.GetInt64(0));
+        Assert.Equal(3, reader.RecordsAffected);
+    }
+
+    [Fact]
     public async Task ExecuteReader_OnQueryFailingBeforeSchema_SurfacesTheErrorInsteadOfHanging()
     {
         using var fake = new FakeTrinoCoordinator();
