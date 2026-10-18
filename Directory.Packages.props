@@ -12,8 +12,8 @@
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0" />
 
     <!-- Auth package -->
-    <PackageVersion Include="Azure.Identity" Version="1.16.0" />
-    <PackageVersion Include="Azure.Core" Version="1.48.0" />
+    <PackageVersion Include="Azure.Identity" Version="1.21.0" />
+    <PackageVersion Include="Azure.Core" Version="1.63.0" />
 
     <!--
       Compression package (FR-5.3, the closed G2 decision in requirements.md §23 Q2/Q3): pure-.NET,
