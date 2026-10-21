@@ -9,7 +9,7 @@
   <ItemGroup>
     <!-- Core -->
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.13" />
 
     <!-- Auth package -->
     <PackageVersion Include="Azure.Identity" Version="1.21.0" />
@@ -27,20 +27,20 @@
       EF Core provider (TriQL.EntityFrameworkCore). A range rather than a pin: the provider builds on
       EF's internal ("pubternal") APIs, which may change in a major release but not within 10.x.
     -->
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="[10.0.12, 11.0.0)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="[10.0.13, 11.0.0)" />
     <!--
       Design-time services for reverse engineering (dotnet ef dbcontext scaffold). Referenced with
       PrivateAssets=all, as the SQLite and Npgsql providers do: the tooling loads it from the
       startup project, so the provider package does not flow it to applications.
     -->
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="[10.0.12, 11.0.0)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="[10.0.13, 11.0.0)" />
 
     <!-- Analyzers -->
     <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0" />
 
     <!-- Tests -->
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
@@ -52,7 +52,7 @@
       bypassing TriQL) so Lane B tests can assert on object-storage state independent of the
       client under test. Confined to TriQL.IntegrationTests; never referenced by shipping src/.
     -->
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.4" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.5" />
 
     <!-- Benchmarks -->
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
