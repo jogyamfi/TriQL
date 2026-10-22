@@ -13,7 +13,7 @@ docfx docfx.json --serve       # builds to docs/_site and serves it at http://lo
 ```
 
 `docfx.json` points at the five packaged projects' `.csproj` files (`TriQL.Client`,
-`TriQL.Client.Auth`, `TriQL.Client.Compression`, `TriQL.Data.ADO`, and the preview
+`TriQL.Client.Auth`, `TriQL.Client.Compression`, `TriQL.Data.ADO`, and
 `TriQL.EntityFrameworkCore`) and extracts their public API
 surface plus doc comments directly from source — nothing is hand-maintained.
 

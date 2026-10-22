@@ -1,9 +1,15 @@
 # Changelog
 
 Notable changes to the TriQL packages. Versions follow [Semantic Versioning](https://semver.org);
-the core packages (`TriQL.Client`, `TriQL.Client.Auth`, `TriQL.Client.Compression`, `TriQL.Data.ADO`)
-share one version, and `TriQL.EntityFrameworkCore` ships as a preview with its own version. GitHub
-Releases carry the same notes.
+all packages (`TriQL.Client`, `TriQL.Client.Auth`, `TriQL.Client.Compression`, `TriQL.Data.ADO`,
+`TriQL.EntityFrameworkCore`) share one version. GitHub Releases carry the same notes.
+
+## Unreleased
+
+### Changed
+
+- `TriQL.EntityFrameworkCore` is stable. It no longer has its own preview version: it ships with
+  the same version as the core packages, and installing it no longer needs `--prerelease`.
 
 ## 1.1.0 — core packages; `TriQL.EntityFrameworkCore` 1.1.0-preview.1 (2026-10-08)
 

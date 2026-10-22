@@ -15,7 +15,7 @@ Additional packages:
 - `TriQL.Client.Auth` — cloud/enterprise authentication providers (Microsoft Entra ID, OAuth 2.0
   client credentials) kept isolated so their dependencies never leak into the core client.
 - `TriQL.Client.Compression` — support for compressed spooled protocol payloads.
-- `TriQL.EntityFrameworkCore` (**preview**) — an Entity Framework Core 10 provider: LINQ on any
+- `TriQL.EntityFrameworkCore` — an Entity Framework Core 10 provider: LINQ on any
   connector, `SaveChanges` and bulk updates on Iceberg, and `dotnet ef dbcontext scaffold`.
 
 See [docs/requirements.md](https://github.com/jogyamfi/TriQL/blob/main/docs/requirements.md) for
@@ -28,7 +28,8 @@ for the phased delivery plan.
 **Stable — 1.1.0.** TriQL follows [Semantic Versioning](https://semver.org): breaking public-API
 changes only in a major version, additive API in minors, fixes in patches. The public API surface
 of each shipping package is locked by `PublicAPI.Shipped.txt` baselines and enforced at build time.
-The Entity Framework Core provider, `TriQL.EntityFrameworkCore`, is a **preview** (`1.1.0-preview.1`).
+The Entity Framework Core provider, `TriQL.EntityFrameworkCore`, is stable and shares the core
+packages' version.
 
 The one deliberately conservative default in 1.x is the spooling protocol, which ships implemented
 and tested but **opt-in** — see [Spooling protocol](#spooling-protocol-opt-in). Release notes for
@@ -48,7 +49,7 @@ dotnet add package TriQL.Client        # streaming SDK
 dotnet add package TriQL.Data.ADO      # ADO.NET provider
 dotnet add package TriQL.Client.Auth   # optional: Entra ID / OAuth2 authentication
 dotnet add package TriQL.Client.Compression  # optional: json+lz4 / json+zstd spooling codecs
-dotnet add package TriQL.EntityFrameworkCore --prerelease  # preview: Entity Framework Core 10 provider
+dotnet add package TriQL.EntityFrameworkCore  # Entity Framework Core 10 provider
 ```
 
 ## Quick start: TriQL SDK (streaming)
@@ -102,7 +103,7 @@ More runnable examples — including Microsoft Entra ID authentication and `IAsy
 consumption — live in
 [samples/TriQL.Samples.Console](https://github.com/jogyamfi/TriQL/blob/main/samples/TriQL.Samples.Console/Program.cs).
 
-## Quick start: Entity Framework Core (preview)
+## Quick start: Entity Framework Core
 
 ```csharp
 public class Nation
@@ -177,7 +178,7 @@ later minor release; that release will call out the behaviour change, and settin
 
 ## Documentation
 
-- [Entity Framework Core guide](https://github.com/jogyamfi/TriQL/blob/main/docs/efcore.md) (preview provider)
+- [Entity Framework Core guide](https://github.com/jogyamfi/TriQL/blob/main/docs/efcore.md)
 - [Connection-string reference](https://github.com/jogyamfi/TriQL/blob/main/docs/connection-string-reference.md)
 - [Type-mapping reference](https://github.com/jogyamfi/TriQL/blob/main/docs/type-mapping-reference.md)
 - [Troubleshooting guide](https://github.com/jogyamfi/TriQL/blob/main/docs/troubleshooting.md)

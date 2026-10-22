@@ -6,9 +6,10 @@ provider. It supports LINQ queries on any connector, raw SQL, `SaveChanges`,
 engineering (`dotnet ef dbcontext scaffold`). Writes are designed for and verified against the
 Iceberg connector.
 
-> **Status: preview** (`1.1.0-preview.*`). Every feature below is covered by unit and SQL-baseline
-> tests, and by a live functional suite that runs in CI against Trino 466 (the oldest supported
-> version) and the latest release, with the `memory`, `tpch` and Iceberg connectors.
+> **Status: stable**, versioned with the core TriQL packages. Every feature below is covered by
+> unit and SQL-baseline tests, and by a live functional suite that runs in CI against Trino 466
+> (the oldest supported version) and the latest release, with the `memory`, `tpch` and Iceberg
+> connectors.
 
 ## Contents
 
@@ -30,7 +31,7 @@ Iceberg connector.
 ## Getting started
 
 ```shell
-dotnet add package TriQL.EntityFrameworkCore --prerelease
+dotnet add package TriQL.EntityFrameworkCore
 ```
 
 ```csharp
