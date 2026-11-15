@@ -8,7 +8,7 @@ namespace TriQL.Client.Auth;
 /// <summary>
 /// Sends <c>Authorization: Bearer &lt;token&gt;</c> using a token acquired via the RFC 6749 §4.4
 /// client-credentials grant. Caches the token until <c>expires_in</c> minus a configurable skew
-/// (default 60 s) and refreshes on 401, with single-flight refresh under concurrency. See FR-2.3.1.
+/// (default 60 s) and refreshes on 401, with single-flight refresh under concurrency.
 /// </summary>
 public sealed class OAuth2ClientCredentialsAuthenticator : ITrinoAuthenticator, ITransmitsBearerCredential, IDisposable
 {

@@ -3,19 +3,19 @@ using System.Net.Http.Headers;
 namespace TriQL.Client.Auth;
 
 /// <summary>
-/// Extension point for authenticating requests to the coordinator. See FR-2.1.1.
+/// Extension point for authenticating requests to the coordinator.
 /// </summary>
 public interface ITrinoAuthenticator
 {
     /// <summary>Validates configuration and acquires an initial credential if required.</summary>
     ValueTask InitializeAsync(CancellationToken cancellationToken);
 
-    /// <summary>Applies the credential to an outgoing request. Called for every request, including polls and cancellations (FR-2.1.2).</summary>
+    /// <summary>Applies the credential to an outgoing request. Called for every request, including polls and cancellations.</summary>
     ValueTask ApplyAsync(HttpRequestMessage request, CancellationToken cancellationToken);
 
     /// <summary>
     /// Invoked after a 401/403. Returns <see langword="true"/> if the credential was refreshed and the
-    /// request should be retried exactly once (FR-2.1.3).
+    /// request should be retried exactly once.
     /// </summary>
     ValueTask<bool> TryRefreshAsync(HttpResponseMessage response, CancellationToken cancellationToken);
 
@@ -25,7 +25,7 @@ public interface ITrinoAuthenticator
 
 /// <summary>
 /// Marker for authenticators that transmit a bearer-style credential (a header value that grants
-/// access on its own), used to enforce the plaintext-credential guard (FR-1.1.3, SEC-3).
+/// access on its own), used to enforce the plaintext-credential guard.
 /// </summary>
 internal interface ITransmitsBearerCredential;
 

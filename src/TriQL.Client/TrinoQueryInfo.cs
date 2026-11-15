@@ -5,7 +5,7 @@ namespace TriQL.Client;
 /// <summary>
 /// A snapshot of <c>GET /v1/query/{queryId}</c> statistics. A distinct, Duration-string-based
 /// shape from <see cref="TrinoQueryStats"/>, which mirrors the millis-based <c>stats</c> member
-/// carried on <c>/v1/statement</c> pages. See FR-10.3.
+/// carried on <c>/v1/statement</c> pages.
 /// </summary>
 public sealed record TrinoQueryInfoStats(
     string? State,
@@ -19,7 +19,7 @@ public sealed record TrinoQueryInfoStats(
     string? PeakUserMemoryReservation);
 
 /// <summary>
-/// The response of <c>GET /v1/query/{queryId}</c>, exposed via <see cref="TrinoClient.GetQueryInfoAsync"/>. See FR-10.3.
+/// The response of <c>GET /v1/query/{queryId}</c>, exposed via <see cref="TrinoClient.GetQueryInfoAsync"/>.
 /// </summary>
 public sealed record TrinoQueryInfo(
     string QueryId,

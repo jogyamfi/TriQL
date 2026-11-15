@@ -1,7 +1,7 @@
 namespace TriQL.Client;
 
 /// <summary>
-/// A single node of the <see cref="TrinoQueryStats.RootStage"/> tree. See FR-11.3.3.
+/// A single node of the <see cref="TrinoQueryStats.RootStage"/> tree.
 /// </summary>
 /// <param name="StageId">The stage id, if reported.</param>
 /// <param name="State">The server-reported stage state.</param>

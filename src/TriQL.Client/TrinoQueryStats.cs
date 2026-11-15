@@ -1,7 +1,7 @@
 namespace TriQL.Client;
 
 /// <summary>
-/// A snapshot of query execution statistics reported with each page. See FR-11.3.3.
+/// A snapshot of query execution statistics reported with each page.
 /// </summary>
 public sealed record TrinoQueryStats(
     string State,

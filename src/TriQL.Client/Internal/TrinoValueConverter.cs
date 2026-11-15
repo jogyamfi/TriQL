@@ -7,7 +7,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Converts raw decoded wire values (as produced by <see cref="RawJsonValueConverter"/>) into the
-/// default CLR type for a column's <see cref="TrinoTypeSignature"/>. See FR-7.2.
+/// default CLR type for a column's <see cref="TrinoTypeSignature"/>.
 /// </summary>
 internal static class TrinoValueConverter
 {
@@ -56,7 +56,7 @@ internal static class TrinoValueConverter
         }
     }
 
-    /// <summary>The default CLR type for <paramref name="type"/>, per the FR-7.2.1 mapping table.</summary>
+    /// <summary>The default CLR type for <paramref name="type"/>, per the type-mapping reference.</summary>
     public static Type GetDefaultClrType(TrinoTypeSignature type) => type.BaseName switch
     {
         "boolean" => typeof(bool),
@@ -85,16 +85,16 @@ internal static class TrinoValueConverter
         _ => typeof(object),
     };
 
-    /// <summary>Whether a <c>decimal(p,s)</c> fits the BCL <see cref="decimal"/> without loss (FR-7.2.1).</summary>
+    /// <summary>Whether a <c>decimal(p,s)</c> fits the BCL <see cref="decimal"/> without loss.</summary>
     public static bool UsesClrDecimal(TrinoTypeSignature type) => (type.Precision ?? DefaultDecimalPrecision) <= 28;
 
-    /// <summary>Whether a <c>time(p)</c>/<c>timestamp(p)</c> fits the BCL 100ns tick resolution (FR-7.2.1).</summary>
+    /// <summary>Whether a <c>time(p)</c>/<c>timestamp(p)</c> fits the BCL 100ns tick resolution.</summary>
     public static bool UsesClrTemporal(TrinoTypeSignature type) => (type.Precision ?? DefaultTemporalPrecision) <= 7;
 
     /// <summary>
     /// Whether values of <paramref name="type"/> are left in raw form by <see cref="Utf8RowDecoder"/>
     /// and materialized only on first access, so a caller reading just the scalar columns of a row
-    /// never pays to build a large <c>array</c>/<c>map</c>/<c>row</c> value (FR-7.2.7).
+    /// never pays to build a large <c>array</c>/<c>map</c>/<c>row</c> value.
     /// </summary>
     public static bool RequiresDeferredMaterialization(TrinoTypeSignature type) =>
         type.BaseName is "array" or "map" or "row";
@@ -102,7 +102,7 @@ internal static class TrinoValueConverter
     /// <summary>
     /// Parses the string-shaped Trino types (everything the wire sends as a JSON string other than
     /// <c>varchar</c>/<c>char</c>/<c>json</c>/<c>uuid</c>/<c>varbinary</c>) from character data.
-    /// Shared by the naive and <see cref="Utf8RowDecoder"/> paths so both parse identically (FR-7.2.6).
+    /// Shared by the naive and <see cref="Utf8RowDecoder"/> paths so both parse identically.
     /// </summary>
     public static object ParseScalarFromText(ReadOnlySpan<char> text, TrinoTypeSignature type) => type.BaseName switch
     {

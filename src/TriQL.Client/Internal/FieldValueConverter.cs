@@ -8,7 +8,7 @@ namespace TriQL.Client.Internal;
 /// not already of the requested type — what ORMs such as EF Core rely on when a column's CLR type
 /// differs from the model's (e.g. <c>COUNT(*)</c> is <c>bigint</c> but the model asks for
 /// <see cref="int"/>). Every narrowing is checked: a value that does not fit throws
-/// <see cref="OverflowException"/> rather than being truncated (FR-7.2.4).
+/// <see cref="OverflowException"/> rather than being truncated.
 /// </summary>
 internal static class FieldValueConverter
 {

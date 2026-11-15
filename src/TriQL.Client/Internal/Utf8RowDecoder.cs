@@ -6,17 +6,17 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Decodes the <c>data</c> array of a statement response straight from the response's UTF-8 bytes
-/// into final CLR values, driven by the column type signatures. See FR-7.2.6, NFR-PERF-3.
+/// into final CLR values, driven by the column type signatures.
 /// </summary>
 /// <remarks>
 /// This replaces the <see cref="RawJsonValueConverter"/> path, which built a <see cref="JsonElement"/>
 /// tree, allocated an intermediate <see cref="string"/> for every text-shaped value (<c>decimal</c>,
 /// <c>date</c>, <c>time</c>, <c>timestamp</c>, <c>uuid</c>, <c>varbinary</c>, <c>ipaddress</c>), boxed
 /// each primitive, and only then parsed to the target type — roughly two allocations per value where
-/// NFR-PERF-3 permits one.
+/// one is enough.
 /// <para>
 /// Scalars are materialized eagerly here; <c>array</c>/<c>map</c>/<c>row</c> values are left as raw
-/// structures and materialized on first access so FR-7.2.7's laziness is preserved.
+/// structures and materialized on first access so complex values stay lazy.
 /// </para>
 /// </remarks>
 internal static class Utf8RowDecoder

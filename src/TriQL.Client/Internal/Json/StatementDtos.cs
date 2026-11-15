@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace TriQL.Client.Internal.Json;
 
-/// <summary>Wire DTO for a single entry of the <c>columns</c> array. See FR-4.2.1.</summary>
+/// <summary>Wire DTO for a single entry of the <c>columns</c> array.</summary>
 internal sealed class StatementColumnDto
 {
     [JsonPropertyName("name")]
@@ -13,7 +13,7 @@ internal sealed class StatementColumnDto
     public string Type { get; set; } = string.Empty;
 }
 
-/// <summary>Wire DTO for <c>error.errorLocation</c>. See FR-12.1.2.</summary>
+/// <summary>Wire DTO for <c>error.errorLocation</c>.</summary>
 internal sealed class StatementErrorLocationDto
 {
     [JsonPropertyName("lineNumber")]
@@ -23,7 +23,7 @@ internal sealed class StatementErrorLocationDto
     public int ColumnNumber { get; set; }
 }
 
-/// <summary>Wire DTO for <c>error.failureInfo</c>. See FR-12.1.2.</summary>
+/// <summary>Wire DTO for <c>error.failureInfo</c>.</summary>
 internal sealed class StatementFailureInfoDto
 {
     [JsonPropertyName("type")]
@@ -39,7 +39,7 @@ internal sealed class StatementFailureInfoDto
     public List<string>? Stack { get; set; }
 }
 
-/// <summary>Wire DTO for the <c>error</c> member. See FR-4.2.1, FR-12.1.2.</summary>
+/// <summary>Wire DTO for the <c>error</c> member.</summary>
 internal sealed class StatementErrorDto
 {
     [JsonPropertyName("message")]
@@ -61,7 +61,7 @@ internal sealed class StatementErrorDto
     public StatementFailureInfoDto? FailureInfo { get; set; }
 }
 
-/// <summary>Wire DTO for a node of the <c>stats.rootStage</c> tree. See FR-11.3.3.</summary>
+/// <summary>Wire DTO for a node of the <c>stats.rootStage</c> tree.</summary>
 internal sealed class StatementStageStatsDto
 {
     [JsonPropertyName("stageId")]
@@ -92,7 +92,7 @@ internal sealed class StatementStageStatsDto
     public List<StatementStageStatsDto>? SubStages { get; set; }
 }
 
-/// <summary>Wire DTO for the <c>stats</c> member. See FR-11.3.3.</summary>
+/// <summary>Wire DTO for the <c>stats</c> member.</summary>
 internal sealed class StatementStatsDto
 {
     [JsonPropertyName("state")]
@@ -153,7 +153,7 @@ internal sealed class StatementStatsDto
     public StatementStageStatsDto? RootStage { get; set; }
 }
 
-/// <summary>Wire DTO for the <c>session</c> member of <c>GET /v1/query/{queryId}</c>. See FR-10.3.</summary>
+/// <summary>Wire DTO for the <c>session</c> member of <c>GET /v1/query/{queryId}</c>.</summary>
 internal sealed class QueryInfoSessionDto
 {
     [JsonPropertyName("user")]
@@ -169,7 +169,7 @@ internal sealed class QueryInfoSessionDto
 /// <summary>
 /// Wire DTO for the <c>queryStats</c> member of <c>GET /v1/query/{queryId}</c>. This is a distinct,
 /// Duration-string-based shape from <see cref="StatementStatsDto"/>'s millis-based <c>stats</c>
-/// member on <c>/v1/statement</c>; only the fields documented as required by FR-10.3 are mapped.
+/// member on <c>/v1/statement</c>; only the fields TriQL exposes are mapped.
 /// </summary>
 internal sealed class QueryInfoStatsDto
 {
@@ -203,7 +203,7 @@ internal sealed class QueryInfoStatsDto
 
 /// <summary>
 /// Wire DTO for the <c>GET /v1/query/{queryId}</c> response body. Unknown members are tolerated
-/// for forward compatibility. See FR-10.3.
+/// for forward compatibility.
 /// </summary>
 internal sealed class QueryInfoDto
 {
@@ -228,7 +228,7 @@ internal sealed class QueryInfoDto
 
 /// <summary>
 /// Wire DTO for the <c>POST /v1/statement</c> submission response and every subsequent
-/// <c>nextUri</c> page. Unknown members are tolerated for forward compatibility. See FR-4.2.1.
+/// <c>nextUri</c> page. Unknown members are tolerated for forward compatibility.
 /// </summary>
 internal sealed class StatementResponseDto
 {
@@ -249,8 +249,7 @@ internal sealed class StatementResponseDto
 
     /// <summary>
     /// The <c>data</c> member, captured as a byte range rather than materialized. An array indicates
-    /// the direct protocol (FR-5.1.2); an object indicates the spooled protocol, which is not
-    /// implemented until Phase 5.
+    /// the direct protocol; an object indicates the spooled protocol.
     /// </summary>
     [JsonPropertyName("data")]
     [JsonConverter(typeof(RawJsonSliceConverter))]

@@ -1,7 +1,7 @@
 namespace TriQL.Client.Exceptions;
 
 /// <summary>
-/// The severity/category Trino assigns to a query failure. See FR-12.1.2.
+/// The severity/category Trino assigns to a query failure.
 /// </summary>
 public enum TrinoErrorType
 {
@@ -19,14 +19,14 @@ public enum TrinoErrorType
 }
 
 /// <summary>
-/// The source location within the query text associated with a <see cref="TrinoQueryException"/>. See FR-12.1.2.
+/// The source location within the query text associated with a <see cref="TrinoQueryException"/>.
 /// </summary>
 /// <param name="LineNumber">The 1-based line number.</param>
 /// <param name="ColumnNumber">The 1-based column number.</param>
 public sealed record TrinoErrorLocation(int LineNumber, int ColumnNumber);
 
 /// <summary>
-/// The server-reported failure detail attached to a <see cref="TrinoQueryException"/>. See FR-12.1.2.
+/// The server-reported failure detail attached to a <see cref="TrinoQueryException"/>.
 /// </summary>
 /// <param name="Type">The fully qualified server-side exception type name.</param>
 /// <param name="Message">The failure message.</param>
@@ -39,7 +39,7 @@ public sealed record TrinoFailureInfo(
     IReadOnlyList<string> Stack);
 
 /// <summary>
-/// Raised when the coordinator reports a query failure. See FR-12.1.2.
+/// Raised when the coordinator reports a query failure.
 /// </summary>
 public sealed class TrinoQueryException : TrinoException
 {

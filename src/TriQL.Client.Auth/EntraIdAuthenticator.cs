@@ -9,7 +9,7 @@ namespace TriQL.Client.Auth;
 /// Microsoft Entra ID, defaulting to <see cref="DefaultAzureCredential"/>. Accepts an explicit
 /// credential for testability and for managed identity / workload identity scenarios. Caches the
 /// acquired token until it is within the refresh skew of expiring and refreshes on 401, with
-/// single-flight refresh under concurrency. See FR-2.3.2.
+/// single-flight refresh under concurrency.
 /// </summary>
 public sealed class EntraIdAuthenticator : ITrinoAuthenticator, ITransmitsBearerCredential, IDisposable
 {

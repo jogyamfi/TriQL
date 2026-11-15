@@ -7,7 +7,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Builds the certificate validation callback for a <see cref="TrinoTlsOptions"/> instance.
-/// Rejects any <see cref="SslPolicyErrors"/> value not explicitly permitted (FR-3.2.2); never a blanket accept.
+/// Rejects any <see cref="SslPolicyErrors"/> value not explicitly permitted; never a blanket accept.
 /// </summary>
 internal static class CertificateValidator
 {

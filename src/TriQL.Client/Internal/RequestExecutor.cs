@@ -9,9 +9,9 @@ using TriQL.Client.Exceptions;
 namespace TriQL.Client.Internal;
 
 /// <summary>
-/// Executes a single logical HTTP exchange: applies authentication (with refresh-on-401/403 per
-/// FR-2.1.3), enforces the per-request timeout via a linked <see cref="CancellationTokenSource"/>
-/// distinct from the query deadline (FR-3.1.5), and retries transient failures via
+/// Executes a single logical HTTP exchange: applies authentication (with refresh-on-401/403),
+/// enforces the per-request timeout via a linked <see cref="CancellationTokenSource"/>
+/// distinct from the query deadline, and retries transient failures via
 /// <see cref="RetryPolicy"/>.
 /// </summary>
 internal static class RequestExecutor

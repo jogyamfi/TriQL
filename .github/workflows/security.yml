@@ -47,7 +47,7 @@ jobs:
       - name: Restore (locked mode)
         run: dotnet restore TriQL.slnx --locked-mode
 
-      - name: Fail on known vulnerable packages (SEC-8)
+      - name: Fail on known vulnerable packages
         run: |
           set -e
           output=$(dotnet list TriQL.slnx package --vulnerable --include-transitive 2>&1)

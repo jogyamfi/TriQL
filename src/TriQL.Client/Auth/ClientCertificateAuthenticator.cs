@@ -3,7 +3,7 @@ using System.Security.Cryptography.X509Certificates;
 namespace TriQL.Client.Auth;
 
 /// <summary>
-/// Attaches one or more client certificates to the HTTP handler for mutual TLS. See FR-2.2.5.
+/// Attaches one or more client certificates to the HTTP handler for mutual TLS.
 /// </summary>
 public sealed class ClientCertificateAuthenticator : ITrinoAuthenticator, IDisposable
 {

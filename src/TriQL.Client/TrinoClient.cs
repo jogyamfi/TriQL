@@ -7,15 +7,15 @@ using TriQL.Client.Internal;
 namespace TriQL.Client;
 
 /// <summary>
-/// Entry point for a Trino session: submits statements (from Phase 2 onward) and exposes
-/// <c>/v1/info</c> and <c>/v1/query/{id}</c>. Thread-safe. See FR-1, FR-10, NFR-REL-1.
+/// Entry point for a Trino session: submits statements and exposes
+/// <c>/v1/info</c> and <c>/v1/query/{id}</c>. Thread-safe.
 /// </summary>
 /// <remarks>
 /// <see cref="HttpMessageInvoker"/> is the supported extension point for externally managed HTTP
-/// pipelines (FR-3.1.2), including clients created by <c>IHttpClientFactory</c> — pass the created
+/// pipelines, including clients created by <c>IHttpClientFactory</c> — pass the created
 /// <see cref="HttpClient"/> directly, since <see cref="HttpClient"/> derives from
 /// <see cref="HttpMessageInvoker"/>. TriQL.Client intentionally does not reference
-/// <c>Microsoft.Extensions.Http</c> so the core package stays dependency-free (REQ-ARCH-4).
+/// <c>Microsoft.Extensions.Http</c> so the core package stays dependency-free.
 /// </remarks>
 public sealed class TrinoClient : IAsyncDisposable, IDisposable
 {
@@ -30,7 +30,7 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
     /// client builds and owns its own HTTP handler (disposed with the client); when supplied —
     /// including a plain <see cref="HttpClient"/>, or one created by an external
     /// <c>IHttpClientFactory</c> — it is treated as externally owned and never disposed by this
-    /// instance (FR-3.1.2, FR-3.1.3).
+    /// instance.
     /// </summary>
     public TrinoClient(TrinoSessionOptions options, HttpMessageInvoker? invoker = null, ILoggerFactory? loggerFactory = null)
     {
@@ -59,7 +59,7 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
     /// <summary>The live session state.</summary>
     public TrinoSession Session { get; }
 
-    /// <summary><c>GET /v1/info</c>. See FR-10.1.</summary>
+    /// <summary><c>GET /v1/info</c>.</summary>
     public async Task<TrinoServerInfo> GetServerInfoAsync(CancellationToken cancellationToken = default)
     {
         var info = await InfoClient.GetServerInfoAsync(_invoker, Options, _logger, cancellationToken).ConfigureAwait(false);
@@ -75,7 +75,7 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
 
     /// <summary>
     /// Returns <see langword="true"/> only when <c>/v1/info</c> responds successfully and the
-    /// server reports <c>starting = false</c>. See FR-10.2.
+    /// server reports <c>starting = false</c>.
     /// </summary>
     public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)
     {
@@ -90,7 +90,7 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
         }
     }
 
-    /// <summary><c>GET /v1/query/{queryId}</c>. See FR-10.3.</summary>
+    /// <summary><c>GET /v1/query/{queryId}</c>.</summary>
     public Task<TrinoQueryInfo> GetQueryInfoAsync(string queryId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(queryId);
@@ -99,12 +99,12 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
 
     /// <summary>
     /// Submits <paramref name="sql"/> via <c>POST /v1/statement</c> and returns a
-    /// <see cref="TrinoResultSet"/> ready for streaming. See FR-4.1, FR-4.5.
+    /// <see cref="TrinoResultSet"/> ready for streaming.
     /// </summary>
     /// <param name="sql">
     /// The statement text. When <paramref name="parameters"/> is non-<see langword="null"/>, this may use
     /// <c>?</c>, <c>:name</c>, or <c>@name</c> placeholders, which are rewritten to positional form
-    /// (FR-8.4, FR-8.5) and bound server-side via <c>PREPARE</c>/<c>EXECUTE</c> (FR-8.1, FR-8.2), or via
+    /// and bound server-side via <c>PREPARE</c>/<c>EXECUTE</c>, or via
     /// <c>EXECUTE IMMEDIATE</c> when <see cref="TrinoSessionOptions.ParameterBinding"/> selects it.
     /// Client-side interpolation of parameter values into <paramref name="sql"/> is never performed.
     /// </param>
@@ -115,14 +115,14 @@ public sealed class TrinoClient : IAsyncDisposable, IDisposable
     /// <param name="retainPreparedStatement">
     /// When <paramref name="parameters"/> is non-<see langword="null"/> and this is <see langword="true"/>,
     /// the generated prepared statement is left registered on <see cref="Session"/> after submission
-    /// instead of being deallocated (FR-8.9). Ignored when <paramref name="parameters"/> is <see langword="null"/>.
+    /// instead of being deallocated. Ignored when <paramref name="parameters"/> is <see langword="null"/>.
     /// Always uses the prepared-statement header path, whatever <see cref="TrinoSessionOptions.ParameterBinding"/> says.
     /// </param>
     /// <param name="cancellationToken">A token to cancel the initial submission.</param>
     /// <exception cref="ArgumentException"><paramref name="sql"/> is null or empty.</exception>
     /// <exception cref="Exceptions.TrinoParameterException">
     /// <paramref name="parameters"/> is supplied and its count does not match the statement's
-    /// placeholder count, or a named placeholder has no matching parameter (FR-8.6).
+    /// placeholder count, or a named placeholder has no matching parameter.
     /// </exception>
     public async Task<TrinoResultSet> ExecuteAsync(
         string sql, TrinoParameterCollection? parameters = null, bool retainPreparedStatement = false, CancellationToken cancellationToken = default)

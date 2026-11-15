@@ -3,7 +3,7 @@ using TriQL.Client;
 
 namespace TriQL.Data.ADO;
 
-/// <summary>A single column's schema metadata for <see cref="TrinoDataReader.GetColumnSchema"/>. See FR-9.3.11.</summary>
+/// <summary>A single column's schema metadata for <see cref="TrinoDataReader.GetColumnSchema"/>.</summary>
 internal sealed class TrinoDbColumn : DbColumn
 {
     public TrinoDbColumn(TrinoColumn column, int ordinal)

@@ -6,8 +6,8 @@ using ZstdSharp;
 namespace TriQL.Client.Compression;
 
 /// <summary>
-/// The <c>json+zstd</c> spooled-segment codec (FR-5.3.3), using the vetted, actively maintained
-/// <c>ZstdSharp.Port</c> package recorded in requirements.md §23 (the closed G2 decision) since no
+/// The <c>json+zstd</c> spooled-segment codec, using the vetted, actively maintained
+/// <c>ZstdSharp.Port</c> package, since no
 /// BCL Zstandard facility exists on <c>net10.0</c>.
 /// </summary>
 internal sealed class ZstdCodec : ISegmentCodec

@@ -4,7 +4,7 @@ using System.Text;
 namespace TriQL.Client.Internal;
 
 /// <summary>
-/// Redacts credential-bearing header values before they reach logs, exception messages, or trace tags (SEC-1).
+/// Redacts credential-bearing header values before they reach logs, exception messages, or trace tags.
 /// </summary>
 internal static class Redactor
 {

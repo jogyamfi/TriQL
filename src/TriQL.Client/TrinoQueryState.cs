@@ -1,7 +1,7 @@
 namespace TriQL.Client;
 
 /// <summary>
-/// The client-observed lifecycle state of a query. See FR-4.5.1.
+/// The client-observed lifecycle state of a query.
 /// </summary>
 public enum TrinoQueryState
 {

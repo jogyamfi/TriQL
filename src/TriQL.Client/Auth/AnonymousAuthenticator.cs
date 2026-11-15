@@ -1,7 +1,7 @@
 namespace TriQL.Client.Auth;
 
 /// <summary>
-/// Sends no credential; relies on <c>X-Trino-User</c> alone. The default authenticator. See FR-2.2.1.
+/// Sends no credential; relies on <c>X-Trino-User</c> alone. The default authenticator.
 /// </summary>
 public sealed class AnonymousAuthenticator : ITrinoAuthenticator
 {

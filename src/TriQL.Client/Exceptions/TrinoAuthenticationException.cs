@@ -1,7 +1,7 @@
 namespace TriQL.Client.Exceptions;
 
 /// <summary>
-/// Raised on authentication failure: a 401/403 response, or credential acquisition failure. See FR-12.1.
+/// Raised on authentication failure: a 401/403 response, or credential acquisition failure.
 /// </summary>
 public sealed class TrinoAuthenticationException : TrinoException
 {

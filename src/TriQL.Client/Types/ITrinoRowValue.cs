@@ -2,7 +2,6 @@ namespace TriQL.Client.Types;
 
 /// <summary>
 /// A materialized <c>row(...)</c> value, supporting both named and positional field access.
-/// See FR-7.2.1.
 /// </summary>
 public interface ITrinoRowValue
 {

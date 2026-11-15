@@ -1,7 +1,7 @@
 namespace TriQL.Client.Exceptions;
 
 /// <summary>
-/// Raised when a server response is malformed, unsupported, or internally inconsistent. See FR-12.1.
+/// Raised when a server response is malformed, unsupported, or internally inconsistent.
 /// </summary>
 public sealed class TrinoProtocolException : TrinoException
 {

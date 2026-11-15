@@ -7,7 +7,7 @@ namespace TriQL.Data.ADO;
 /// The full <see cref="DbParameterCollection"/> contract for <see cref="TrinoCommand.Parameters"/>,
 /// including indexer-by-name (case-insensitive), <see cref="IndexOf(string)"/>,
 /// <see cref="Contains(string)"/>, <see cref="Insert"/>, <see cref="RemoveAt(string)"/>,
-/// <see cref="AddRange"/>, and <see cref="CopyTo"/>. See FR-9.4.4.
+/// <see cref="AddRange"/>, and <see cref="CopyTo"/>.
 /// </summary>
 #pragma warning disable CA1010 // The required DbParameterCollection base only implements non-generic IList; there is no generic ADO.NET contract to satisfy instead.
 public sealed class TrinoParameterCollection : DbParameterCollection

@@ -1,8 +1,8 @@
 # API Reference
 
 TriQL's API reference is generated from the XML documentation comments on every public type and
-member (`NFR-MAINT-3` requires them on all four packages; `NFR-MAINT-1`/`TreatWarningsAsErrors`
-makes a missing doc comment a build error, so the reference is never stale relative to the code).
+member. A missing doc comment is a build error, so the reference is never stale relative to the
+code.
 
 ## Generating the reference locally
 

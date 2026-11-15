@@ -6,12 +6,12 @@ namespace TriQL.Client;
 
 /// <summary>
 /// A single row of a <see cref="TrinoResultSet"/>. <see cref="GetValue(int)"/> and the typed
-/// accessors materialize each column's default CLR type (FR-7.2.1) lazily and cache the result per
-/// row instance (FR-7.2.7).
+/// accessors materialize each column's default CLR type lazily and cache the result per
+/// row instance.
 /// </summary>
 /// <remarks>
 /// A <see cref="TrinoRow"/> instance is documented as valid only until the enumerator's next
-/// <c>MoveNextAsync</c> call (FR-6.11); use <see cref="ToArray"/> or <see cref="Clone"/> to retain
+/// <c>MoveNextAsync</c> call; use <see cref="ToArray"/> or <see cref="Clone"/> to retain
 /// a row's data beyond that point.
 /// </remarks>
 public sealed class TrinoRow
@@ -37,7 +37,7 @@ public sealed class TrinoRow
     /// <summary>Returns the column name at <paramref name="ordinal"/>.</summary>
     public string GetName(int ordinal) => _columns[ordinal].Name;
 
-    /// <summary>Returns the default CLR type for the column at <paramref name="ordinal"/> (FR-7.2.1).</summary>
+    /// <summary>Returns the default CLR type for the column at <paramref name="ordinal"/>.</summary>
     public Type GetFieldType(int ordinal) => TrinoValueConverter.GetDefaultClrType(_columns[ordinal].TypeSignature);
 
     /// <summary>Returns the materialized value at <paramref name="ordinal"/>, or <see langword="null"/> if the value is SQL <c>NULL</c>.</summary>
@@ -74,11 +74,11 @@ public sealed class TrinoRow
 
     /// <summary>Returns the value at <paramref name="ordinal"/> as <typeparamref name="T"/>.</summary>
     /// <remarks>
-    /// A <c>json</c> (or <c>varchar</c>) column may be requested as <see cref="JsonDocument"/> (FR-7.2.1);
+    /// A <c>json</c> (or <c>varchar</c>) column may be requested as <see cref="JsonDocument"/>;
     /// the returned document is owned by the caller and must be disposed.
     /// <para>
     /// When the value is not already a <typeparamref name="T"/>, the documented conversions are
-    /// applied (FR-7.2.4): checked numeric widening/narrowing (including the unsigned types, enums
+    /// applied: checked numeric widening/narrowing (including the unsigned types, enums
     /// and whole-valued decimals), the precision types to their nearest BCL type,
     /// <see cref="DateOnly"/>/<see cref="DateTimeOffset"/> to <see cref="DateTime"/>, and
     /// <see cref="string"/> to <see cref="Guid"/>/<see cref="char"/>. <see cref="Nullable{T}"/> targets

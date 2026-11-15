@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace TriQL.Client.Internal;
 
 /// <summary>
-/// Builds the configured <see cref="SocketsHttpHandler"/> pipeline for a <see cref="TrinoClient"/>. See FR-3.1.4.
+/// Builds the configured <see cref="SocketsHttpHandler"/> pipeline for a <see cref="TrinoClient"/>.
 /// </summary>
 internal static class HttpHandlerFactory
 {

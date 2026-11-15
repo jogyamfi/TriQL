@@ -3,17 +3,17 @@ using System.Net;
 namespace TriQL.Client.Internal;
 
 /// <summary>
-/// Writes the Trino protocol request headers (Appendix A.1) from <see cref="TrinoSessionOptions"/>
-/// and the live <see cref="TrinoSession"/>. Empty values are omitted entirely (FR-4.1.2).
+/// Writes the Trino protocol request headers from <see cref="TrinoSessionOptions"/>
+/// and the live <see cref="TrinoSession"/>. Empty values are omitted entirely.
 /// </summary>
 internal static class ProtocolHeaders
 {
-    /// <summary>The client capabilities TriQL declares. See FR-4.1.3.</summary>
+    /// <summary>The client capabilities TriQL declares.</summary>
     public const string ClientCapabilities = "PATH,PARAMETRIC_DATETIME,SESSION_AUTHORIZATION";
 
     /// <summary>
     /// Writes the full session header set. Required only on the initial statement submission — <c>nextUri</c>
-    /// polls MUST NOT resend these (FR-4.1.5).
+    /// polls MUST NOT resend these.
     /// </summary>
     public static void WriteSessionHeaders(HttpRequestMessage request, TrinoSessionOptions options, TrinoSession session)
     {
@@ -63,7 +63,7 @@ internal static class ProtocolHeaders
 
     /// <summary>
     /// Writes the minimal header set that <c>nextUri</c> polls and <c>DELETE</c> cancellations carry.
-    /// The coordinator keeps the session on the query (FR-4.1.5), but the identifying user header is
+    /// The coordinator keeps the session on the query, but the identifying user header is
     /// still sent because reverse proxies fronting the coordinator commonly authorize against it.
     /// </summary>
     public static void WriteFollowUpHeaders(HttpRequestMessage request, TrinoSessionOptions options)
@@ -79,7 +79,7 @@ internal static class ProtocolHeaders
     /// <summary>
     /// Resolves the effective <c>X-Trino-User</c>: the explicit <see cref="TrinoSessionOptions.User"/>,
     /// or the <see cref="Auth.BasicAuthenticator.Username"/> when a Basic-family authenticator is configured
-    /// and no explicit user was set (FR-2.2.2).
+    /// and no explicit user was set.
     /// </summary>
     public static string ResolveUser(TrinoSessionOptions options)
     {

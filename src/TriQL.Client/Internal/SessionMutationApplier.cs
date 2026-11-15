@@ -4,7 +4,7 @@ using System.Net.Http.Headers;
 namespace TriQL.Client.Internal;
 
 /// <summary>
-/// The complete set of session mutations parsed from a single response, applied atomically. See FR-1.2.2, FR-1.2.3.
+/// The complete set of session mutations parsed from a single response, applied atomically.
 /// </summary>
 internal sealed record SessionMutationBatch(
     string? Catalog,
@@ -26,8 +26,8 @@ internal sealed record SessionMutationBatch(
 }
 
 /// <summary>
-/// Parses the server-driven session mutation headers of Appendix A.2 into a <see cref="SessionMutationBatch"/>,
-/// in the order required by FR-1.2.2.
+/// Parses the server-driven session mutation headers into a <see cref="SessionMutationBatch"/>,
+/// in the order the Trino client protocol requires.
 /// </summary>
 internal static class SessionMutationApplier
 {

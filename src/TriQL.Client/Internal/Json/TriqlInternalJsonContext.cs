@@ -29,7 +29,7 @@ internal sealed class ServerInfoDto
 }
 
 /// <summary>
-/// Source-generated serializer context for internal wire DTOs, kept trimming- and AOT-compatible (NFR-COMPAT-3, SEC-5).
+/// Source-generated serializer context for internal wire DTOs, kept trimming- and AOT-compatible.
 /// </summary>
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase, MaxDepth = 64)]
 [JsonSerializable(typeof(ServerInfoDto))]

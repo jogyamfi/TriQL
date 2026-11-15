@@ -6,7 +6,7 @@ using TriQL.Client.Exceptions;
 namespace TriQL.Client.Compression;
 
 /// <summary>
-/// The <c>json+lz4</c> spooled-segment codec (FR-5.3.2). The payload is raw LZ4 block-compressed
+/// The <c>json+lz4</c> spooled-segment codec. The payload is raw LZ4 block-compressed
 /// data with no frame header, so the exact uncompressed length — <c>metadata.uncompressedSize</c> —
 /// MUST be known before decoding.
 /// </summary>

@@ -3,7 +3,7 @@ using System.Data.Common;
 namespace TriQL.Data.ADO;
 
 /// <summary>
-/// The <see cref="DbProviderFactory"/> for Trino. See FR-9.4.1, FR-9.4.2.
+/// The <see cref="DbProviderFactory"/> for Trino.
 /// </summary>
 /// <remarks>
 /// Register with <c>DbProviderFactories.RegisterFactory(TrinoProviderFactory.InvariantName, TrinoProviderFactory.Instance)</c>.

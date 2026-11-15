@@ -9,7 +9,7 @@ using TriQL.Client.Internal.Json;
 namespace TriQL.Client.Internal;
 
 /// <summary>
-/// <c>GET /v1/query/{queryId}</c>. See FR-10.3, FR-10.6.
+/// <c>GET /v1/query/{queryId}</c>.
 /// </summary>
 internal static class QueryInfoClient
 {

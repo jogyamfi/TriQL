@@ -4,11 +4,11 @@ using TriQL.Client.Codecs;
 namespace TriQL.Client.Compression;
 
 /// <summary>
-/// Registers the <c>json+lz4</c> and <c>json+zstd</c> spooled-protocol codecs (FR-5.3.2, FR-5.3.3)
+/// Registers the <c>json+lz4</c> and <c>json+zstd</c> spooled-protocol codecs
 /// with <c>TriQL.Client</c>'s internal codec registry. Call <see cref="RegisterAll"/> once during
 /// application startup — before executing a query whose <see cref="TrinoSessionOptions.QueryDataEncodings"/>
 /// includes <c>json+lz4</c> or <c>json+zstd"</c> — the same explicit, non-reflective registration
-/// pattern <c>TriQL.Client.Auth</c>'s authenticators use (NFR-COMPAT-3, FR-5.3.6).
+/// pattern <c>TriQL.Client.Auth</c>'s authenticators use.
 /// </summary>
 public static class CompressionCodecs
 {

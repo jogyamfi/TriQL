@@ -6,7 +6,7 @@ namespace TriQL.Client.Internal.Json;
 /// Wire DTO for a spooled segment's <c>metadata</c> object. <c>rowsCount</c> and
 /// <c>uncompressedSize</c> are optional: Trino did not enforce <c>rowsCount</c> as mandatory on the
 /// response before server release 475 (a floor-466 server can omit it), and
-/// <c>uncompressedSize</c> is absent whenever the server left a segment uncompressed — see FR-5.2.1.
+/// <c>uncompressedSize</c> is absent whenever the server left a segment uncompressed.
 /// </summary>
 internal sealed class SpooledSegmentMetadataDto
 {
@@ -25,7 +25,7 @@ internal sealed class SpooledSegmentMetadataDto
 
 /// <summary>
 /// Wire DTO for one entry of the spooled <c>data.segments</c> array. <c>data</c>/<c>uri</c>/<c>ackUri</c>/<c>headers</c>
-/// are populated according to <c>type</c> (<c>"inline"</c> or <c>"spooled"</c>). See FR-5.2.1.
+/// are populated according to <c>type</c> (<c>"inline"</c> or <c>"spooled"</c>).
 /// </summary>
 internal sealed class SpooledSegmentDto
 {
@@ -54,7 +54,7 @@ internal sealed class SpooledSegmentDto
 
 /// <summary>
 /// Wire DTO for the spooled-protocol <c>data</c> member shape: <c>{ "encoding": "...", "segments": [...] }</c>.
-/// Detected by <see cref="RawJsonSlice.Kind"/> being <see cref="System.Text.Json.JsonValueKind.Object"/>. See FR-5.1.2.
+/// Detected by <see cref="RawJsonSlice.Kind"/> being <see cref="System.Text.Json.JsonValueKind.Object"/>.
 /// </summary>
 internal sealed class SpooledDataEnvelopeDto
 {

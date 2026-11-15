@@ -7,10 +7,10 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Fires spooled-segment acknowledgements (<c>GET ackUri</c>) without blocking the consumer
-/// (FR-5.2.3): retried via <see cref="RetryPolicy"/>, and a failure — even after retries — is
+///: retried via <see cref="RetryPolicy"/>, and a failure — even after retries — is
 /// logged at <see cref="LogLevel.Warning"/> rather than failing the query, since a failed
 /// acknowledgement only leaks server-side storage. Every in-flight acknowledgement is tracked so
-/// <see cref="DrainAsync"/> can make a best-effort wait for them during cancellation (FR-5.2.7).
+/// <see cref="DrainAsync"/> can make a best-effort wait for them during cancellation.
 /// </summary>
 internal sealed class SegmentAcknowledger
 {
@@ -39,7 +39,7 @@ internal sealed class SegmentAcknowledger
     /// <summary>
     /// Waits up to <paramref name="timeout"/> for outstanding acknowledgements to finish. Never
     /// throws: acknowledgements that do not complete in time are abandoned, exactly as any other
-    /// acknowledgement failure is (FR-5.2.7).
+    /// acknowledgement failure is.
     /// </summary>
     public async Task DrainAsync(TimeSpan timeout)
     {

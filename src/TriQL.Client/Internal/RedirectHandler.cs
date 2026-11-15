@@ -2,7 +2,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Manually follows redirects for <c>GET</c> requests only, up to a configurable maximum, and never
-/// across an <c>https</c>→<c>http</c> scheme downgrade. See FR-3.3.5.
+/// across an <c>https</c>→<c>http</c> scheme downgrade.
 /// </summary>
 /// <remarks>
 /// The underlying <see cref="SocketsHttpHandler"/> is configured with

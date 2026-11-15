@@ -4,9 +4,9 @@ namespace TriQL.Client.Diagnostics;
 
 /// <summary>
 /// The <c>TriQL.Client</c> <see cref="ActivitySource"/>, emitting a span per query (<c>trino.query</c>)
-/// and per HTTP request (<c>trino.request</c>) with OpenTelemetry-conventional tags (FR-11.2.2).
+/// and per HTTP request (<c>trino.request</c>) with OpenTelemetry-conventional tags.
 /// <see cref="ActivitySource.StartActivity(string, ActivityKind)"/> itself is the zero-cost path
-/// when no listener is attached (FR-11.2.4): it returns <see langword="null"/> without allocating,
+/// when no listener is attached: it returns <see langword="null"/> without allocating,
 /// and every helper below tolerates that.
 /// </summary>
 internal static class Tracing
@@ -15,7 +15,7 @@ internal static class Tracing
 
     private static readonly ActivitySource Source = new(SourceName);
 
-    /// <summary>Starts the per-query <c>trino.query</c> span. <paramref name="statement"/> is redacted when <paramref name="redactStatement"/> is set (FR-11.2.2, SEC-1).</summary>
+    /// <summary>Starts the per-query <c>trino.query</c> span. <paramref name="statement"/> is redacted when <paramref name="redactStatement"/> is set.</summary>
     public static Activity? StartQueryActivity(string statement, string? catalog, string? schema, Uri? server, bool redactStatement)
     {
         var activity = Source.StartActivity("trino.query", ActivityKind.Client);
@@ -48,11 +48,11 @@ internal static class Tracing
     /// <summary>Tags a started <c>trino.query</c> span with the id assigned once the statement is submitted.</summary>
     public static void SetQueryId(Activity? activity, string queryId) => activity?.SetTag("trino.query_id", queryId);
 
-    /// <summary>Marks a query span as failed (FR-11.2.2). No-op when <paramref name="activity"/> is <see langword="null"/>.</summary>
+    /// <summary>Marks a query span as failed. No-op when <paramref name="activity"/> is <see langword="null"/>.</summary>
     public static void RecordFailure(Activity? activity, Exception exception) =>
         activity?.SetStatus(ActivityStatusCode.Error, exception.Message);
 
-    /// <summary>Starts the per-HTTP-request <c>trino.request</c> span (FR-11.2.2).</summary>
+    /// <summary>Starts the per-HTTP-request <c>trino.request</c> span.</summary>
     public static Activity? StartRequestActivity(HttpMethod method, Uri? requestUri)
     {
         var activity = Source.StartActivity("trino.request", ActivityKind.Client);
@@ -75,7 +75,7 @@ internal static class Tracing
 
     /// <summary>
     /// Propagates the ambient <see cref="Activity.Current"/> (this source's own span, or one from
-    /// a hosting application) onto an outbound request as a <c>traceparent</c> header (FR-11.2.3).
+    /// a hosting application) onto an outbound request as a <c>traceparent</c> header.
     /// </summary>
     public static void PropagateTraceContext(HttpRequestMessage request)
     {

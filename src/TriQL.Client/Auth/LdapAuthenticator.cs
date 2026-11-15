@@ -5,7 +5,7 @@ namespace TriQL.Client.Auth;
 /// <summary>
 /// Behaves as <see cref="BasicAuthenticator"/> but unconditionally refuses to operate over a
 /// non-TLS connection, since Trino requires LDAP authentication over HTTPS. There is no override
-/// for this refusal, unlike the general plaintext-credential guard (FR-1.1.3). See FR-2.2.3.
+/// for this refusal, unlike the general plaintext-credential guard.
 /// </summary>
 public sealed class LdapAuthenticator : BasicAuthenticator
 {

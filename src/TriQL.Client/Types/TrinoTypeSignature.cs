@@ -3,14 +3,14 @@ using System.Globalization;
 
 namespace TriQL.Client.Types;
 
-/// <summary>A single field of a <c>row(...)</c> type signature. See FR-7.1.2.</summary>
+/// <summary>A single field of a <c>row(...)</c> type signature.</summary>
 /// <param name="Name">The field name, or <see langword="null"/> for an anonymous field.</param>
 /// <param name="Type">The field's type signature.</param>
 public sealed record TrinoRowField(string? Name, TrinoTypeSignature Type);
 
 /// <summary>
 /// A parsed Trino type signature tree, e.g. <c>map(varchar, array(row(a bigint, b timestamp(6)
-/// with time zone)))</c>. Parsed signatures are cached per distinct type string. See FR-7.1.
+/// with time zone)))</c>. Parsed signatures are cached per distinct type string.
 /// </summary>
 public sealed class TrinoTypeSignature
 {
@@ -68,7 +68,7 @@ public sealed class TrinoTypeSignature
     /// <summary>The declared scale for <c>decimal(p,s)</c>. Defaults to <c>0</c> when only precision is given.</summary>
     public int? Scale => BaseName == "decimal" ? (NumericParameters.Count > 1 ? NumericParameters[1] : 0) : null;
 
-    /// <summary>Parses <paramref name="typeString"/>, caching the result per distinct string (FR-7.1.3).</summary>
+    /// <summary>Parses <paramref name="typeString"/>, caching the result per distinct string.</summary>
     public static TrinoTypeSignature Parse(string typeString)
     {
         ArgumentException.ThrowIfNullOrEmpty(typeString);

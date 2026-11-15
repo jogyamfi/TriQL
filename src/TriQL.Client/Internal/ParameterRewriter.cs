@@ -5,7 +5,7 @@ namespace TriQL.Client.Internal;
 /// <summary>
 /// Rewrites named placeholders (<c>:name</c>, <c>@name</c>) to positional <c>?</c> form. Aware of
 /// string literals, quoted identifiers, and <c>--</c>/<c>/* */</c> comments so placeholder-like text
-/// inside them is left untouched. See FR-8.4, FR-8.5.
+/// inside them is left untouched.
 /// </summary>
 internal static class ParameterRewriter
 {

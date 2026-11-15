@@ -1,7 +1,7 @@
 namespace TriQL.Client.Exceptions;
 
 /// <summary>
-/// Base type for every exception raised by TriQL. See FR-12.1.
+/// Base type for every exception raised by TriQL.
 /// </summary>
 public abstract class TrinoException : Exception
 {

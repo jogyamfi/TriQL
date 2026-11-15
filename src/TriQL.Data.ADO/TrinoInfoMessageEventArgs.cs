@@ -3,7 +3,7 @@ using TriQL.Client;
 namespace TriQL.Data.ADO;
 
 /// <summary>
-/// Carries a query progress snapshot or a query failure for <see cref="TrinoConnection.InfoMessage"/>. See FR-9.1.14.
+/// Carries a query progress snapshot or a query failure for <see cref="TrinoConnection.InfoMessage"/>.
 /// </summary>
 public sealed class TrinoInfoMessageEventArgs : EventArgs
 {

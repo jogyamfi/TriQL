@@ -4,7 +4,7 @@ namespace TriQL.Client.Types;
 
 /// <summary>
 /// A Trino <c>interval year to month</c> value, expressed as a signed total month count. Not
-/// representable as <see cref="TimeSpan"/>. See FR-7.2.1, FR-7.2.3.
+/// representable as <see cref="TimeSpan"/>.
 /// </summary>
 public readonly struct TrinoIntervalYearToMonth :
     IEquatable<TrinoIntervalYearToMonth>,

@@ -5,7 +5,7 @@ using TriQL.Client.Internal.Json;
 namespace TriQL.Client.Internal;
 
 /// <summary>
-/// Maps <see cref="StatementResponseDto"/> wire shapes into <see cref="TrinoPageEnvelope"/>. See FR-4.2.
+/// Maps <see cref="StatementResponseDto"/> wire shapes into <see cref="TrinoPageEnvelope"/>.
 /// </summary>
 internal static class StatementResponseMapper
 {
@@ -56,7 +56,7 @@ internal static class StatementResponseMapper
     }
 
     /// <summary>
-    /// Detects the direct-vs-spooled shape of the <c>data</c> member (FR-5.1.2). An array is decoded
+    /// Detects the direct-vs-spooled shape of the <c>data</c> member. An array is decoded
     /// immediately (the existing direct-protocol path); an object is parsed into a
     /// <see cref="SpooledPageData"/> descriptor and handed back unresolved, since fetching spooled
     /// segments is async I/O that this synchronous mapper cannot perform — the caller

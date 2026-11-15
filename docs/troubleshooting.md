@@ -11,7 +11,7 @@ them uniformly.
 | `TrinoConfigurationException` | Invalid `TrinoSessionOptions`/connection string. | `Server` must be an absolute `http`/`https` URI; a credential-transmitting authenticator over `http` requires `Tls.AllowPlaintextCredentials = true`. |
 | `TrinoConnectionException` | Cannot reach the coordinator, or a request exceeded `RequestTimeout`. | Network/firewall/DNS to `Server`; consider raising `RequestTimeout` for a slow network. |
 | `TrinoAuthenticationException` | 401/403, or credential acquisition failed. | Verify the configured authenticator's credentials; for `EntraIdAuthenticator`/`OAuth2ClientCredentialsAuthenticator`, check the token endpoint/scopes are reachable and correct. |
-| `TrinoProtocolException` | Malformed/unsupported/inconsistent server response. | Confirm the server is Trino 466+ (`NFR-COMPAT-2`); if using the spooled protocol, confirm the cluster is actually spooling-configured (see below). |
+| `TrinoProtocolException` | Malformed/unsupported/inconsistent server response. | Confirm the server is Trino 466+; if using the spooled protocol, confirm the cluster is actually spooling-configured (see below). |
 | `TrinoQueryException` | The server reported a query failure. | Inspect `ErrorCode`/`ErrorName`/`ErrorType`/`FailureInfo` — these mirror the server's own error reporting. |
 | `TrinoParameterException` | Parameter binding/count/type mismatch. | Check placeholder count/names match the supplied `TrinoParameterCollection`. |
 | `TrinoTimeoutException` | The client-side `QueryTimeout` deadline was exceeded. | Raise `QueryTimeout`, or investigate why the query is slow server-side (`ConfiguredTimeout`/`Elapsed` are on the exception). |
@@ -22,7 +22,7 @@ them uniformly.
 - **`TrinoConfigurationException: Server must be set to an absolute URI.`** — `Server` is
   required; the connection-string `Host`/`Port`/`EnableSsl` keys build it for you, or set
   `TrinoSessionOptions.Server` directly.
-- **TLS certificate validation failures** — TLS validation is on by default (SEC-2). Do not
+- **TLS certificate validation failures** — TLS validation is on by default. Do not
   disable it broadly; use the narrowly-scoped `TrinoTlsOptions` flags (`AllowSelfSignedCertificate`,
   `AllowHostNameMismatch`, `TrustedRootCertificatePath`) for the specific failure mode you have,
   each of which logs a `Warning` when enabled.
@@ -76,5 +76,5 @@ submitted SQL text) must not leave the process.
 ## Still stuck?
 
 Enable `Trace`-level logging via the `ILoggerFactory` passed to `TrinoClient`/`TrinoConnection` —
-it logs redacted request/response headers and per-row diagnostics (FR-11.1.3), which is usually
+it logs redacted request/response headers and per-row diagnostics, which is usually
 enough to tell a client-side problem from a server-side one.

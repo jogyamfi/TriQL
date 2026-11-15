@@ -1,7 +1,7 @@
 namespace TriQL.Client.Exceptions;
 
 /// <summary>
-/// Raised when <see cref="TrinoSessionOptions"/> or a connection string is invalid. See FR-12.1.
+/// Raised when <see cref="TrinoSessionOptions"/> or a connection string is invalid.
 /// </summary>
 public sealed class TrinoConfigurationException : TrinoException
 {

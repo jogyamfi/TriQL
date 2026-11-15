@@ -6,7 +6,7 @@ namespace TriQL.Client;
 
 /// <summary>
 /// Mutable configuration for a <see cref="TrinoClient"/>: server, credentials, catalog, schema,
-/// session properties, TLS, and buffering. See FR-1.1.
+/// session properties, TLS, and buffering.
 /// </summary>
 public sealed class TrinoSessionOptions
 {
@@ -58,7 +58,7 @@ public sealed class TrinoSessionOptions
     /// <summary>Resource estimates for the query. Maps to <c>X-Trino-Resource-Estimate</c>.</summary>
     public IDictionary<string, string> ResourceEstimates { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
-    /// <summary>Extra credentials passed through to connectors. Maps to <c>X-Trino-Extra-Credential</c>. Treated as secret (SEC-1).</summary>
+    /// <summary>Extra credentials passed through to connectors. Maps to <c>X-Trino-Extra-Credential</c>. Treated as secret.</summary>
     public IDictionary<string, string> ExtraCredentials { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
     /// <summary>Initial role selections, keyed by catalog (empty key for the system role). Maps to <c>X-Trino-Role</c>.</summary>
@@ -76,19 +76,19 @@ public sealed class TrinoSessionOptions
     /// <summary>The per-HTTP-request timeout. Default 100 seconds.</summary>
     public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(100);
 
-    /// <summary>The read-ahead buffer byte budget. Default 50 MB. See FR-6.</summary>
+    /// <summary>The read-ahead buffer byte budget. Default 50 MB.</summary>
     public long ReadAheadBufferBytes { get; set; } = 52_428_800;
 
     /// <summary>The <c>targetResultSize</c> query parameter value, in bytes. Default 5 MB.</summary>
     public long TargetResultSizeBytes { get; set; } = 5_242_880;
 
-    /// <summary>The initial adaptive polling delay after an empty page. Default 50 ms. See FR-4.4.5.</summary>
+    /// <summary>The initial adaptive polling delay after an empty page. Default 50 ms.</summary>
     public TimeSpan PollingBackoffInitialDelay { get; set; } = TimeSpan.FromMilliseconds(50);
 
-    /// <summary>The multiplier applied to the polling delay after each empty page. Default 1.2. See FR-4.4.5.</summary>
+    /// <summary>The multiplier applied to the polling delay after each empty page. Default 1.2.</summary>
     public double PollingBackoffMultiplier { get; set; } = 1.2;
 
-    /// <summary>The maximum adaptive polling delay. Default 5 seconds. See FR-4.4.5.</summary>
+    /// <summary>The maximum adaptive polling delay. Default 5 seconds.</summary>
     public TimeSpan PollingBackoffMaxDelay { get; set; } = TimeSpan.FromSeconds(5);
 
     /// <summary>Disables automatic response decompression. Default <see langword="false"/>.</summary>
@@ -96,7 +96,7 @@ public sealed class TrinoSessionOptions
 
     /// <summary>
     /// The spooled-protocol encodings to request, in preference order. Empty forces the direct protocol.
-    /// Defaults to empty (opt-in) in 1.0 per FR-5.1.6.
+    /// Defaults to empty, so the spooled protocol is opt-in.
     /// </summary>
     public IReadOnlyList<string> QueryDataEncodings { get; set; } = [];
 
@@ -104,20 +104,20 @@ public sealed class TrinoSessionOptions
     /// The maximum number of bytes a single decoded (decompressed) spooled segment may occupy. A
     /// segment whose decoded size would exceed <c>max(metadata.uncompressedSize, this value)</c> is
     /// rejected with <see cref="Exceptions.TrinoProtocolException"/> instead of allocating unbounded
-    /// memory (FR-5.3.4, SEC-6). Default 256 MB.
+    /// memory. Default 256 MB.
     /// </summary>
     public long MaxDecompressedSegmentBytes { get; set; } = 268_435_456;
 
     /// <summary>
-    /// The maximum number of spooled segments fetched concurrently for a single page (FR-5.2.5).
+    /// The maximum number of spooled segments fetched concurrently for a single page.
     /// Default 4.
     /// </summary>
     public int SegmentFetchParallelism { get; set; } = 4;
 
     /// <summary>
     /// An optional allowlist of hosts a spooled segment <c>uri</c> may point at. Empty (the
-    /// default) permits any host, subject to the mandatory <c>https</c> requirement (SEC-7, the
-    /// closed G3 decision in requirements.md §23 Q6). Does not apply to a segment's <c>ackUri</c>,
+    /// default) permits any host, subject to the mandatory <c>https</c> requirement.
+    /// Does not apply to a segment's <c>ackUri</c>,
     /// which is always restricted to the coordinator's own origin regardless of this setting.
     /// </summary>
     public IReadOnlyList<string> SegmentHostAllowlist { get; set; } = [];
@@ -135,7 +135,7 @@ public sealed class TrinoSessionOptions
 
     /// <summary>
     /// When <see langword="true"/>, the <c>db.statement</c> tag on the <c>trino.query</c> trace span
-    /// (FR-11.2.2) is redacted instead of carrying the submitted SQL text. Default <see langword="false"/>.
+    /// is redacted instead of carrying the submitted SQL text. Default <see langword="false"/>.
     /// </summary>
     public bool RedactStatementInTraces { get; set; }
 
@@ -143,7 +143,7 @@ public sealed class TrinoSessionOptions
     public TrinoTlsOptions Tls { get; } = new();
 
     /// <summary>
-    /// Constructs a <see cref="Server"/> URI from its parts, mirroring the connection-string model. See FR-1.1.4.
+    /// Constructs a <see cref="Server"/> URI from its parts, mirroring the connection-string model.
     /// </summary>
     public static Uri FromParts(string host, int port, bool useTls, string? path = null)
     {
@@ -154,7 +154,7 @@ public sealed class TrinoSessionOptions
     }
 
     /// <summary>
-    /// Validates the options. Called automatically on first use by <see cref="TrinoClient"/>. See FR-1.1.2, FR-1.1.3.
+    /// Validates the options. Called automatically on first use by <see cref="TrinoClient"/>.
     /// </summary>
     /// <exception cref="ArgumentException"><see cref="Server"/> is missing or not an absolute http/https URI.</exception>
     /// <exception cref="TrinoConfigurationException">

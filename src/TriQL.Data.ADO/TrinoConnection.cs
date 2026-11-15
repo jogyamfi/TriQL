@@ -8,11 +8,11 @@ using TriQL.Data.ADO.Internal;
 namespace TriQL.Data.ADO;
 
 /// <summary>
-/// A <see cref="DbConnection"/> to a Trino coordinator. See FR-9.1.
+/// A <see cref="DbConnection"/> to a Trino coordinator.
 /// </summary>
 /// <remarks>
 /// <para>
-/// A single command may execute at a time per connection (FR-9.1.15); attempting to start a
+/// A single command may execute at a time per connection; attempting to start a
 /// second concurrent command throws <see cref="InvalidOperationException"/> rather than
 /// corrupting session state.
 /// </para>
@@ -50,14 +50,14 @@ public sealed class TrinoConnection : DbConnection
     internal TrinoConnection(string connectionString, Lazy<HttpMessageInvoker> sharedInvoker)
         : this(connectionString) => _sharedInvoker = sharedInvoker;
 
-    /// <summary>Initializes a new instance for dependency-injection scenarios (FR-9.1.16).</summary>
+    /// <summary>Initializes a new instance for dependency-injection scenarios.</summary>
     public TrinoConnection(TrinoSessionOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
         _options = options;
     }
 
-    /// <summary>Initializes a new instance that creates its <see cref="HttpClient"/> via <paramref name="httpClientFactory"/> (FR-9.1.16).</summary>
+    /// <summary>Initializes a new instance that creates its <see cref="HttpClient"/> via <paramref name="httpClientFactory"/>.</summary>
     public TrinoConnection(TrinoSessionOptions options, IHttpClientFactory httpClientFactory)
         : this(options)
     {
@@ -65,11 +65,11 @@ public sealed class TrinoConnection : DbConnection
         _httpClientFactory = httpClientFactory;
     }
 
-    /// <summary>Raised with query progress statistics and query failures (FR-9.1.14).</summary>
+    /// <summary>Raised with query progress statistics and query failures.</summary>
     public event EventHandler<TrinoInfoMessageEventArgs>? InfoMessage;
 
     /// <inheritdoc/>
-    /// <exception cref="InvalidOperationException">The connection is not <see cref="ConnectionState.Closed"/> (FR-1.3.6).</exception>
+    /// <exception cref="InvalidOperationException">The connection is not <see cref="ConnectionState.Closed"/>.</exception>
     [AllowNull]
     public override string ConnectionString
     {
@@ -78,7 +78,7 @@ public sealed class TrinoConnection : DbConnection
         {
             if (_state != ConnectionState.Closed)
             {
-                throw new InvalidOperationException("ConnectionString can only be set while the connection is Closed (FR-1.3.6).");
+                throw new InvalidOperationException("ConnectionString can only be set while the connection is Closed.");
             }
 
             _connectionString = value;
@@ -96,7 +96,7 @@ public sealed class TrinoConnection : DbConnection
     public override string DataSource => _options?.Server?.ToString() ?? string.Empty;
 
     /// <inheritdoc/>
-    /// <remarks>Fetched from <c>/v1/info</c> on first access and cached for the connection's lifetime (FR-9.1.4).</remarks>
+    /// <remarks>Fetched from <c>/v1/info</c> on first access and cached for the connection's lifetime.</remarks>
     /// <exception cref="InvalidOperationException">The connection is not open.</exception>
     public override string ServerVersion =>
         _serverVersion ??= SyncBridge.Run(() => RequireOpenClient().GetServerInfoAsync(CancellationToken.None)).Version;
@@ -188,7 +188,7 @@ public sealed class TrinoConnection : DbConnection
     /// <exception cref="ArgumentException"><paramref name="databaseName"/> is null or empty.</exception>
     public override void ChangeDatabase(string databaseName) => SyncBridge.Run(() => ChangeDatabaseAsync(databaseName, CancellationToken.None));
 
-    /// <summary>Sets the session schema (FR-9.1.9).</summary>
+    /// <summary>Sets the session schema.</summary>
     public override async Task ChangeDatabaseAsync(string databaseName, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(databaseName);
@@ -204,9 +204,9 @@ public sealed class TrinoConnection : DbConnection
     protected override DbCommand CreateDbCommand() => new TrinoCommand { Connection = this };
 
     /// <inheritdoc/>
-    /// <exception cref="NotSupportedException">Always. TriQL does not support transactions (FR-9.1.11).</exception>
+    /// <exception cref="NotSupportedException">Always. TriQL does not support transactions.</exception>
     protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel) =>
-        throw new NotSupportedException("TriQL does not support transactions (FR-9.1.11).");
+        throw new NotSupportedException("TriQL does not support transactions.");
 
     /// <inheritdoc/>
     public override DataTable GetSchema() => SyncBridge.Run(() => GetSchemaAsync());
@@ -219,7 +219,7 @@ public sealed class TrinoConnection : DbConnection
         SyncBridge.Run(() => GetSchemaAsync(collectionName, restrictionValues));
 
     /// <inheritdoc/>
-    /// <remarks>The async form of the parameterless <see cref="GetSchema()"/> (FR-9.5.6).</remarks>
+    /// <remarks>The async form of the parameterless <see cref="GetSchema()"/>.</remarks>
     // RS0026: these three overloads each carry an optional cancellationToken because they override
     // DbConnection's own fixed, pre-existing virtual signatures — not a new API design choice.
 #pragma warning disable RS0026
@@ -227,12 +227,12 @@ public sealed class TrinoConnection : DbConnection
         GetSchemaAsync(SchemaCollections.MetaDataCollectionsName, [], cancellationToken);
 
     /// <inheritdoc/>
-    /// <remarks>The async form of <see cref="GetSchema(string)"/> (FR-9.5.6).</remarks>
+    /// <remarks>The async form of <see cref="GetSchema(string)"/>.</remarks>
     public override Task<DataTable> GetSchemaAsync(string collectionName, CancellationToken cancellationToken = default) =>
         GetSchemaAsync(collectionName, [], cancellationToken);
 
     /// <inheritdoc/>
-    /// <remarks>The async form of <see cref="GetSchema(string, string?[])"/> (FR-9.5.6).</remarks>
+    /// <remarks>The async form of <see cref="GetSchema(string, string?[])"/>.</remarks>
     public override async Task<DataTable> GetSchemaAsync(string collectionName, string?[] restrictionValues, CancellationToken cancellationToken = default)
 #pragma warning restore RS0026
     {
@@ -256,12 +256,12 @@ public sealed class TrinoConnection : DbConnection
             ? _client
             : throw new InvalidOperationException("The connection is not open.");
 
-    /// <summary>Enforces single-command-at-a-time execution (FR-9.1.15).</summary>
+    /// <summary>Enforces single-command-at-a-time execution.</summary>
     internal void BeginCommand()
     {
         if (Interlocked.CompareExchange(ref _commandActive, 1, 0) != 0)
         {
-            throw new InvalidOperationException("Only one command may execute at a time per connection (FR-9.1.15).");
+            throw new InvalidOperationException("Only one command may execute at a time per connection.");
         }
     }
 
@@ -272,10 +272,10 @@ public sealed class TrinoConnection : DbConnection
         Volatile.Write(ref _commandActive, 0);
     }
 
-    /// <summary>Tracks the running query so <see cref="CloseAsync"/> can cancel it (FR-9.1.8).</summary>
+    /// <summary>Tracks the running query so <see cref="CloseAsync"/> can cancel it.</summary>
     internal void RegisterActiveQuery(IDisposable query) => Interlocked.Exchange(ref _activeQuery, query);
 
-    /// <summary>Raises <see cref="InfoMessage"/> (FR-9.1.14).</summary>
+    /// <summary>Raises <see cref="InfoMessage"/>.</summary>
     internal void RaiseInfoMessage(TrinoQueryStats? stats, Exception? error) =>
         InfoMessage?.Invoke(this, new TrinoInfoMessageEventArgs(stats, error));
 

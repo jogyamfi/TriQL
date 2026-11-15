@@ -6,8 +6,8 @@ using TriQL.Data.ADO.Internal;
 namespace TriQL.Data.ADO;
 
 /// <summary>
-/// A strongly typed <see cref="DbConnectionStringBuilder"/> for every key in the connection-string
-/// key table (Appendix B). See FR-1.3.
+/// A strongly typed <see cref="DbConnectionStringBuilder"/> for every key in the
+/// connection-string reference.
 /// </summary>
 #pragma warning disable CA1010 // The required DbConnectionStringBuilder base only implements non-generic ICollection; there is no generic ADO.NET contract to satisfy instead.
 public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
@@ -38,7 +38,7 @@ public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
     /// <summary>
     /// When <see langword="true"/>, <see cref="ToString"/> redacts <see cref="Password"/>,
     /// <see cref="AccessToken"/>, and <see cref="ClientSecret"/>. The default <see langword="false"/>
-    /// preserves round-trip fidelity (FR-1.3.4); callers are responsible for not logging the raw string.
+    /// preserves round-trip fidelity; callers are responsible for not logging the raw string.
     /// </summary>
     public bool RedactSecrets { get; set; }
 
@@ -60,7 +60,7 @@ public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
     /// <summary>The Trino user. Defaults to <see cref="Environment.UserName"/>.</summary>
     public string? User { get => GetString("User"); set => SetValue("User", value); }
 
-    /// <summary>The Basic/LDAP password. Treated as a secret (SEC-1).</summary>
+    /// <summary>The Basic/LDAP password. Treated as a secret.</summary>
     public string? Password { get => GetString("Password"); set => SetValue("Password", value); }
 
     /// <summary>The user to run the query as, distinct from the authenticated <see cref="User"/>.</summary>
@@ -68,17 +68,17 @@ public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
 
     /// <summary>
     /// The authenticator short name: <c>none</c>, <c>basic</c>, <c>ldap</c>, <c>jwt</c>,
-    /// <c>oauth2-client-credentials</c>, <c>entra-id</c>, or <c>certificate</c> (FR-1.3.5).
+    /// <c>oauth2-client-credentials</c>, <c>entra-id</c>, or <c>certificate</c>.
     /// </summary>
     public string? Auth { get => GetString("Auth"); set => SetValue("Auth", value); }
 
-    /// <summary>The JWT bearer token. Treated as a secret (SEC-1).</summary>
+    /// <summary>The JWT bearer token. Treated as a secret.</summary>
     public string? AccessToken { get => GetString("AccessToken"); set => SetValue("AccessToken", value); }
 
     /// <summary>The OAuth2/Entra ID client id.</summary>
     public string? ClientId { get => GetString("ClientId"); set => SetValue("ClientId", value); }
 
-    /// <summary>The OAuth2 client secret. Treated as a secret (SEC-1).</summary>
+    /// <summary>The OAuth2 client secret. Treated as a secret.</summary>
     public string? ClientSecret { get => GetString("ClientSecret"); set => SetValue("ClientSecret", value); }
 
     /// <summary>The OAuth2 token endpoint.</summary>
@@ -117,7 +117,7 @@ public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
     /// <summary>Comma-separated <c>k=v</c> initial session properties.</summary>
     public string? SessionProperties { get => GetString("SessionProperties"); set => SetValue("SessionProperties", value); }
 
-    /// <summary>Comma-separated <c>k=v</c> extra credentials. Treated as secret (SEC-1).</summary>
+    /// <summary>Comma-separated <c>k=v</c> extra credentials. Treated as secret.</summary>
     public string? ExtraCredentials { get => GetString("ExtraCredentials"); set => SetValue("ExtraCredentials", value); }
 
     /// <summary>Comma-separated <c>k=v</c> resource estimates.</summary>
@@ -180,7 +180,7 @@ public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
     public bool AllowPlaintextCredentials { get => GetBoolean("AllowPlaintextCredentials") ?? false; set => SetValue("AllowPlaintextCredentials", value); }
 
     /// <inheritdoc/>
-    /// <exception cref="ArgumentException"><paramref name="keyword"/> is not a recognized key (FR-1.3.3).</exception>
+    /// <exception cref="ArgumentException"><paramref name="keyword"/> is not a recognized key.</exception>
     public override object this[string keyword]
     {
         get => base[keyword];
@@ -209,7 +209,7 @@ public sealed class TrinoConnectionStringBuilder : DbConnectionStringBuilder
     /// <inheritdoc/>
     /// <remarks>
     /// Round-trips through the base <see cref="DbConnectionStringBuilder"/> quoting rules
-    /// (FR-1.3.4). When <see cref="RedactSecrets"/> is set, <see cref="Password"/>,
+    ///. When <see cref="RedactSecrets"/> is set, <see cref="Password"/>,
     /// <see cref="AccessToken"/>, and <see cref="ClientSecret"/> are replaced with <c>***</c>.
     /// </remarks>
     public override string ToString()

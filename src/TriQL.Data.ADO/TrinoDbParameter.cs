@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace TriQL.Data.ADO;
 
 /// <summary>
-/// A single ADO.NET parameter bound to a <see cref="TrinoCommand"/>. See FR-9.2.9, FR-9.4.4.
+/// A single ADO.NET parameter bound to a <see cref="TrinoCommand"/>.
 /// </summary>
 public sealed class TrinoDbParameter : DbParameter
 {

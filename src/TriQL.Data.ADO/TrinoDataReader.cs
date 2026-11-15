@@ -10,7 +10,7 @@ using TriQL.Data.ADO.Internal;
 namespace TriQL.Data.ADO;
 
 /// <summary>
-/// A <see cref="DbDataReader"/> over a <see cref="TrinoResultSet"/>. See FR-9.3.
+/// A <see cref="DbDataReader"/> over a <see cref="TrinoResultSet"/>.
 /// </summary>
 #pragma warning disable CA1010 // The required DbDataReader base only implements non-generic IEnumerable; there is no generic ADO.NET contract to satisfy instead.
 public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
@@ -39,7 +39,7 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
     /// <summary>
     /// Creates and primes a reader: waits for the schema, and — unless <see cref="CommandBehavior.SchemaOnly"/>
     /// is set — eagerly fetches the first row so <see cref="HasRows"/> is answerable before the
-    /// first <see cref="Read"/> (FR-9.3.5).
+    /// first <see cref="Read"/>.
     /// </summary>
     internal static async Task<TrinoDataReader> CreateAsync(
         TrinoResultSet resultSet, CommandBehavior behavior, Action? onClosed, CancellationToken cancellationToken)
@@ -80,7 +80,7 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
     /// <inheritdoc/>
     /// <remarks>
     /// Reports whether the result set contained any rows, answered from the eagerly-fetched first
-    /// row without consuming it (FR-9.3.5). Stays <see langword="true"/> after the last row has been
+    /// row without consuming it. Stays <see langword="true"/> after the last row has been
     /// read, matching the <see cref="DbDataReader"/> contract.
     /// </remarks>
     public override bool HasRows => _hadRows;
@@ -177,7 +177,7 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
     public override Type GetFieldType(int ordinal) => Column(ordinal).ClrType;
 
     /// <inheritdoc/>
-    /// <exception cref="IndexOutOfRangeException">No column named <paramref name="name"/> exists (FR-9.3.8).</exception>
+    /// <exception cref="IndexOutOfRangeException">No column named <paramref name="name"/> exists.</exception>
     public override int GetOrdinal(string name)
     {
         ArgumentNullException.ThrowIfNull(name);
@@ -271,7 +271,7 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
 
     /// <inheritdoc/>
     /// <remarks>
-    /// Implements the documented ADO.NET contract precisely (FR-9.3.2): a <see langword="null"/>
+    /// Implements the documented ADO.NET contract precisely: a <see langword="null"/>
     /// <paramref name="buffer"/> returns the total length; offsets are range-checked; the return
     /// value is the number of bytes actually copied, clamped to what remains.
     /// </remarks>
@@ -306,7 +306,7 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
     }
 
     /// <inheritdoc/>
-    /// <remarks>Implements the same contract as <see cref="GetBytes"/> for character data (FR-9.3.2).</remarks>
+    /// <remarks>Implements the same contract as <see cref="GetBytes"/> for character data.</remarks>
     public override long GetChars(int ordinal, long dataOffset, char[]? buffer, int bufferOffset, int length)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(dataOffset);
@@ -338,8 +338,8 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
     }
 
     /// <inheritdoc/>
-    /// <remarks>Populates at minimum every column required by FR-9.3.10. No key information is available (FR-9.2.13, <c>KeyInfo</c>).</remarks>
-    [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "The DataType column legitimately stores System.Type values per the ADO.NET GetSchemaTable contract (FR-9.3.10); this is not app-controlled reflection.")]
+    /// <remarks>Populates at minimum every column of the standard ADO.NET schema table. No key information is available (<c>KeyInfo</c>).</remarks>
+    [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "The DataType column legitimately stores System.Type values per the ADO.NET GetSchemaTable contract; this is not app-controlled reflection.")]
     public override DataTable GetSchemaTable()
     {
         var table = new DataTable("SchemaTable");
@@ -443,7 +443,7 @@ public sealed class TrinoDataReader : DbDataReader, IDbColumnSchemaGenerator
     private TrinoColumn Column(int ordinal) => _columns[ordinal];
 
     private TrinoRow RequireRow() =>
-        _current ?? throw new InvalidOperationException("No current row: call Read() first, or the reader is past the last row (FR-9.3.13).");
+        _current ?? throw new InvalidOperationException("No current row: call Read() first, or the reader is past the last row.");
 
     private void ThrowIfClosed()
     {

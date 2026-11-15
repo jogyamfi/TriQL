@@ -1,7 +1,7 @@
 namespace TriQL.Client;
 
 /// <summary>
-/// The response of <c>GET /v1/info</c>. See FR-10.1.
+/// The response of <c>GET /v1/info</c>.
 /// </summary>
 /// <param name="Version">The coordinator's Trino node version string.</param>
 /// <param name="Environment">The configured cluster environment name.</param>

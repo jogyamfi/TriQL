@@ -1,7 +1,7 @@
 namespace TriQL.Client.Auth;
 
 /// <summary>
-/// Sends <c>Authorization: Basic base64(user:password)</c>. See FR-2.2.2.
+/// Sends <c>Authorization: Basic base64(user:password)</c>.
 /// </summary>
 public class BasicAuthenticator : ITrinoAuthenticator, ITransmitsBearerCredential
 {
@@ -20,7 +20,7 @@ public class BasicAuthenticator : ITrinoAuthenticator, ITransmitsBearerCredentia
 
     /// <summary>
     /// The Basic username. Used as the default <c>X-Trino-User</c> when
-    /// <see cref="TrinoSessionOptions.User"/> is not explicitly set (FR-2.2.2).
+    /// <see cref="TrinoSessionOptions.User"/> is not explicitly set.
     /// </summary>
     public string Username => _username;
 

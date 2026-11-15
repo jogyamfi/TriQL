@@ -4,7 +4,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Numeric widening/narrowing for <see cref="TrinoRow"/>'s typed accessors. Widening always
-/// succeeds; narrowing that would lose data throws <see cref="OverflowException"/>. See FR-7.2.4.
+/// succeeds; narrowing that would lose data throws <see cref="OverflowException"/>.
 /// </summary>
 internal static class NumericAccessors
 {

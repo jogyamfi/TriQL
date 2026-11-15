@@ -1,6 +1,6 @@
 name: Release
 
-# REL-7: triggers on a `v*` tag; packs, signs, and publishes all five shipping packages via NuGet
+# Triggers on a `v*` tag; packs, signs, and publishes all five shipping packages via NuGet
 # trusted publishing (OIDC — no long-lived API key stored in the repo), then creates a GitHub
 # Release with generated notes. Requires the repository to have NuGet trusted publishing configured
 # for this GitHub repo/workflow (see https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
@@ -49,7 +49,7 @@ jobs:
       - name: Build (Release, warnings as errors)
         run: dotnet build TriQL.slnx -c Release --no-restore -p:Version=${{ steps.version.outputs.version }}
 
-      - name: "Pack shipping packages (REL-4: deterministic, Source Link, .snupkg)"
+      - name: "Pack shipping packages (deterministic, Source Link, .snupkg)"
         run: |
           for proj in TriQL.Client TriQL.Client.Auth TriQL.Client.Compression TriQL.Data.ADO TriQL.EntityFrameworkCore; do
             dotnet pack "src/$proj/$proj.csproj" -c Release --no-build \
@@ -57,7 +57,7 @@ jobs:
               -o ./artifacts
           done
 
-      # REL-7: sign packages before publishing. Configure a code-signing certificate secret
+      # Sign packages before publishing. Configure a code-signing certificate secret
       # (e.g. via Azure Trusted Signing or a stored .pfx) and uncomment/adapt before first use.
       # - name: Sign packages
       #   run: dotnet nuget sign ./artifacts/*.nupkg --certificate-path <cert> --timestamper http://timestamp.digicert.com

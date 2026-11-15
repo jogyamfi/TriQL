@@ -1,7 +1,7 @@
 namespace TriQL.Client.Exceptions;
 
 /// <summary>
-/// Raised when a wire value could not be converted to the requested CLR type. See FR-12.1.
+/// Raised when a wire value could not be converted to the requested CLR type.
 /// </summary>
 public sealed class TrinoTypeConversionException : TrinoException
 {

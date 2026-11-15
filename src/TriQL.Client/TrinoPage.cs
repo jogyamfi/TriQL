@@ -2,7 +2,7 @@ namespace TriQL.Client;
 
 /// <summary>
 /// A single page of a query response: zero or more rows plus the schema and statistics known at
-/// that point. See FR-6.7.
+/// that point.
 /// </summary>
 public sealed class TrinoPage
 {

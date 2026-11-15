@@ -6,9 +6,9 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// The bounded read-ahead buffer between the background page-fetch pump and the consumer. Bounded
-/// by a byte budget rather than a page count (FR-6.2); the queue itself never blocks the consumer
+/// by a byte budget rather than a page count; the queue itself never blocks the consumer
 /// side (it awaits a signal, per <see cref="Channel{T}"/> semantics), and production suspends via
-/// <see cref="ByteBudgetGate"/> when the budget is exhausted. See FR-6.1—FR-6.5.
+/// <see cref="ByteBudgetGate"/> when the budget is exhausted.
 /// </summary>
 internal sealed class PageBuffer : IDisposable
 {
@@ -39,7 +39,7 @@ internal sealed class PageBuffer : IDisposable
     /// <summary>
     /// Marks the buffer complete. When <paramref name="error"/> is non-null, the consumer's
     /// enumeration rethrows it (preserving its original stack) at the point enumeration reaches
-    /// the end of the buffered pages. See FR-6.8.
+    /// the end of the buffered pages.
     /// </summary>
     public void Complete(Exception? error) => _channel.Writer.TryComplete(error);
 

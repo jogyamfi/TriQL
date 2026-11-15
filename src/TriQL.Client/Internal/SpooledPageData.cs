@@ -1,6 +1,6 @@
 namespace TriQL.Client.Internal;
 
-/// <summary>The two segment kinds of the spooled protocol (FR-5.2.1).</summary>
+/// <summary>The two segment kinds of the spooled protocol.</summary>
 internal enum SegmentKind
 {
     /// <summary>A base64 payload embedded directly in the page response.</summary>
@@ -12,16 +12,16 @@ internal enum SegmentKind
 
 /// <summary>
 /// One entry of a spooled page's <c>segments</c> array, parsed from the wire shape but not yet
-/// fetched or decoded. See FR-5.2.1.
+/// fetched or decoded.
 /// </summary>
 /// <param name="Kind">Whether the payload is embedded (<see cref="SegmentKind.Inline"/>) or fetched (<see cref="SegmentKind.Spooled"/>).</param>
-/// <param name="RowOffset">The zero-based row offset of this segment's first row within the query's overall result (FR-5.2.4).</param>
+/// <param name="RowOffset">The zero-based row offset of this segment's first row within the query's overall result.</param>
 /// <param name="RowsCount">
 /// The row count the server declares for this segment, when present. Optional: Trino did not
-/// enforce this as a mandatory response field before server release 475 (see the divergence note
-/// in the Phase 5 implementation report); below that, it may be absent even on a floor-466 server.
+/// enforce this as a mandatory response field before server release 475;
+/// below that, it may be absent even on a floor-466 server.
 /// </param>
-/// <param name="SegmentSize">The exact byte length the fetched/decoded-from-base64 payload MUST have before decompression (FR-5.2.6).</param>
+/// <param name="SegmentSize">The exact byte length the fetched/decoded-from-base64 payload MUST have before decompression.</param>
 /// <param name="UncompressedSize">
 /// The exact byte length the payload MUST have after decompression, when present. Its absence
 /// means the server did not compress this particular segment (it was below the server's
@@ -48,6 +48,6 @@ internal sealed record SegmentDescriptor(
 
 /// <summary>
 /// The parsed <c>encoding</c>+<c>segments</c> shape of a spooled-protocol page's <c>data</c> member
-/// (FR-5.1.2), awaiting resolution by <see cref="SegmentClient"/>.
+///, awaiting resolution by <see cref="SegmentClient"/>.
 /// </summary>
 internal sealed record SpooledPageData(string Encoding, IReadOnlyList<SegmentDescriptor> Segments);

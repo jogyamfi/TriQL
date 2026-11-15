@@ -4,7 +4,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Maps <see cref="System.Data.DbType"/> to a Trino type name, as the documented inverse of
-/// FR-7.2 where a unique inverse exists. See FR-8.8.
+/// the Trino-to-CLR type mapping where a unique inverse exists.
 /// </summary>
 internal static class DbTypeMapping
 {

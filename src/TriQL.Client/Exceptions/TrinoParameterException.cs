@@ -1,7 +1,7 @@
 namespace TriQL.Client.Exceptions;
 
 /// <summary>
-/// Raised when parameter binding, count, or type validation fails before a request is sent. See FR-12.1.
+/// Raised when parameter binding, count, or type validation fails before a request is sent.
 /// </summary>
 public sealed class TrinoParameterException : TrinoException
 {

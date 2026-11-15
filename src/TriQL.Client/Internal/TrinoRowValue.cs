@@ -4,7 +4,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Lazily-materializing <see cref="ITrinoRowValue"/> backed by a <c>row(...)</c> type signature and
-/// its raw positional field values. See FR-7.2.1, FR-7.2.7.
+/// its raw positional field values.
 /// </summary>
 internal sealed class TrinoRowValue : ITrinoRowValue
 {

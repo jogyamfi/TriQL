@@ -4,7 +4,7 @@ using TriQL.Client.Diagnostics;
 namespace TriQL.Client.Internal;
 
 /// <summary>
-/// Backoff parameters for <see cref="RetryPolicy"/>. Defaults match FR-3.3.1: base 50 ms, factor 2.0, cap 10 s, 5 attempts.
+/// Backoff parameters for <see cref="RetryPolicy"/>. Defaults: base 50 ms, factor 2.0, cap 10 s, 5 attempts.
 /// </summary>
 internal readonly record struct RetryPolicyOptions(TimeSpan BaseDelay, double Multiplier, TimeSpan MaxDelay, int MaxAttempts, bool RetryOnResponseStatus = true)
 {
@@ -12,7 +12,7 @@ internal readonly record struct RetryPolicyOptions(TimeSpan BaseDelay, double Mu
 }
 
 /// <summary>
-/// Exponential backoff with full jitter for idempotent HTTP requests. See FR-3.3.1, FR-3.3.2, FR-3.3.2a.
+/// Exponential backoff with full jitter for idempotent HTTP requests.
 /// </summary>
 internal static class RetryPolicy
 {

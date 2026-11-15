@@ -4,7 +4,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Matches parsed placeholders to supplied <see cref="TrinoParameter"/> values, in the order the
-/// placeholders occur, before any network call. See FR-8.4, FR-8.5, FR-8.6.
+/// placeholders occur, before any network call.
 /// </summary>
 internal static class ParameterBinder
 {

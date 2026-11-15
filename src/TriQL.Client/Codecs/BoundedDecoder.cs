@@ -5,7 +5,7 @@ namespace TriQL.Client.Codecs;
 
 /// <summary>
 /// The single gate every codec decode passes through, enforcing the decompression-bomb bound
-/// (SEC-6, FR-5.3.4): a decoded segment exceeding <c>max(uncompressedSize, ceiling)</c> raises
+///: a decoded segment exceeding <c>max(uncompressedSize, ceiling)</c> raises
 /// <see cref="TrinoProtocolException"/> rather than allocating unbounded memory. Defense in depth
 /// alongside each codec's own bound check.
 /// </summary>

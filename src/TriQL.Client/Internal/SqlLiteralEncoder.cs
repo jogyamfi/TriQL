@@ -8,7 +8,7 @@ namespace TriQL.Client.Internal;
 /// <summary>
 /// Renders <see cref="TrinoParameter"/> values as Trino SQL literals for the <c>EXECUTE ... USING</c>
 /// clause. Never concatenates unescaped caller input; rejects values it cannot render rather than
-/// falling back to <c>ToString()</c>. See FR-8.3, SEC-4.
+/// falling back to <c>ToString()</c>.
 /// </summary>
 internal static class SqlLiteralEncoder
 {

@@ -8,24 +8,23 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Resolves a <see cref="SpooledPageData"/> descriptor into decoded rows, in <c>rowOffset</c> order
-/// (FR-5.2.4), fetching <see cref="SegmentKind.Spooled"/> segments concurrently up to
-/// <see cref="TrinoSessionOptions.SegmentFetchParallelism"/> (FR-5.2.5) and scheduling a
-/// fire-and-forget acknowledgement for each one once its rows have decoded successfully (FR-5.2.3).
+///, fetching <see cref="SegmentKind.Spooled"/> segments concurrently up to
+/// <see cref="TrinoSessionOptions.SegmentFetchParallelism"/> and scheduling a
+/// fire-and-forget acknowledgement for each one once its rows have decoded successfully.
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>Divergence from requirements.md FR-5.2.1/FR-5.2.2</b> (see the Phase 5 implementation
-/// report): the real protocol's segment <c>metadata</c> object carries <c>rowOffset</c> and
+/// <b>Protocol notes.</b> The real protocol's segment <c>metadata</c> object carries <c>rowOffset</c> and
 /// <c>segmentSize</c> always, but <c>uncompressedSize</c> only when the server actually compressed
 /// that segment, and <c>rowsCount</c> only reliably from server release 475 onward (Trino issue
 /// history documents it as not enforced as mandatory before then, and this client's floor is 466).
 /// A segment whose metadata omits <c>uncompressedSize</c> is decoded as plain uncompressed JSON —
 /// via the built-in <c>json</c> codec — regardless of the page's negotiated top-level
 /// <c>encoding</c>; this is not a TriQL choice, it mirrors both the official Python and Go client
-/// implementations. Separately, FR-5.2.2 says segment fetches "MUST carry the session's
-/// authentication credential"; the reference clients instead attach the session credential only
-/// when the segment/ack host matches the coordinator's origin (the "coordinator-proxied" case
-/// FR-5.2.2 itself describes), and otherwise rely solely on the server-supplied per-segment
+/// implementations. Separately, segment fetches do not always carry the session's
+/// authentication credential: like the reference clients, this client attaches it only
+/// when the segment/ack host matches the coordinator's origin (the "coordinator-proxied" case),
+/// and otherwise relies solely on the server-supplied per-segment
 /// <c>headers</c> — sending a Trino bearer token to an off-origin object store would both do
 /// nothing useful and leak the credential. This client follows the reference clients' behaviour.
 /// </para>

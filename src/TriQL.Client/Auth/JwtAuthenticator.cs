@@ -5,7 +5,7 @@ namespace TriQL.Client.Auth;
 
 /// <summary>
 /// Sends <c>Authorization: Bearer &lt;token&gt;</c>. Supports a static token or a refresh callback,
-/// refreshing on 401 and proactively when a known <c>exp</c> claim is within the configured skew. See FR-2.2.4.
+/// refreshing on 401 and proactively when a known <c>exp</c> claim is within the configured skew.
 /// </summary>
 public sealed class JwtAuthenticator : ITrinoAuthenticator, ITransmitsBearerCredential, IDisposable
 {

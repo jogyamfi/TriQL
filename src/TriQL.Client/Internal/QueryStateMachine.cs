@@ -2,7 +2,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Maintains <see cref="TrinoQueryState"/> transitions via compare-and-swap so that concurrent
-/// cancellation and completion cannot both take effect. See FR-4.5.1.
+/// cancellation and completion cannot both take effect.
 /// </summary>
 internal sealed class QueryStateMachine
 {

@@ -1,7 +1,7 @@
 namespace TriQL.Client;
 
 /// <summary>
-/// The kind of role selection applied to a catalog. See FR-1.1.1, FR-1.2.2.
+/// The kind of role selection applied to a catalog.
 /// </summary>
 public enum TrinoSelectedRoleType
 {
@@ -16,7 +16,7 @@ public enum TrinoSelectedRoleType
 }
 
 /// <summary>
-/// A role selection sent via <c>X-Trino-Role</c> or received via <c>X-Trino-Set-Role</c>. See FR-1.1.1, FR-1.2.2.
+/// A role selection sent via <c>X-Trino-Role</c> or received via <c>X-Trino-Set-Role</c>.
 /// </summary>
 /// <param name="Type">The kind of selection.</param>
 /// <param name="RoleName">The role name, required only when <paramref name="Type"/> is <see cref="TrinoSelectedRoleType.Role"/>.</param>

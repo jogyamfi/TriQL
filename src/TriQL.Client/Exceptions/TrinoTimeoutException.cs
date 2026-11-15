@@ -2,7 +2,7 @@ namespace TriQL.Client.Exceptions;
 
 /// <summary>
 /// Raised when a client-side query deadline (<see cref="TrinoSessionOptions.QueryTimeout"/>) is exceeded.
-/// Distinct from <see cref="OperationCanceledException"/>, which signals caller-initiated cancellation. See FR-4.6.5, FR-12.1.
+/// Distinct from <see cref="OperationCanceledException"/>, which signals caller-initiated cancellation.
 /// </summary>
 public sealed class TrinoTimeoutException : TrinoException
 {

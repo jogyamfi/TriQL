@@ -5,11 +5,11 @@ namespace TriQL.Client.Internal.Json;
 
 /// <summary>
 /// Records the position, extent, and shape of a JSON member without materializing it, so the
-/// <c>data</c> array can be decoded later straight from the response bytes (NFR-PERF-3).
+/// <c>data</c> array can be decoded later straight from the response bytes.
 /// </summary>
 /// <param name="Start">Byte offset of the member's first token within the deserialized buffer.</param>
 /// <param name="Length">Length in bytes of the member's complete token sequence.</param>
-/// <param name="Kind">The member's JSON shape, used for direct-vs-spooled detection (FR-5.1.2).</param>
+/// <param name="Kind">The member's JSON shape, used for direct-vs-spooled detection.</param>
 internal readonly record struct RawJsonSlice(int Start, int Length, JsonValueKind Kind);
 
 /// <summary>

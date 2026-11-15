@@ -4,7 +4,7 @@ namespace TriQL.Client.Types;
 
 /// <summary>
 /// A Trino <c>time(p)</c> value where <c>p &gt; 7</c>, exceeding the 100 ns resolution of
-/// <see cref="TimeOnly"/>. Stores time-of-day at picosecond resolution. See FR-7.2.1, FR-7.2.3.
+/// <see cref="TimeOnly"/>. Stores time-of-day at picosecond resolution.
 /// </summary>
 public readonly struct TrinoTime :
     IEquatable<TrinoTime>,

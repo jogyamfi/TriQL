@@ -5,7 +5,7 @@ namespace TriQL.Client.Internal;
 /// <summary>
 /// Estimates the in-memory size of decoded row data for <see cref="PageBuffer"/> accounting.
 /// Deliberately measures the <b>decoded payload</b>, never the raw response string length
-/// (FR-6.5): estimating from <c>responseStr.Length</c> understates managed memory for wide rows,
+///: estimating from <c>responseStr.Length</c> understates managed memory for wide rows,
 /// since JSON escaping and BCL object overhead diverge sharply from wire size.
 /// </summary>
 internal static class PayloadSizeEstimator

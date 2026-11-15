@@ -5,7 +5,7 @@ namespace TriQL.Client.Types;
 
 /// <summary>
 /// An arbitrary-precision decimal value for <c>decimal(p,s)</c> columns where <c>p &gt; 28</c>,
-/// beyond what the BCL <see cref="decimal"/> can represent losslessly. See FR-7.2.1, FR-7.2.3.
+/// beyond what the BCL <see cref="decimal"/> can represent losslessly.
 /// </summary>
 public readonly struct TrinoBigDecimal :
     IEquatable<TrinoBigDecimal>,

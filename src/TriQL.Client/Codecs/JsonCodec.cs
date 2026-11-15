@@ -5,7 +5,7 @@ namespace TriQL.Client.Codecs;
 /// <summary>
 /// The built-in, always-registered <c>json</c> (uncompressed) codec. Also used as the effective
 /// codec for any segment whose metadata omits <c>uncompressedSize</c>, regardless of the
-/// negotiated top-level encoding — see the divergence note on <c>SegmentClient.DecodeSegmentBytes</c>. FR-5.3.1.
+/// negotiated top-level encoding — see the divergence note on <c>SegmentClient.DecodeSegmentBytes</c>.
 /// </summary>
 internal sealed class JsonCodec : ISegmentCodec
 {

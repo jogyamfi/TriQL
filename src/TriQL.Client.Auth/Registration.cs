@@ -7,7 +7,7 @@ namespace TriQL.Client.Auth;
 /// <summary>
 /// Registers <see cref="OAuth2ClientCredentialsAuthenticator"/> and <see cref="EntraIdAuthenticator"/>
 /// with the connection-string authenticator registry as soon as this assembly is loaded, making
-/// <c>Auth=oauth2-client-credentials</c> and <c>Auth=entra-id</c> resolvable (FR-2.3.4, P6-T3).
+/// <c>Auth=oauth2-client-credentials</c> and <c>Auth=entra-id</c> resolvable.
 /// </summary>
 internal static class Registration
 {

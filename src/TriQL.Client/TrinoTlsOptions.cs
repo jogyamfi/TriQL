@@ -4,7 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 namespace TriQL.Client;
 
 /// <summary>
-/// TLS policy for connections to the coordinator. See FR-3.2.1.
+/// TLS policy for connections to the coordinator.
 /// </summary>
 public sealed class TrinoTlsOptions
 {
@@ -26,7 +26,7 @@ public sealed class TrinoTlsOptions
 
     /// <summary>
     /// Additional trusted roots used to build a custom chain via <see cref="X509ChainTrustMode.CustomRootTrust"/>.
-    /// These are never added to <see cref="ClientCertificates"/> (FR-3.2.4).
+    /// These are never added to <see cref="ClientCertificates"/>.
     /// </summary>
     public ICollection<X509Certificate2> TrustedRootCertificates { get; } = new List<X509Certificate2>();
 
@@ -44,7 +44,6 @@ public sealed class TrinoTlsOptions
 
     /// <summary>
     /// Permit transmission of a bearer credential over an unencrypted <c>http</c> connection. Default <see langword="false"/>.
-    /// See FR-1.1.3, SEC-3.
     /// </summary>
     public bool AllowPlaintextCredentials { get; set; }
 

@@ -4,7 +4,7 @@ namespace TriQL.Client.Types;
 
 /// <summary>
 /// A Trino <c>time(p) with time zone</c> value: a time-of-day plus a fixed UTC offset. There is no
-/// CLR equivalent for a zoned time-of-day without a calendar date. See FR-7.2.1, FR-7.2.3.
+/// CLR equivalent for a zoned time-of-day without a calendar date.
 /// </summary>
 public readonly struct TrinoTimeWithTimeZone :
     IEquatable<TrinoTimeWithTimeZone>,

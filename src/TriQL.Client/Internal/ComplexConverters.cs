@@ -5,13 +5,13 @@ using TriQL.Client.Types;
 namespace TriQL.Client.Internal;
 
 /// <summary>
-/// Materializes <c>array(T)</c> and <c>map(K,V)</c> wire values. See FR-7.2.1.
+/// Materializes <c>array(T)</c> and <c>map(K,V)</c> wire values.
 /// </summary>
 /// <remarks>
 /// Array elements are given a strongly-typed <c>T[]</c> array for every scalar leaf type via an
 /// explicit switch (never <c>Array.CreateInstance</c>/<c>Type.MakeArrayType</c>, which are
 /// AOT/trim-incompatible); nested array/map/row elements fall back to <c>object?[]</c>, which the
-/// FR-7.2.1 table already anticipates. Maps always use <c>IReadOnlyDictionary&lt;object,object?&gt;</c>
+/// type-mapping table already anticipates. Maps always use <c>IReadOnlyDictionary&lt;object,object?&gt;</c>
 /// — building the full key-type × value-type generic cross product via reflection would likewise
 /// require AOT-incompatible <c>Type.MakeGenericType</c>.
 /// </remarks>

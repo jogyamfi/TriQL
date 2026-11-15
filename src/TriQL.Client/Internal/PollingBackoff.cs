@@ -2,7 +2,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Adaptive polling delay: immediate after a page with rows, otherwise an exponentially
-/// increasing delay reset to <c>initial</c> the moment a page with rows is seen again. See FR-4.4.
+/// increasing delay reset to <c>initial</c> the moment a page with rows is seen again.
 /// </summary>
 internal sealed class PollingBackoff
 {

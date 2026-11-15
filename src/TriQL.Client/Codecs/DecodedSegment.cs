@@ -5,7 +5,7 @@ namespace TriQL.Client.Codecs;
 /// <summary>
 /// A decoded segment payload: either the original bytes passed through verbatim (the <c>json</c>
 /// codec never copies), or a buffer rented from <see cref="ArrayPool{T}.Shared"/> that MUST be
-/// returned via <see cref="Dispose"/> — on every path, including exceptional ones (FR-5.3.5).
+/// returned via <see cref="Dispose"/> — on every path, including exceptional ones.
 /// </summary>
 internal readonly struct DecodedSegment : IDisposable
 {

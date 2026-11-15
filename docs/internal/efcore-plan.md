@@ -5,7 +5,7 @@
 | Document | EF Core provider — phased implementation plan |
 | Product | `TriQL.EntityFrameworkCore` — Entity Framework Core 10 provider for Trino |
 | Builds on | `TriQL.Data.ADO` 1.x (`TrinoConnection`, `TrinoCommand`, `TrinoDataReader`) |
-| Modelled on | `BricksNet.EntityFrameworkCore` (`C:\DevelopmentRep\BricksNet\docs\EFCORE_PLAN.md`) |
+| Modelled on | `BricksNet.EntityFrameworkCore` |
 | Date | 2026-10-07 |
 | Status | Phases 0–10 complete (2026-10-08, branch `feature/efcore-provider`); ready for review and the 1.1.0 release |
 
@@ -157,14 +157,14 @@ Findings from reading `src/TriQL.Client` and `src/TriQL.Data.ADO`:
 
 | # | Gap | Where | Impact on EF |
 |---|---|---|---|
-| G1 | Parameterized SQL is registered as a session prepared statement and sent in the `X-Trino-Prepared-Statement` header on every request. | [TrinoClient.cs:143](../src/TriQL.Client/TrinoClient.cs#L143), [ProtocolHeaders.cs:40](../src/TriQL.Client/Internal/ProtocolHeaders.cs#L40) | **Revised after measurement (T6):** the default coordinator accepts ~1.7 MB headers, so this only fails behind proxies or gateways with small header limits. Addressed by the opt-in `ExecuteImmediate` binding (EF0-T1), not by changing the default. |
-| G2 | Each `TrinoConnection.Open()` creates a new `TrinoClient` and, without an `IHttpClientFactory`, a new `SocketsHttpHandler`. `Close()` disposes it. | [TrinoConnection.cs:117-118](../src/TriQL.Data.ADO/TrinoConnection.cs#L117-L118), `TrinoClient.CreateOwnedInvoker` | EF opens and closes the connection around every command, so every query pays a TCP + TLS handshake, and sockets churn. |
-| G3 | `GetFieldValue<T>` returns only the exact CLR type (or `JsonDocument`). | `TrinoRow.GetFieldValue<T>` ([TrinoRow.cs:81-105](../src/TriQL.Client/TrinoRow.cs#L81-L105)) | EF materialisers call `GetFieldValue<T>` for types without a dedicated getter. Fails for `long` on `integer`, `decimal` on `decimal(p > 28)` (which returns `TrinoBigDecimal`), `DateTime` on `timestamp(p > 7)`, `byte`/`ushort`/`uint`/`ulong`, `char`, enums. |
-| G4 | `TrinoDataReader.RecordsAffected` returns `-1` whenever the result has columns. | [TrinoDataReader.cs:92-111](../src/TriQL.Data.ADO/TrinoDataReader.cs#L92-L111) | Trino DML returns a `rows` column (T2), so a reader over `UPDATE` reports `-1`. EF's concurrency checks would then fail. Also verify that `TrinoResultSet.UpdateCount` reflects the **final** page, not only the initial response. |
-| G5 | `TrinoDbParameter.Precision`/`Scale` are declared with `new`, hiding `DbParameter.Precision`/`Scale` instead of overriding them. | [TrinoDbParameter.cs:81-84](../src/TriQL.Data.ADO/TrinoDbParameter.cs#L81-L84) | EF's `RelationalTypeMapping.ConfigureParameter` sets precision and scale through the `DbParameter` base type, so the values are silently lost. |
+| G1 | Parameterized SQL is registered as a session prepared statement and sent in the `X-Trino-Prepared-Statement` header on every request. | [TrinoClient.cs:143](../../src/TriQL.Client/TrinoClient.cs#L143), [ProtocolHeaders.cs:40](../../src/TriQL.Client/Internal/ProtocolHeaders.cs#L40) | **Revised after measurement (T6):** the default coordinator accepts ~1.7 MB headers, so this only fails behind proxies or gateways with small header limits. Addressed by the opt-in `ExecuteImmediate` binding (EF0-T1), not by changing the default. |
+| G2 | Each `TrinoConnection.Open()` creates a new `TrinoClient` and, without an `IHttpClientFactory`, a new `SocketsHttpHandler`. `Close()` disposes it. | [TrinoConnection.cs:117-118](../../src/TriQL.Data.ADO/TrinoConnection.cs#L117-L118), `TrinoClient.CreateOwnedInvoker` | EF opens and closes the connection around every command, so every query pays a TCP + TLS handshake, and sockets churn. |
+| G3 | `GetFieldValue<T>` returns only the exact CLR type (or `JsonDocument`). | `TrinoRow.GetFieldValue<T>` ([TrinoRow.cs:81-105](../../src/TriQL.Client/TrinoRow.cs#L81-L105)) | EF materialisers call `GetFieldValue<T>` for types without a dedicated getter. Fails for `long` on `integer`, `decimal` on `decimal(p > 28)` (which returns `TrinoBigDecimal`), `DateTime` on `timestamp(p > 7)`, `byte`/`ushort`/`uint`/`ulong`, `char`, enums. |
+| G4 | `TrinoDataReader.RecordsAffected` returns `-1` whenever the result has columns. | [TrinoDataReader.cs:92-111](../../src/TriQL.Data.ADO/TrinoDataReader.cs#L92-L111) | Trino DML returns a `rows` column (T2), so a reader over `UPDATE` reports `-1`. EF's concurrency checks would then fail. Also verify that `TrinoResultSet.UpdateCount` reflects the **final** page, not only the initial response. |
+| G5 | `TrinoDbParameter.Precision`/`Scale` are declared with `new`, hiding `DbParameter.Precision`/`Scale` instead of overriding them. | [TrinoDbParameter.cs:81-84](../../src/TriQL.Data.ADO/TrinoDbParameter.cs#L81-L84) | EF's `RelationalTypeMapping.ConfigureParameter` sets precision and scale through the `DbParameter` base type, so the values are silently lost. |
 | G6 | The session time zone defaults to the client machine's zone. | `TrinoSessionOptions.TimeZone` | Results of `DateTime.Now`, `DateTimeOffset` parts and timestamp casts differ between machines. **No core change needed:** `TrinoConnectionStringBuilder.TimeZone` is `null` unless the connection string sets it, so the EF provider can default to UTC on its own (EF1-T5). |
-| G7 | A `null` parameter renders as an untyped `NULL`, even when `DbType`/`TrinoType` is set. | [SqlLiteralEncoder.cs:19-22](../src/TriQL.Client/Internal/SqlLiteralEncoder.cs#L19-L22) | `COALESCE(?, col)`, `CASE`, `SELECT ?` and some function arguments fail type inference with `unknown`. |
-| G8 | `DbType.DateTime` maps to bare `timestamp`, which is `timestamp(3)`. | [DbTypeMapping.cs](../src/TriQL.Client/Internal/DbTypeMapping.cs) | Only matters on the explicit-type path (CLR-type encoding wins today), but EF sends typed nulls through it once G7 is fixed, so this needs `timestamp(6)`. |
+| G7 | A `null` parameter renders as an untyped `NULL`, even when `DbType`/`TrinoType` is set. | [SqlLiteralEncoder.cs:19-22](../../src/TriQL.Client/Internal/SqlLiteralEncoder.cs#L19-L22) | `COALESCE(?, col)`, `CASE`, `SELECT ?` and some function arguments fail type inference with `unknown`. |
+| G8 | `DbType.DateTime` maps to bare `timestamp`, which is `timestamp(3)`. | [DbTypeMapping.cs](../../src/TriQL.Client/Internal/DbTypeMapping.cs) | Only matters on the explicit-type path (CLR-type encoding wins today), but EF sends typed nulls through it once G7 is fixed, so this needs `timestamp(6)`. |
 | G9 | Query failures carry `ErrorName`/`ErrorType`, but there is no notion of a *transient* query error. `IsRetryable` covers transport failures only. | `TrinoQueryException`, `RetryPolicy` | The EF execution strategy needs a shared classification (`ICEBERG_COMMIT_ERROR`, `SERVER_STARTING_UP`, `CLUSTER_OUT_OF_MEMORY`, `TOO_MANY_REQUESTS_FAILED`, 429/503). |
 | G10 | One command at a time per connection (FR-9.1.15). | `TrinoConnection.BeginCommand` | EF split queries and nested readers must buffer. Verify that EF buffers when the connection does not support multiple active result sets (Phase 3). No core change is planned. |
 | G11 | `src/` projects inherit `IsTrimmable`/`IsAotCompatible` and PublicAPI analyzers from `Directory.Build.props`. | `Directory.Build.props` | EF Core's runtime is not trim/AOT safe, so the EF project must opt out of trimming and AOT. It keeps the PublicAPI analyzers. |
@@ -854,7 +854,7 @@ and retries of transient conflicts.
 Make writes and repeated queries practical despite per-statement latency (T19).
 
 > **Status: done.** 12 SQL baselines and 7 live tests (5 `EfIceberg`, 2 `EfRead`); benchmarks in
-> [benchmarks.md §9](benchmarks.md#9-ef-core-provider--ef7-t6). What was built and found:
+> [benchmarks.md §9](../benchmarks.md#9-ef-core-provider--ef7-t6). What was built and found:
 > - **New, measured on 466: Trino's `UPDATE` and `DELETE` take no table alias** (`mismatched input 'AS'`),
 >   but EF always generates `DELETE FROM t AS a` / `UPDATE t AS a`. Every `ExecuteDelete`/`ExecuteUpdate`
 >   would have failed on the server; the earlier phases had them only in SQL baselines. The generator now
@@ -1042,7 +1042,7 @@ produces a compiling `DbContext` and entities for existing tables and views.
 ## Phase 10 — Docs, samples, packaging and release
 
 > **Status: done, release not yet cut.** What was built:
-> - **User guide (EF10-T1):** [`docs/efcore.md`](efcore.md), structured like BricksNet's, built only from
+> - **User guide (EF10-T1):** [`docs/efcore.md`](../efcore.md), structured like BricksNet's, built only from
 >   behaviour measured or tested in Phases 0–9.
 > - **README (EF10-T2):** the package in the list and install block, an EF Core quick start, and a link to the
 >   guide. (The README is also every package's NuGet README.)

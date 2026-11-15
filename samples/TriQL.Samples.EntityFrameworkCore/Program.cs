@@ -1,4 +1,4 @@
-// TriQL.EntityFrameworkCore quick start (EF10-T3). Reads the coordinator from TRINO_SERVER (default
+// TriQL.EntityFrameworkCore quick start. Reads the coordinator from TRINO_SERVER (default
 // http://localhost:8080/) and, for the write examples, a catalog that supports UPDATE, DELETE and MERGE
 // from TRINO_WRITE_CATALOG (default "iceberg"). Run: `TRINO_SERVER=https://host:8443 dotnet run`.
 using Microsoft.EntityFrameworkCore;

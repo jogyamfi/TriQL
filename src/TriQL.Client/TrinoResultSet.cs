@@ -9,8 +9,8 @@ namespace TriQL.Client;
 
 /// <summary>
 /// The streaming result of a query submitted via <see cref="TrinoClient.ExecuteAsync(string, TrinoParameterCollection?, bool, System.Threading.CancellationToken)"/>. Pages are
-/// fetched on a background task while the consumer processes already-buffered rows (FR-6.1);
-/// disposing before enumeration completes cancels the query server-side (FR-4.6.6).
+/// fetched on a background task while the consumer processes already-buffered rows;
+/// disposing before enumeration completes cancels the query server-side.
 /// </summary>
 public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
 {
@@ -73,7 +73,7 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
     /// <summary>The id of the underlying query.</summary>
     public string QueryId { get; }
 
-    /// <summary>The Trino web UI deep-link for this query, if reported. See FR-10.4.</summary>
+    /// <summary>The Trino web UI deep-link for this query, if reported.</summary>
     public Uri? InfoUri { get; }
 
     /// <summary>The column schema, once known. Empty until <see cref="WaitForSchemaAsync"/> completes or a row is read.</summary>
@@ -88,25 +88,25 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
     /// <summary>The server-reported affected-row count for DDL/DML statements, once known.</summary>
     public long? UpdateCount => _updateCount;
 
-    /// <summary>The client-observed lifecycle state. See FR-4.5.2.</summary>
+    /// <summary>The client-observed lifecycle state.</summary>
     public TrinoQueryState State => _state.Current;
 
-    /// <summary>The last server-reported query state string (e.g. <c>RUNNING</c>), once known. See FR-4.5.2.</summary>
+    /// <summary>The last server-reported query state string (e.g. <c>RUNNING</c>), once known.</summary>
     public string? ServerState => _lastStats?.State;
 
-    /// <summary>Raised after each page with the latest statistics. See FR-11.3.1.</summary>
+    /// <summary>Raised after each page with the latest statistics.</summary>
     public event EventHandler<TrinoQueryProgressEventArgs>? Progress;
 
-    /// <summary>An alternative progress sink to <see cref="Progress"/>, invoked identically. See FR-11.3.1.</summary>
+    /// <summary>An alternative progress sink to <see cref="Progress"/>, invoked identically.</summary>
     public IProgress<TrinoQueryStats>? ProgressReporter { get; set; }
 
     /// <summary>
-    /// Completes as soon as the column schema is known, without requiring a row to be read. See FR-6.9.
+    /// Completes as soon as the column schema is known, without requiring a row to be read.
     /// </summary>
     public Task<IReadOnlyList<TrinoColumn>> WaitForSchemaAsync(CancellationToken cancellationToken = default) =>
         _schemaTcs.Task.WaitAsync(cancellationToken);
 
-    /// <summary>The page-level streaming surface. See FR-6.7.</summary>
+    /// <summary>The page-level streaming surface.</summary>
     public async IAsyncEnumerable<TrinoPage> ReadPagesAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Cancelling `cancellationToken` stops the producer promptly via this registration (FR-6.10).
@@ -125,7 +125,7 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
         }
     }
 
-    /// <summary>The primary row-level streaming surface. See FR-6.6.</summary>
+    /// <summary>The primary row-level streaming surface.</summary>
     public async IAsyncEnumerable<TrinoRow> ReadRowsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await foreach (var page in ReadPagesAsync(cancellationToken).ConfigureAwait(false))
@@ -139,7 +139,7 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
 
     /// <summary>
     /// Drains every row without materializing them, for DDL/DML statements or callers that only
-    /// need <see cref="UpdateType"/>/<see cref="UpdateCount"/>. See FR-6.12.
+    /// need <see cref="UpdateType"/>/<see cref="UpdateCount"/>.
     /// </summary>
     public async Task<TrinoExecutionSummary> DrainAsync(CancellationToken cancellationToken = default)
     {
@@ -179,7 +179,7 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
 
     /// <summary>
     /// Signals cancellation and returns immediately without blocking on the background pump
-    /// (NFR-REL-2 forbids sync-over-async). The pump still performs its own bounded (FR-4.6.2)
+    /// (the library never blocks on async work). The pump still performs its own bounded
     /// server-side cancellation in the background. Prefer <see cref="DisposeAsync"/> for a
     /// deterministic bounded wait.
     /// </summary>
@@ -323,7 +323,7 @@ public sealed class TrinoResultSet : IAsyncDisposable, IDisposable
     /// <summary>
     /// Guarantees <see cref="WaitForSchemaAsync"/> always completes once the query is over. A DDL/DML
     /// statement never carries columns, and a query that fails before its first schema-bearing page
-    /// never carries them either — without this, both would wait forever (FR-6.9).
+    /// never carries them either — without this, both would wait forever.
     /// </summary>
     private void SettleSchema(Exception? failure)
     {

@@ -4,7 +4,7 @@ using TriQL.Client;
 namespace TriQL.Data.ADO;
 
 /// <summary>
-/// A <see cref="DbDataSource"/> for pooled, DI-friendly <see cref="TrinoConnection"/> creation. See FR-9.4.3.
+/// A <see cref="DbDataSource"/> for pooled, DI-friendly <see cref="TrinoConnection"/> creation.
 /// </summary>
 /// <remarks>
 /// Every connection created by a data source sends its requests through one shared HTTP handler, so

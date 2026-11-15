@@ -1,7 +1,7 @@
 namespace TriQL.Client.Exceptions;
 
 /// <summary>
-/// Raised when the coordinator cannot be reached or a connection cannot be opened. See FR-12.1.
+/// Raised when the coordinator cannot be reached or a connection cannot be opened.
 /// </summary>
 public sealed class TrinoConnectionException : TrinoException
 {

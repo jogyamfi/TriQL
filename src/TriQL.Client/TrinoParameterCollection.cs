@@ -3,7 +3,7 @@ using System.Collections;
 namespace TriQL.Client;
 
 /// <summary>
-/// An ordered collection of <see cref="TrinoParameter"/> bound to a parameterized statement. See FR-8.7.
+/// An ordered collection of <see cref="TrinoParameter"/> bound to a parameterized statement.
 /// </summary>
 public sealed class TrinoParameterCollection : IReadOnlyList<TrinoParameter>
 {

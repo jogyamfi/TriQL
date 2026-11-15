@@ -4,8 +4,8 @@ using TriQL.Client.Exceptions;
 namespace TriQL.Client.Internal;
 
 /// <summary>
-/// SSRF containment for server-supplied segment and acknowledgement URIs (SEC-7, P5-T9, the closed
-/// G3 decision in requirements.md §23 Q6). Mirrors <see cref="RedirectHandler"/>'s scheme-downgrade
+/// SSRF containment for server-supplied segment and acknowledgement URIs.
+/// Mirrors <see cref="RedirectHandler"/>'s scheme-downgrade
 /// pattern: every check is scoped to one specific failure mode rather than a blanket accept/reject.
 /// </summary>
 internal static class UriGuard
@@ -24,7 +24,7 @@ internal static class UriGuard
         {
             throw new TrinoProtocolException(
                 $"The server-supplied ackUri '{ackUri}' does not share the coordinator's origin " +
-                $"({OriginOf(coordinatorOrigin)}). Segment acknowledgement is restricted to the session origin (SEC-7).");
+                $"({OriginOf(coordinatorOrigin)}). Segment acknowledgement is restricted to the session origin.");
         }
     }
 
@@ -74,7 +74,7 @@ internal static class UriGuard
         {
             throw new TrinoProtocolException(
                 $"The server-supplied {what} '{uri}' does not use the 'https' scheme. Spooled segment and " +
-                "acknowledgement endpoints are required to use https regardless of the coordinator's own scheme (SEC-7).");
+                "acknowledgement endpoints are required to use https regardless of the coordinator's own scheme.");
         }
     }
 

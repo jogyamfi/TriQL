@@ -12,7 +12,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Drives a single query's <c>POST /v1/statement</c> submission, <c>nextUri</c> advance loop, and
-/// <c>DELETE</c> cancellation. See FR-4.1, FR-4.3, FR-4.6.
+/// <c>DELETE</c> cancellation.
 /// </summary>
 internal sealed class StatementClient
 {
@@ -40,8 +40,8 @@ internal sealed class StatementClient
     }
 
     /// <summary>
-    /// <c>POST {server}/v1/statement</c> (FR-4.1.1). Retried only on pre-dispatch (connection)
-    /// failures, never on a response received after dispatch, to avoid duplicate query execution (FR-3.3.3).
+    /// <c>POST {server}/v1/statement</c>. Retried only on pre-dispatch (connection)
+    /// failures, never on a response received after dispatch, to avoid duplicate query execution.
     /// </summary>
     public async Task<TrinoPageEnvelope> SubmitAsync(string sql, CancellationToken cancellationToken)
     {
@@ -67,7 +67,7 @@ internal sealed class StatementClient
         return await ReadEnvelopeAsync(response, requestUri, previousColumns: null, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>Follows <paramref name="current"/>'s <c>nextUri</c> (FR-4.3.1).</summary>
+    /// <summary>Follows <paramref name="current"/>'s <c>nextUri</c>.</summary>
     public async Task<TrinoPageEnvelope> AdvanceAsync(TrinoPageEnvelope current, CancellationToken cancellationToken)
     {
         var nextUri = current.NextUri ?? throw new InvalidOperationException("AdvanceAsync requires a page with a nextUri.");
@@ -92,7 +92,7 @@ internal sealed class StatementClient
     /// <summary>
     /// <c>DELETE</c>s the last known <c>nextUri</c> (falling back to <c>partialCancelUri</c>) to
     /// terminate the query server-side. Idempotent; bounded by its own timeout, never the caller's
-    /// (possibly already-cancelled) token; failures are logged, never thrown. See FR-4.6.1—FR-4.6.4.
+    /// (possibly already-cancelled) token; failures are logged, never thrown.
     /// </summary>
     public async Task CancelAsync()
     {

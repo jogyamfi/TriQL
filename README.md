@@ -1,71 +1,62 @@
-# TriQL — .NET Client for Trino
+# TriQL — .NET client for Trino
 
-TriQL is a from-scratch .NET client library for [Trino](https://trino.io). It provides two
-complementary programming surfaces over the same core engine:
+[![NuGet](https://img.shields.io/nuget/v/TriQL.Client.svg)](https://www.nuget.org/packages/TriQL.Client)
+[![Downloads](https://img.shields.io/nuget/dt/TriQL.Client.svg)](https://www.nuget.org/packages/TriQL.Client)
+[![CI](https://github.com/jogyamfi/TriQL/actions/workflows/ci.yml/badge.svg)](https://github.com/jogyamfi/TriQL/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/jogyamfi/TriQL/blob/main/LICENSE)
 
-- **TriQL SDK** (`TriQL.Client`) — a low-level, async-first client that maps directly onto the
-  Trino client protocol (sessions, statements, pages, rows). Intended for high-throughput data
-  movement, custom tooling, and callers who want explicit control over paging and buffering.
-- **TriQL ADO.NET Provider** (`TriQL.Data.ADO`) — a complete `System.Data.Common` provider
-  (`DbConnection`, `DbCommand`, `DbDataReader`, `DbParameter`, `DbProviderFactory`) so that Trino
-  can be used from existing ADO.NET-based applications, ORMs, reporting tools, and BI connectors.
+TriQL lets .NET applications query [Trino](https://trino.io). Use it three ways, depending on how
+much abstraction you want:
 
-Additional packages:
+- a **streaming client** that hands you rows as the server produces them,
+- an **ADO.NET provider** (`DbConnection`, `DbCommand`, `DbDataReader`) that works with Dapper,
+  reporting tools and any other ADO.NET-based code,
+- an **Entity Framework Core provider** for LINQ queries and `SaveChanges`.
 
-- `TriQL.Client.Auth` — cloud/enterprise authentication providers (Microsoft Entra ID, OAuth 2.0
-  client credentials) kept isolated so their dependencies never leak into the core client.
-- `TriQL.Client.Compression` — support for compressed spooled protocol payloads.
-- `TriQL.EntityFrameworkCore` — an Entity Framework Core 10 provider: LINQ on any
-  connector, `SaveChanges` and bulk updates on Iceberg, and `dotnet ef dbcontext scaffold`.
+## Packages
 
-See [docs/requirements.md](https://github.com/jogyamfi/TriQL/blob/main/docs/requirements.md) for
-the full requirements specification and
-[docs/implementation-plan.md](https://github.com/jogyamfi/TriQL/blob/main/docs/implementation-plan.md)
-for the phased delivery plan.
+| Package | Use it for |
+|---|---|
+| [`TriQL.Client`](https://www.nuget.org/packages/TriQL.Client) | The async streaming client. No third-party dependencies beyond `Microsoft.Extensions.Logging.Abstractions`. |
+| [`TriQL.Data.ADO`](https://www.nuget.org/packages/TriQL.Data.ADO) | The ADO.NET provider. |
+| [`TriQL.EntityFrameworkCore`](https://www.nuget.org/packages/TriQL.EntityFrameworkCore) | The Entity Framework Core 10 provider. |
+| [`TriQL.Client.Auth`](https://www.nuget.org/packages/TriQL.Client.Auth) | Optional. Microsoft Entra ID and OAuth 2.0 client-credentials authentication. |
+| [`TriQL.Client.Compression`](https://www.nuget.org/packages/TriQL.Client.Compression) | Optional. LZ4 and Zstandard codecs for the spooling protocol. |
 
-## Status
-
-**Stable — 1.1.0.** TriQL follows [Semantic Versioning](https://semver.org): breaking public-API
-changes only in a major version, additive API in minors, fixes in patches. The public API surface
-of each shipping package is locked by `PublicAPI.Shipped.txt` baselines and enforced at build time.
-The Entity Framework Core provider, `TriQL.EntityFrameworkCore`, is stable and shares the core
-packages' version.
-
-The one deliberately conservative default in 1.x is the spooling protocol, which ships implemented
-and tested but **opt-in** — see [Spooling protocol](#spooling-protocol-opt-in). Release notes for
-every version are published on [GitHub Releases](https://github.com/jogyamfi/TriQL/releases).
+All packages share one version number and follow [Semantic Versioning](https://semver.org).
 
 ## Requirements
 
-- .NET 10.0. `netstandard2.0` and .NET Framework are not supported.
-- **Trino server 466 or later** (27 Nov 2024, the release that introduced the spooling protocol).
-  This is the minimum version the conformance suite verifies against; the CI matrix covers
-  `{466, latest}`.
+- .NET 10. (.NET Framework and `netstandard2.0` are not supported.)
+- Trino 466 or later.
 
 ## Install
 
+Install the package for the layer you want; each one brings in the layers beneath it.
+
 ```bash
-dotnet add package TriQL.Client        # streaming SDK
-dotnet add package TriQL.Data.ADO      # ADO.NET provider
-dotnet add package TriQL.Client.Auth   # optional: Entra ID / OAuth2 authentication
-dotnet add package TriQL.Client.Compression  # optional: json+lz4 / json+zstd spooling codecs
-dotnet add package TriQL.EntityFrameworkCore  # Entity Framework Core 10 provider
+dotnet add package TriQL.Client               # streaming client
+dotnet add package TriQL.Data.ADO             # ADO.NET provider
+dotnet add package TriQL.EntityFrameworkCore  # EF Core provider
 ```
 
-## Quick start: TriQL SDK (streaming)
+## Quick start
+
+### Streaming client
 
 ```csharp
 using TriQL.Client;
 
 var options = new TrinoSessionOptions
 {
-    Server = new Uri("https://trino.example.com:443/"),
+    Server = new Uri("https://trino.example.com/"),
     Catalog = "tpch",
     Schema = "tiny",
 };
 
 await using var client = new TrinoClient(options);
-await using var resultSet = await client.ExecuteAsync("SELECT nationkey, name FROM tpch.tiny.nation ORDER BY nationkey");
+await using var resultSet = await client.ExecuteAsync(
+    "SELECT nationkey, name FROM nation ORDER BY nationkey");
 
 await foreach (var row in resultSet.ReadRowsAsync())
 {
@@ -73,24 +64,19 @@ await foreach (var row in resultSet.ReadRowsAsync())
 }
 ```
 
-## Quick start: ADO.NET provider
+Rows are streamed, not buffered: memory use stays flat however large the result is.
+
+### ADO.NET
 
 ```csharp
-using System.Data.Common;
 using TriQL.Data.ADO;
 
-var connectionString = new TrinoConnectionStringBuilder
-{
-    Server = "https://trino.example.com:443/",
-    Catalog = "tpch",
-    Schema = "tiny",
-}.ConnectionString;
-
-await using DbConnection connection = new TrinoConnection(connectionString);
+await using var connection = new TrinoConnection(
+    "Server=https://trino.example.com/;Catalog=tpch;Schema=tiny");
 await connection.OpenAsync();
 
 await using var command = connection.CreateCommand();
-command.CommandText = "SELECT nationkey, name FROM tpch.tiny.nation ORDER BY nationkey";
+command.CommandText = "SELECT nationkey, name FROM nation ORDER BY nationkey";
 
 await using var reader = await command.ExecuteReaderAsync();
 while (await reader.ReadAsync())
@@ -99,11 +85,10 @@ while (await reader.ReadAsync())
 }
 ```
 
-More runnable examples — including Microsoft Entra ID authentication and `IAsyncEnumerable`
-consumption — live in
-[samples/TriQL.Samples.Console](https://github.com/jogyamfi/TriQL/blob/main/samples/TriQL.Samples.Console/Program.cs).
+Every connection-string key is listed in the
+[connection-string reference](https://github.com/jogyamfi/TriQL/blob/main/docs/connection-string-reference.md).
 
-## Quick start: Entity Framework Core
+### Entity Framework Core
 
 ```csharp
 public class Nation
@@ -126,67 +111,125 @@ services.AddDbContext<TpchContext>(options => options.UseTrino(
     "Server=https://trino.example.com;Catalog=tpch;Schema=tiny;User=analyst",
     o => o.EnableRetryOnFailure()));
 
-var europe = await db.Nations.Where(n => n.RegionKey == 3).OrderBy(n => n.Name).Select(n => n.Name).ToListAsync();
+var names = await db.Nations
+    .Where(n => n.RegionKey == 3)
+    .OrderBy(n => n.Name)
+    .Select(n => n.Name)
+    .ToListAsync();
 ```
 
-Trino has no multi-statement transactions, identity columns or enforced keys, so the provider sets
-keys in .NET, commits each `SaveChanges` statement on its own, and rejects unsupported model
-configuration with guidance. Writes are verified on the Iceberg connector. See the
-[EF Core guide](https://github.com/jogyamfi/TriQL/blob/main/docs/efcore.md) and
-[samples/TriQL.Samples.EntityFrameworkCore](https://github.com/jogyamfi/TriQL/blob/main/samples/TriQL.Samples.EntityFrameworkCore/Program.cs).
+LINQ queries work against any Trino connector. Writes (`SaveChanges`, `ExecuteUpdate`,
+`ExecuteDelete`) are verified on the Iceberg connector. Three things differ from a typical
+relational provider, because Trino itself works differently:
 
-## Spooling protocol (opt-in)
+- **`SaveChanges` is not atomic.** Trino has no multi-statement transactions, so each statement
+  commits on its own.
+- **Keys are generated in .NET.** Trino has no identity columns.
+- **Migrations are not supported.** `EnsureCreated`/`EnsureDeleted` and
+  `dotnet ef dbcontext scaffold` are.
 
-Trino's spooling protocol (compressed, object-storage-backed result segments) is implemented but
-ships **off by default and opt-in** (1.0 and 1.1): `TrinoSessionOptions.QueryDataEncodings` defaults to
-an empty list, which forces the direct protocol. Enable it explicitly once your cluster is
-configured for spooling:
+The [EF Core guide](https://github.com/jogyamfi/TriQL/blob/main/docs/efcore.md) covers all of this
+in detail.
+
+## Parameters
+
+Pass values as parameters instead of concatenating them into SQL. Both positional (`?`) and named
+(`:name`) placeholders are supported:
 
 ```csharp
-// The json+lz4 and json+zstd codecs live in the separate TriQL.Client.Compression package
-// (kept out of TriQL.Client to stay dependency-free) and must be registered before executing
-// a query that can select them, or the client throws TrinoProtocolException once the server
-// picks an encoding it can't decode.
+var parameters = new TrinoParameterCollection();
+parameters.Add("region", 3);
+
+await using var resultSet = await client.ExecuteAsync(
+    "SELECT name FROM nation WHERE regionkey = :region", parameters);
+```
+
+The ADO.NET provider takes parameters through the usual `DbCommand.Parameters` collection.
+
+## Authentication
+
+| Method | Connection string | Streaming client |
+|---|---|---|
+| None (user name only) | `User=alice` | default |
+| Password (Basic / LDAP) | `Auth=basic;User=alice;Password=…` | `new BasicAuthenticator(user, password)` |
+| JWT | `Auth=jwt;AccessToken=…` | `new JwtAuthenticator(token)`, or a callback that refreshes the token |
+| Client certificate (mutual TLS) | `Auth=certificate;ClientCertificatePath=…` | `ClientCertificateAuthenticator.FromFile(path)` |
+| Microsoft Entra ID | `Auth=entra-id;…` | `new EntraIdAuthenticator(scopes, credential)` |
+| OAuth 2.0 client credentials | `Auth=oauth2-client-credentials;…` | `new OAuth2ClientCredentialsAuthenticator(…)` |
+
+With the streaming client, assign the authenticator to `TrinoSessionOptions.Authenticator`:
+
+```csharp
+var options = new TrinoSessionOptions
+{
+    Server = new Uri("https://trino.example.com/"),
+    Authenticator = new BasicAuthenticator("alice", password),
+};
+```
+
+Entra ID and OAuth 2.0 need the `TriQL.Client.Auth` package. Credentials are only sent over HTTPS
+unless you explicitly allow otherwise. You can also plug in your own scheme by implementing
+`ITrinoAuthenticator`.
+
+## Spooling protocol
+
+Trino's [spooling protocol](https://trino.io/docs/current/client/client-protocol.html) delivers
+large results as compressed segments from object storage instead of through the coordinator. TriQL
+supports it, but it is **off by default** — turn it on once your cluster is configured for it:
+
+```csharp
+// Needs the TriQL.Client.Compression package. Call once at startup.
 TriQL.Client.Compression.CompressionCodecs.RegisterAll();
 
 options.QueryDataEncodings = ["json+zstd", "json+lz4", "json"];
 ```
 
-Add a `<PackageReference Include="TriQL.Client.Compression" />` to your project, or set
-`QueryDataEncodings = ["json"]` to enable spooling with the built-in uncompressed codec only,
-which needs no extra package or registration call.
+To use spooling without the extra package, set `QueryDataEncodings = ["json"]` (uncompressed).
 
-Cluster prerequisites:
+Things to know:
 
-- The coordinator must be spooling-configured (`protocol.spooling.enabled=true`, an object-storage
-  spooling manager, and a shared secret key). A cluster without spooling simply returns
-  direct-protocol data, which TriQL handles transparently.
-- **The coordinator must be served over HTTPS**, as well as the object store. TriQL requires
-  `https` on every segment and acknowledgement URI, so a plain-HTTP coordinator with spooling
-  enabled fails with `TrinoProtocolException`.
+- The cluster needs `protocol.spooling.enabled=true`, an object-storage spooling manager and a
+  shared secret key. If the cluster is not set up for spooling, TriQL falls back to the direct
+  protocol automatically.
+- Both the coordinator and the object store must be served over **HTTPS**. TriQL refuses to fetch
+  segments over plain HTTP.
+- Tuning options on `TrinoSessionOptions`: `SegmentFetchParallelism` (default 4),
+  `MaxDecompressedSegmentBytes` (default 256 MiB) and `SegmentHostAllowlist` (limits which hosts
+  segments may be fetched from).
+- Spooling is tested against MinIO. It has not yet been verified against AWS S3 or Azure Blob
+  Storage, which is why it remains opt-in. A future minor release is expected to enable it by
+  default; setting `QueryDataEncodings = []` will keep the direct protocol.
 
-Related options on `TrinoSessionOptions`: `SegmentFetchParallelism` (default 4),
-`MaxDecompressedSegmentBytes` (default 256 MiB), and `SegmentHostAllowlist` (restricts which
-object-storage hosts segments may be fetched from; empty allows any `https` host).
+## Diagnostics
 
-The spooled path is verified in CI against a real spooling-configured Trino coordinator backed by
-MinIO (all three codecs, SSE-C encryption, segment acknowledgement, and cancellation cleanup). It
-stays opt-in because it has not yet been checked against AWS S3 or Azure Blob Storage, and
-throughput over the spooled path has not been benchmarked. Making it the default is planned for a
-later minor release; that release will call out the behaviour change, and setting
-`QueryDataEncodings = []` will keep the direct protocol.
+TriQL logs through `Microsoft.Extensions.Logging` and publishes OpenTelemetry-compatible metrics
+and traces under the name `TriQL.Client`. Nothing is emitted unless you subscribe. See the
+[troubleshooting guide](https://github.com/jogyamfi/TriQL/blob/main/docs/troubleshooting.md) for
+the exception types, common errors and how to turn on detailed logging.
 
 ## Documentation
 
 - [Entity Framework Core guide](https://github.com/jogyamfi/TriQL/blob/main/docs/efcore.md)
 - [Connection-string reference](https://github.com/jogyamfi/TriQL/blob/main/docs/connection-string-reference.md)
-- [Type-mapping reference](https://github.com/jogyamfi/TriQL/blob/main/docs/type-mapping-reference.md)
+- [Type-mapping reference](https://github.com/jogyamfi/TriQL/blob/main/docs/type-mapping-reference.md) — how Trino types map to .NET types
 - [Troubleshooting guide](https://github.com/jogyamfi/TriQL/blob/main/docs/troubleshooting.md)
-- [Benchmarks](https://github.com/jogyamfi/TriQL/blob/main/docs/benchmarks.md)
-- [API reference](https://github.com/jogyamfi/TriQL/blob/main/docs/api-reference.md) (generated from XML doc comments)
-- [Release notes](https://github.com/jogyamfi/TriQL/releases)
+- [Samples](https://github.com/jogyamfi/TriQL/tree/main/samples) — runnable projects for each quick start and authentication method
+- [Changelog](https://github.com/jogyamfi/TriQL/blob/main/CHANGELOG.md) and [release notes](https://github.com/jogyamfi/TriQL/releases)
+
+## Getting help and contributing
+
+Found a bug or have a question? [Open an issue](https://github.com/jogyamfi/TriQL/issues). Pull
+requests are welcome — to build and run the unit tests you need only the .NET 10 SDK:
+
+```bash
+dotnet build
+dotnet test
+```
+
+The integration tests start Trino in a container, so they also need Docker.
 
 ## License
 
 [Apache-2.0](https://github.com/jogyamfi/TriQL/blob/main/LICENSE)
 
+TriQL is an independent project and is not affiliated with the Trino Software Foundation.

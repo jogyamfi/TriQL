@@ -5,7 +5,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Classifies a page-level <c>error</c> and builds the corresponding <see cref="TrinoQueryException"/>.
-/// Every <c>errorType</c> in FR-12.2.1 is terminal, so this never signals retryability. See FR-12.2.1, FR-12.2.2.
+/// Every <c>errorType</c> Trino reports is terminal, so this never signals retryability.
 /// </summary>
 internal static class FailureClassifier
 {

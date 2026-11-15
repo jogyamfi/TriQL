@@ -3,7 +3,7 @@ namespace TriQL.Client.Internal;
 /// <summary>
 /// A byte-budget gate used to implement <see cref="PageBuffer"/> backpressure: suspends without
 /// spinning when the budget is exhausted, and resumes as soon as the consumer releases enough
-/// space. See FR-6.2, FR-6.4.
+/// space.
 /// </summary>
 internal sealed class ByteBudgetGate
 {
@@ -30,7 +30,7 @@ internal sealed class ByteBudgetGate
     /// <summary>
     /// Reserves <paramref name="size"/> bytes, awaiting a release signal if the budget is
     /// currently exhausted. A single reservation is always admitted when nothing else is
-    /// occupying space, even if it alone exceeds the budget (FR-6.3: at least one maximal page
+    /// occupying space, even if it alone exceeds the budget (at least one maximal page
     /// always fits).
     /// </summary>
     public async ValueTask ReserveAsync(long size, CancellationToken cancellationToken)

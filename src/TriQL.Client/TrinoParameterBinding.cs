@@ -3,7 +3,7 @@ namespace TriQL.Client;
 /// <summary>
 /// How a parameterized statement's text reaches the coordinator. In both modes the values are bound
 /// by the server from typed literals in a <c>USING</c> clause; parameter values are never
-/// interpolated into the statement text (FR-8.3, SEC-4).
+/// interpolated into the statement text.
 /// </summary>
 public enum TrinoParameterBinding
 {

@@ -4,8 +4,7 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Decodes raw <c>data</c> row arrays into <see cref="object"/> graphs without any Trino-specific
-/// type knowledge. This is a Phase 2 placeholder — full Trino-to-CLR materialization (FR-7.2)
-/// arrives in Phase 3 and will replace this conversion for scalar/temporal/decimal columns.
+/// type knowledge. Trino-to-CLR materialization is layered on top by <c>TrinoValueConverter</c>.
 /// </summary>
 internal static class RawJsonValueConverter
 {

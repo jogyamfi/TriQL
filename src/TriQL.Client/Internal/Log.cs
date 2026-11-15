@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 namespace TriQL.Client.Internal;
 
 /// <summary>
-/// Source-generated log messages. Level assignments follow FR-11.1.3.
+/// Source-generated log messages.
 /// </summary>
 internal static partial class Log
 {

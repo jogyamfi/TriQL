@@ -1,4 +1,4 @@
-// TriQL quick-start samples (P6-T10, README quick starts point here). Every sample reads the
+// TriQL quick-start samples (the README quick starts point here). Every sample reads the
 // coordinator address from TRINO_SERVER (defaulting to a local dev cluster) so this project can
 // be run against a real Trino coordinator: `TRINO_SERVER=https://host:8443 dotnet run`.
 using System.Data.Common;
@@ -27,7 +27,7 @@ EntraIdQuickStart(server);
 return;
 
 // The low-level TriQL.Client SDK: submit a statement and stream rows directly, with explicit
-// control over the column schema and query progress (FR-4, FR-6).
+// control over the column schema and query progress.
 static async Task SdkStreamingQuickStartAsync(string server)
 {
     var options = new TrinoSessionOptions
@@ -50,7 +50,7 @@ static async Task SdkStreamingQuickStartAsync(string server)
 }
 
 // The ADO.NET provider: use TriQL.Data.ADO like any other System.Data.Common provider, e.g. from
-// an ORM, reporting tool, or existing ADO.NET-based application (FR-9).
+// an ORM, reporting tool, or existing ADO.NET-based application.
 static async Task AdoNetQuickStartAsync(string server)
 {
     var connectionString = new TrinoConnectionStringBuilder
@@ -98,7 +98,7 @@ static async IAsyncEnumerable<long> SelectNationKeysAsync(TrinoResultSet resultS
     }
 }
 
-// Microsoft Entra ID authentication via TriQL.Client.Auth (FR-2.3.2). This only builds the
+// Microsoft Entra ID authentication via TriQL.Client.Auth. This only builds the
 // authenticator (no live acquisition happens here) since it needs real Entra ID app registration
 // details to run end to end; wire the result into TrinoSessionOptions.Authenticator.
 static void EntraIdQuickStart(string server)

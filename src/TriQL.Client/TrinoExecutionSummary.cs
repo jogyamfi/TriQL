@@ -2,7 +2,7 @@ namespace TriQL.Client;
 
 /// <summary>
 /// The final summary of a non-query (DDL/DML) statement, or of a query drained to completion via
-/// <see cref="TrinoResultSet.DrainAsync"/>. See FR-6.12.
+/// <see cref="TrinoResultSet.DrainAsync"/>.
 /// </summary>
 /// <param name="UpdateType">The server-reported update type, e.g. <c>CREATE TABLE</c>, if any.</param>
 /// <param name="UpdateCount">The number of rows affected, if reported.</param>

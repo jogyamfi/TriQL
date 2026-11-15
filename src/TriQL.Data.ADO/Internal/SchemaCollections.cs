@@ -7,12 +7,12 @@ using ClientParameterCollection = TriQL.Client.TrinoParameterCollection;
 namespace TriQL.Data.ADO.Internal;
 
 /// <summary>
-/// Builds the twelve <c>GetSchema</c> collections (FR-9.5.2). Restriction values are always bound
-/// parameters or client-side filters — never concatenated into generated SQL text (FR-9.5.3, SEC-4).
+/// Builds the twelve <c>GetSchema</c> collections. Restriction values are always bound
+/// parameters or client-side filters — never concatenated into generated SQL text.
 /// </summary>
 internal static class SchemaCollections
 {
-    /// <summary>The name of the collection describing every other collection (FR-9.5.1).</summary>
+    /// <summary>The name of the collection describing every other collection.</summary>
     public const string MetaDataCollectionsName = "MetaDataCollections";
 
     private static readonly IReadOnlyDictionary<string, int> RestrictionCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
@@ -67,7 +67,7 @@ internal static class SchemaCollections
         "CAST", "USING", "EXECUTE", "PREPARE", "DEALLOCATE",
     ];
 
-    /// <summary>Builds the requested collection (FR-9.5.2, FR-9.5.4, FR-9.5.5).</summary>
+    /// <summary>Builds the requested collection.</summary>
     public static async Task<DataTable> GetSchemaAsync(
         TrinoClient? client, string collectionName, string?[]? restrictions, CancellationToken cancellationToken)
     {
@@ -267,7 +267,7 @@ internal static class SchemaCollections
     /// Queries an <c>information_schema</c> table, scoped to a single catalog when the catalog
     /// restriction (always restriction index 0) is supplied, or across every catalog otherwise.
     /// Every non-catalog restriction is bound as a <c>?</c> parameter, never concatenated into the
-    /// generated SQL text (FR-9.5.3, FR-9.5.7, SEC-4).
+    /// generated SQL text.
     /// </summary>
     private static async Task<DataTable> BuildInformationSchemaAsync(
         TrinoClient client, string infoSchemaTable, string[] otherRestrictionColumns, string?[]? restrictions, CancellationToken cancellationToken)

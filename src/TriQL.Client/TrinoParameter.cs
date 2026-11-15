@@ -4,7 +4,7 @@ namespace TriQL.Client;
 
 /// <summary>
 /// A single bound parameter for a parameterized statement. Values are rendered into the Trino
-/// <c>EXECUTE ... USING</c> clause by the audited <c>SqlLiteralEncoder</c>. See FR-8.7.
+/// <c>EXECUTE ... USING</c> clause by the audited <c>SqlLiteralEncoder</c>.
 /// </summary>
 public sealed class TrinoParameter
 {

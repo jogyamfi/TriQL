@@ -4,8 +4,8 @@ namespace TriQL.Client.Internal;
 
 /// <summary>
 /// Drives the advance loop against a <see cref="StatementClient"/>: follows <c>nextUri</c>
-/// iteratively (never recursively, FR-4.3.5), applies adaptive backoff on empty pages (FR-4.4),
-/// and raises the page-level <c>error</c> as a <see cref="Exceptions.TrinoQueryException"/> (FR-12.2.2).
+/// iteratively (never recursively), applies adaptive backoff on empty pages,
+/// and raises the page-level <c>error</c> as a <see cref="Exceptions.TrinoQueryException"/>.
 /// </summary>
 internal static class PageReader
 {

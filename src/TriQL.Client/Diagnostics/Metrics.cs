@@ -4,10 +4,10 @@ using System.Runtime.CompilerServices;
 namespace TriQL.Client.Diagnostics;
 
 /// <summary>
-/// The <c>TriQL.Client</c> <see cref="Meter"/> and its instruments (FR-11.2.1). Kept internal:
+/// The <c>TriQL.Client</c> <see cref="Meter"/> and its instruments. Kept internal:
 /// listeners attach by meter/instrument name via <see cref="MeterListener"/> or an OpenTelemetry
 /// exporter, never through a reference to this type. Every instrument call is a documented no-op
-/// fast path when no listener is attached (FR-11.2.4), so callers pay nothing for unused telemetry.
+/// fast path when no listener is attached, so callers pay nothing for unused telemetry.
 /// </summary>
 internal static class Metrics
 {

@@ -3,7 +3,7 @@ using TriQL.Client.Internal;
 namespace TriQL.Client;
 
 /// <summary>
-/// Carries the set of server-driven header names applied by a <see cref="TrinoSession.SessionChanged"/> event. See FR-1.2.6.
+/// Carries the set of server-driven header names applied by a <see cref="TrinoSession.SessionChanged"/> event.
 /// </summary>
 /// <param name="appliedHeaders">The response header names whose mutations were applied.</param>
 public sealed class TrinoSessionChangedEventArgs(IReadOnlyList<string> appliedHeaders) : EventArgs
@@ -14,7 +14,7 @@ public sealed class TrinoSessionChangedEventArgs(IReadOnlyList<string> appliedHe
 
 /// <summary>
 /// The live session state derived from the initial <see cref="TrinoSessionOptions"/> plus every
-/// server-driven mutation applied since. Safe for concurrent reads while a statement executes. See FR-1.2.1.
+/// server-driven mutation applied since. Safe for concurrent reads while a statement executes.
 /// </summary>
 public sealed class TrinoSession
 {
@@ -78,7 +78,7 @@ public sealed class TrinoSession
 
     /// <summary>
     /// Client-side bookkeeping for a prepared statement created via <c>X-Trino-Prepared-Statement</c>
-    /// (FR-8.2). The coordinator does not retain prepared-statement state across requests, so the
+    ///. The coordinator does not retain prepared-statement state across requests, so the
     /// name/text pair is resent with every subsequent initial submission until deallocated.
     /// </summary>
     internal void RegisterPreparedStatement(string name, string sql)
@@ -89,7 +89,7 @@ public sealed class TrinoSession
         }
     }
 
-    /// <summary>Removes client-side bookkeeping for a prepared statement (FR-8.9).</summary>
+    /// <summary>Removes client-side bookkeeping for a prepared statement.</summary>
     internal void UnregisterPreparedStatement(string name)
     {
         lock (_gate)
@@ -102,7 +102,7 @@ public sealed class TrinoSession
     public IReadOnlyList<TrinoSelectedRole> OriginalRoles { get { lock (_gate) { return _originalRoles; } } }
 
     /// <summary>
-    /// Applies a batch of server-driven mutations atomically, in the order required by FR-1.2.2,
+    /// Applies a batch of server-driven mutations atomically, in the order the Trino client protocol requires,
     /// and raises <see cref="SessionChanged"/> once for the batch.
     /// </summary>
     internal void Apply(SessionMutationBatch batch)

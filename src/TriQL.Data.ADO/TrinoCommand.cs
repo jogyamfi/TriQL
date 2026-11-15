@@ -10,7 +10,7 @@ using ClientParameterCollection = TriQL.Client.TrinoParameterCollection;
 namespace TriQL.Data.ADO;
 
 /// <summary>
-/// A <see cref="DbCommand"/> that executes SQL against a <see cref="TrinoConnection"/>. See FR-9.2.
+/// A <see cref="DbCommand"/> that executes SQL against a <see cref="TrinoConnection"/>.
 /// </summary>
 public sealed class TrinoCommand : DbCommand
 {
@@ -49,7 +49,7 @@ public sealed class TrinoCommand : DbCommand
     }
 
     /// <inheritdoc/>
-    /// <remarks><c>0</c> means unbounded. Per-command only; never mutates the connection's shared options (FR-9.2.3).</remarks>
+    /// <remarks><c>0</c> means unbounded. Per-command only; never mutates the connection's shared options.</remarks>
     public override int CommandTimeout { get => _commandTimeout; set => _commandTimeout = value; }
 
     /// <inheritdoc/>
@@ -79,7 +79,7 @@ public sealed class TrinoCommand : DbCommand
     /// <inheritdoc/>
     protected override DbParameterCollection DbParameterCollection => _parameters;
 
-    /// <summary>The strongly typed parameter collection (FR-9.4.4).</summary>
+    /// <summary>The strongly typed parameter collection.</summary>
     public new TrinoParameterCollection Parameters => _parameters;
 
     /// <inheritdoc/>
@@ -90,7 +90,7 @@ public sealed class TrinoCommand : DbCommand
         {
             if (value is not null)
             {
-                throw new NotSupportedException("TriQL does not support transactions (FR-9.1.11).");
+                throw new NotSupportedException("TriQL does not support transactions.");
             }
         }
     }
@@ -247,8 +247,8 @@ public sealed class TrinoCommand : DbCommand
 
     /// <summary>
     /// Publishes the result set to the connection: progress statistics feed
-    /// <see cref="TrinoConnection.InfoMessage"/> (FR-9.1.14), and the registration lets
-    /// <see cref="TrinoConnection.CloseAsync"/> cancel the query if it is still running (FR-9.1.8).
+    /// <see cref="TrinoConnection.InfoMessage"/>, and the registration lets
+    /// <see cref="TrinoConnection.CloseAsync"/> cancel the query if it is still running.
     /// </summary>
     private void TrackResultSet(TrinoConnection connection, TrinoResultSet resultSet)
     {

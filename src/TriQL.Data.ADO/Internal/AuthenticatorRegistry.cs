@@ -4,7 +4,7 @@ using TriQL.Client.Exceptions;
 namespace TriQL.Data.ADO.Internal;
 
 /// <summary>
-/// The credential material a connection string may carry for authenticator resolution. See FR-1.3.5.
+/// The credential material a connection string may carry for authenticator resolution.
 /// </summary>
 internal readonly record struct AuthenticatorContext(
     string? User,
@@ -20,9 +20,9 @@ internal readonly record struct AuthenticatorContext(
 
 /// <summary>
 /// Resolves the connection-string <c>Auth</c> key to an <see cref="ITrinoAuthenticator"/> through a
-/// static registry, never through reflective type loading (FR-1.3.5, NFR-COMPAT-3, R3, P4-T2).
+/// static registry, never through reflective type loading.
 /// Authenticators requiring <c>TriQL.Client.Auth</c> (<c>entra-id</c>, <c>oauth2-client-credentials</c>)
-/// are not registered here, since that package is not referenced by <c>TriQL.Data.ADO</c> (FR-2.3.3);
+/// are not registered here, since that package is not referenced by <c>TriQL.Data.ADO</c>;
 /// <see cref="Register"/> is the extension point that package uses to add itself when referenced.
 /// </summary>
 internal static class AuthenticatorRegistry
@@ -49,7 +49,7 @@ internal static class AuthenticatorRegistry
     /// <summary>
     /// Registers (or replaces) the factory for an authenticator short name. The extension point
     /// used by packages such as <c>TriQL.Client.Auth</c> to make their providers reachable from a
-    /// connection string (FR-2.3.4).
+    /// connection string.
     /// </summary>
     public static void Register(string name, Func<AuthenticatorContext, ITrinoAuthenticator> factory)
     {
@@ -82,7 +82,7 @@ internal static class AuthenticatorRegistry
         {
             throw new TrinoConfigurationException(
                 $"Authenticator '{authKind}' requires referencing the '{package}' package and letting it register itself; " +
-                "it is not implemented in TriQL.Client or TriQL.Data.ADO to keep those packages dependency-free (FR-2.3.3, FR-2.3.4).");
+                "it is not implemented in TriQL.Client or TriQL.Data.ADO to keep those packages dependency-free.");
         }
 
         string[] known;

@@ -1,7 +1,7 @@
 namespace TriQL.Client;
 
 /// <summary>
-/// Carries the latest <see cref="TrinoQueryStats"/> for <see cref="TrinoResultSet.Progress"/>. See FR-11.3.1.
+/// Carries the latest <see cref="TrinoQueryStats"/> for <see cref="TrinoResultSet.Progress"/>.
 /// </summary>
 public sealed class TrinoQueryProgressEventArgs(TrinoQueryStats stats) : EventArgs
 {
